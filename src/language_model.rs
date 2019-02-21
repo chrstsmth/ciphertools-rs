@@ -1,9 +1,11 @@
 use super::*;
+use serde::ser::{Serialize, Serializer, SerializeSeq, SerializeStruct};
 use std::collections::VecDeque;
 
 pub struct Node {
 	next: [Option<Box<Node>>; 26],
 	freq: u32,
+	pop: usize,
 }
 
 pub struct LanguageModel {
@@ -15,6 +17,7 @@ impl Node {
 		Node {
 			next: Default::default(), //TODO would be nice if this was explicitly None
 			freq: 0,
+			pop: 0,
 		}
 	}
 }
@@ -54,6 +57,7 @@ impl LanguageModel {
 			match *next {
 				None => {
 					*next = Some(Box::new(Node::new())); // TODO Errors on new?
+					cursor.pop += 1;
 				}
 				_ => (),
 			}
