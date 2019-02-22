@@ -1,6 +1,7 @@
 use super::*;
-use serde::ser::{Serialize, Serializer, SerializeSeq, SerializeStruct};
+use serde::ser::{Serialize, Serializer, SerializeMap};
 use std::collections::VecDeque;
+use std::convert::TryFrom;
 
 pub struct Node {
 	next: [Option<Box<Node>>; 26],
@@ -64,6 +65,7 @@ impl LanguageModel {
 			cursor = next.as_mut().unwrap();
 			cursor.freq += 1;
 		}
+		self.head.freq += 1;
 	}
 }
 
@@ -72,9 +74,25 @@ impl Serialize for LanguageModel {
 		where
 			S: Serializer,
 		{
-			let mut s = serializer.serialize_struct("LanguageModel:", 1)?;
-			s.serialize_field("Node", &self.head)?;
-			s.end()
+			Node::serialize(&self.head, serializer)
 		}
+}
 
+impl Serialize for Node {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+		where
+			S: Serializer,
+		{
+			let mut m = serializer.serialize_map(Some(self.pop + 1))?;
+			m.serialize_entry("freq", &self.freq)?;
+			for (i, n) in self.next.iter().enumerate() {
+				match n {
+					Some(x) => {
+						m.serialize_entry(&Alphabet::try_from(i).unwrap(), x)?;
+					}
+					_ => (),
+				}
+			}
+			m.end()
+		}
 }
