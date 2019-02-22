@@ -8,7 +8,6 @@ use std::fs::File;
 use std::error::Error;
 use std::io::prelude::*;
 use std::convert::TryFrom;
-use serde::ser::{Serialize, Serializer, SerializeSeq, SerializeStruct};
 
 mod language_model;
 mod alphabet;

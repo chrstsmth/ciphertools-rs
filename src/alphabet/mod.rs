@@ -1,6 +1,7 @@
 use std::fmt;
 use std::convert::TryFrom;
 use std::error;
+use serde::ser::{Serialize, Serializer};
 
 #[derive(Copy, Clone)]
 pub enum Alphabet {
@@ -9,6 +10,9 @@ pub enum Alphabet {
 
 #[derive(Debug,Clone)]
 pub struct TryFromCharError;
+
+#[derive(Debug,Clone)]
+pub struct TryFromIntError;
 
 impl From<Alphabet> for char {
 	fn from(a: Alphabet) -> char {
@@ -59,6 +63,22 @@ impl fmt::Display for TryFromCharError {
 	}
 }
 
+impl error::Error for TryFromIntError {
+	fn description(&self) -> &str {
+		"No conversion available"
+	}
+
+	fn cause(&self) -> Option<&error::Error> {
+		None
+	}
+}
+
+impl fmt::Display for TryFromIntError  {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "TODO")
+	}
+}
+
 impl TryFrom<char> for Alphabet {
 	type Error = TryFromCharError;
 	fn try_from(c: char) -> Result<Alphabet, TryFromCharError> {
@@ -92,6 +112,50 @@ impl TryFrom<char> for Alphabet {
 			_ => Err(TryFromCharError),
 		}
 	}
+}
+
+impl TryFrom<usize> for Alphabet {
+	type Error = TryFromIntError;
+	fn try_from(i: usize) -> Result<Alphabet, TryFromIntError> {
+		match i {
+			0 => Ok(Alphabet::A),
+			1 => Ok(Alphabet::B),
+			2 => Ok(Alphabet::C),
+			3 => Ok(Alphabet::D),
+			4 => Ok(Alphabet::E),
+			5 => Ok(Alphabet::F),
+			6 => Ok(Alphabet::G),
+			7 => Ok(Alphabet::H),
+			8 => Ok(Alphabet::I),
+			9 => Ok(Alphabet::J),
+			10 => Ok(Alphabet::K),
+			11 => Ok(Alphabet::L),
+			12 => Ok(Alphabet::M),
+			13 => Ok(Alphabet::N),
+			14 => Ok(Alphabet::O),
+			15 => Ok(Alphabet::P),
+			16 => Ok(Alphabet::Q),
+			17 => Ok(Alphabet::R),
+			18 => Ok(Alphabet::S),
+			19 => Ok(Alphabet::T),
+			20 => Ok(Alphabet::U),
+			21 => Ok(Alphabet::V),
+			22 => Ok(Alphabet::W),
+			23 => Ok(Alphabet::X),
+			24 => Ok(Alphabet::Y),
+			25 => Ok(Alphabet::Z),
+			_ => Err(TryFromIntError),
+		}
+	}
+}
+
+impl Serialize for Alphabet {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+		where
+			S: Serializer,
+		{
+			serializer.serialize_char(char::from(*self))
+		}
 }
 
 impl fmt::Display for Alphabet {
