@@ -1,5 +1,4 @@
 #![feature(nll)]
-#![feature(try_from)]
 
 extern crate serde;
 extern crate serde_json;
