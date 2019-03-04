@@ -1,12 +1,19 @@
-use super::*;
-use serde::ser::{Serialize, Serializer, SerializeMap};
-use std::collections::VecDeque;
+use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
+use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, SeqAccess};
 use std::convert::TryFrom;
+use std::fmt;
+
+use super::*;
+use std::collections::VecDeque;
+
+struct NextNode {
+	node: [Option<Box<Node>>; 26],
+	pop: usize,
+}
 
 pub struct Node {
-	next: [Option<Box<Node>>; 26],
 	freq: u32,
-	pop: usize,
+	next: NextNode,
 }
 
 pub struct LanguageModel {
@@ -16,8 +23,16 @@ pub struct LanguageModel {
 impl Node {
 	pub fn new() -> Node {
 		Node {
-			next: Default::default(), //TODO would be nice if this was explicitly None
 			freq: 0,
+			next: NextNode::new(),
+		}
+	}
+}
+
+impl NextNode {
+	pub fn new() -> NextNode {
+		NextNode{
+			node: Default::default(),
 			pop: 0,
 		}
 	}
@@ -54,11 +69,11 @@ impl LanguageModel {
 		let mut cursor: &mut Node = &mut self.head;
 
 		for c in s {
-			let next: &mut Option<Box<Node>> = &mut cursor.next[c as usize];
+			let next: &mut Option<Box<Node>> = &mut cursor.next.node[c as usize];
 			match *next {
 				None => {
 					*next = Some(Box::new(Node::new())); // TODO Errors on new?
-					cursor.pop += 1;
+					cursor.next.pop += 1;
 				}
 				_ => (),
 			}
@@ -70,29 +85,107 @@ impl LanguageModel {
 }
 
 impl Serialize for LanguageModel {
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-		where
-			S: Serializer,
-		{
-			Node::serialize(&self.head, serializer)
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where
+		S: Serializer,
+	{
+		self.head.serialize(serializer)
+	}
+}
+
+impl Serialize for NextNode {
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where
+		S: Serializer,
+	{
+		let mut m = serializer.serialize_map(Some(self.pop))?;
+		for (i, n) in self.node.iter().enumerate() {
+			match n {
+				Some(x) => {
+					m.serialize_entry(&Alphabet::try_from(i).unwrap(), x)?;
+				}
+				_ => (),
+			}
 		}
+		m.end()
+	}
 }
 
 impl Serialize for Node {
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-		where
-			S: Serializer,
-		{
-			let mut m = serializer.serialize_map(Some(self.pop + 1))?;
-			m.serialize_entry("freq", &self.freq)?;
-			for (i, n) in self.next.iter().enumerate() {
-				match n {
-					Some(x) => {
-						m.serialize_entry(&Alphabet::try_from(i).unwrap(), x)?;
-					}
-					_ => (),
-				}
-			}
-			m.end()
+	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where
+		S: Serializer,
+	{
+		let mut m = serializer.serialize_seq(Some(2))?;
+		m.serialize_element(&self.freq)?;
+		m.serialize_element(&self.next)?;
+		m.end()
+	}
+}
+
+struct NodeVisitor;
+
+impl<'de> Visitor<'de> for NodeVisitor {
+	type Value = Node;
+
+	fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+		formatter.write_str("node sequence")
+	}
+
+	fn visit_seq<V>(self, mut seq: V) -> Result<Self::Value, V::Error> where
+		V: SeqAccess<'de>,
+	{
+		let mut node = Node::new();
+		node.freq = seq.next_element()?
+			.ok_or_else(|| de::Error::invalid_length(1, &self))?;
+		node.next = seq.next_element()?
+			.ok_or_else(|| de::Error::invalid_length(2, &self))?;
+		Ok(node)
+	}
+}
+
+
+struct NextNodeVisitor;
+
+impl<'de> Visitor<'de> for NextNodeVisitor {
+	type Value = NextNode;
+
+	fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+		formatter.write_str("next node map")
+	}
+
+	fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error> where
+		M: MapAccess<'de>,
+	{
+		let mut next = NextNode::new();
+		while let Some((key, value)) = access.next_entry::<Alphabet, Node>()? {
+			let i = usize::from(key);
+			next.node[i] = Some(Box::new(value));
+			next.pop += 1;
 		}
+		Ok(next)
+	}
+}
+
+impl<'de> Deserialize<'de> for LanguageModel {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where
+		D: Deserializer<'de>,
+	{
+		let mut l = LanguageModel::new();
+		l.head = deserializer.deserialize_seq(NodeVisitor)?;
+		Ok(l)
+	}
+}
+
+impl<'de> Deserialize<'de> for Node {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where
+		D: Deserializer<'de>,
+	{
+		deserializer.deserialize_seq(NodeVisitor)
+	}
+}
+
+impl<'de> Deserialize<'de> for NextNode {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where
+		D: Deserializer<'de>,
+	{
+		deserializer.deserialize_map(NextNodeVisitor)
+	}
 }
