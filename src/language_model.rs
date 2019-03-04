@@ -56,7 +56,7 @@ impl LanguageModel {
 		self.insert_word(&mut v.iter().cloned());
 
 		for c in s.by_ref() {
-			v.pop_front(); //TODO can't overwrite in one function call
+			v.pop_front();
 			v.push_back(c);
 			self.insert_word(&mut v.iter().cloned());
 		}
@@ -72,7 +72,7 @@ impl LanguageModel {
 			let next: &mut Option<Box<Node>> = &mut cursor.next.node[c as usize];
 			match *next {
 				None => {
-					*next = Some(Box::new(Node::new())); // TODO Errors on new?
+					*next = Some(Box::new(Node::new()));
 					cursor.next.pop += 1;
 				}
 				_ => (),
