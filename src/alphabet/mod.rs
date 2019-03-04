@@ -2,8 +2,9 @@ use std::fmt;
 use std::convert::TryFrom;
 use std::error;
 use serde::ser::{Serialize, Serializer};
+use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Alphabet {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
@@ -183,6 +184,34 @@ impl Serialize for Alphabet {
 		{
 			serializer.serialize_char(char::from(*self))
 		}
+}
+
+impl<'de> Deserialize<'de> for Alphabet {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where
+		D: Deserializer<'de>,
+	{
+		struct AlphabetVisitor;
+
+		impl<'de> Visitor<'de> for AlphabetVisitor {
+			type Value = Alphabet;
+
+			fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+				formatter.write_str("alphabet character")
+			}
+
+			fn visit_str<E>(self, s: &str) -> Result<Self::Value, E> where
+				E: de::Error,
+			{
+				let c = s.chars().next().unwrap();
+				match Alphabet::try_from(c) {
+					Ok(a) => Ok(a),
+					_ => Err(de::Error::invalid_value(Unexpected::Char(c), &self)),
+				}
+			}
+		}
+
+		deserializer.deserialize_char(AlphabetVisitor)
+	}
 }
 
 impl fmt::Display for Alphabet {
