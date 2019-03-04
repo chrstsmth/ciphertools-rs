@@ -47,35 +47,6 @@ impl From<Alphabet> for char {
 	}
 }
 
-impl error::Error for TryFromCharError {
-	fn description(&self) -> &str {
-		"No conversion available"
-	}
-
-	fn cause(&self) -> Option<&error::Error> {
-		None
-	}
-}
-
-impl fmt::Display for TryFromCharError {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "TODO")
-	}
-}
-
-impl error::Error for TryFromIntError {
-	fn description(&self) -> &str {
-		"No conversion available"
-	}
-
-	fn cause(&self) -> Option<&error::Error> {
-		None
-	}
-}
-
-impl fmt::Display for TryFromIntError  {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "TODO")
 impl From<Alphabet> for usize {
 	fn from(a: Alphabet) -> usize {
 		match a {
@@ -220,3 +191,34 @@ impl fmt::Display for Alphabet {
 	}
 }
 
+impl error::Error for TryFromCharError {
+	fn description(&self) -> &str {
+		"no conversion available"
+	}
+
+	fn cause(&self) -> Option<&error::Error> {
+		None
+	}
+}
+
+impl fmt::Display for TryFromCharError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "no conversion available")
+	}
+}
+
+impl error::Error for TryFromIntError {
+	fn description(&self) -> &str {
+		"no conversion available"
+	}
+
+	fn cause(&self) -> Option<&error::Error> {
+		None
+	}
+}
+
+impl fmt::Display for TryFromIntError  {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "no conversion available")
+	}
+}
