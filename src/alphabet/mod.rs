@@ -76,6 +76,36 @@ impl error::Error for TryFromIntError {
 impl fmt::Display for TryFromIntError  {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "TODO")
+impl From<Alphabet> for usize {
+	fn from(a: Alphabet) -> usize {
+		match a {
+			Alphabet::A => 0,
+			Alphabet::B => 1,
+			Alphabet::C => 2,
+			Alphabet::D => 3,
+			Alphabet::E => 4,
+			Alphabet::F => 5,
+			Alphabet::G => 6,
+			Alphabet::H => 7,
+			Alphabet::I => 8,
+			Alphabet::J => 9,
+			Alphabet::K => 10,
+			Alphabet::L => 11,
+			Alphabet::M => 12,
+			Alphabet::N => 13,
+			Alphabet::O => 14,
+			Alphabet::P => 15,
+			Alphabet::Q => 16,
+			Alphabet::R => 17,
+			Alphabet::S => 18,
+			Alphabet::T => 19,
+			Alphabet::U => 20,
+			Alphabet::V => 21,
+			Alphabet::W => 22,
+			Alphabet::X => 23,
+			Alphabet::Y => 24,
+			Alphabet::Z => 25,
+		}
 	}
 }
 
