@@ -6,6 +6,9 @@ use std::fmt;
 use super::*;
 use std::collections::VecDeque;
 
+#[cfg(test)]
+mod tests;
+
 struct NextNode {
 	node: [Option<Box<Node>>; 26],
 	pop: usize,
