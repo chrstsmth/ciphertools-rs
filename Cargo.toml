@@ -6,3 +6,7 @@ authors = ["Christopher T Smith <git@chrstsmth.ca>"]
 [dependencies]
 serde = "*"
 serde_json = "*"
+
+[[bin]]
+name = "langauge-modeler"
+path = "src/language-modeler.rs"
