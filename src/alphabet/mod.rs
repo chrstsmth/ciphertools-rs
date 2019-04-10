@@ -3,6 +3,8 @@ use std::convert::TryFrom;
 use std::error;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
+use std::ops::Add;
+use std::ops::Sub;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Alphabet {
@@ -174,6 +176,22 @@ impl TryFrom<usize> for Alphabet {
 			25 => Ok(Alphabet::Z),
 			_ => Err(TryFromIntError),
 		}
+	}
+}
+
+impl Add for Alphabet {
+	type Output = Alphabet;
+	fn add(self, other: Alphabet) -> Alphabet {
+		let a = (usize::from(self) + usize::from(other)) % 26;
+		Alphabet::try_from(a).unwrap()
+	}
+}
+
+impl Sub for Alphabet {
+	type Output = Alphabet;
+	fn sub(self, other: Alphabet) -> Alphabet {
+		let a = (usize::from(self) + usize::from(other)) % 26;
+		Alphabet::try_from(a).unwrap()
 	}
 }
 
