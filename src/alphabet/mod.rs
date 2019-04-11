@@ -274,6 +274,18 @@ impl fmt::Display for TryFromIntError  {
 	}
 }
 
+impl Text {
+	pub fn from_string(s: &str) -> Result<Text, TryFromCharError> {
+		let mut text = Text {
+			t: Vec::with_capacity(s.len())
+		};
+		for c in s.chars() {
+			text.t.push(Alphabet::try_from(c)?)
+		}
+		Ok(text)
+	}
+}
+
 impl fmt::Display for Text {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		for a in &self.t {
