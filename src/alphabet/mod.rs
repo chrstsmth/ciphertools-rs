@@ -11,10 +11,6 @@ pub enum Alphabet {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 
-pub struct Text {
-	pub t: Vec<Alphabet>,
-}
-
 #[derive(Debug,Clone)]
 pub struct TryFromCharError;
 
@@ -271,26 +267,5 @@ impl error::Error for TryFromIntError {
 impl fmt::Display for TryFromIntError  {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "no conversion available")
-	}
-}
-
-impl Text {
-	pub fn from_string(s: &str) -> Result<Text, TryFromCharError> {
-		let mut text = Text {
-			t: Vec::with_capacity(s.len())
-		};
-		for c in s.chars() {
-			text.t.push(Alphabet::try_from(c)?)
-		}
-		Ok(text)
-	}
-}
-
-impl fmt::Display for Text {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		for a in &self.t {
-			write!(f, "{}", a)?
-		}
-		Ok(())
 	}
 }

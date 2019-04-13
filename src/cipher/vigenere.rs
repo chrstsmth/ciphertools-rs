@@ -1,5 +1,8 @@
 use super::*;
+use alphabet::*;
 use std::iter::Iterator;
+
+use std::convert::TryFrom;
 
 pub struct Vigenere;
 
@@ -10,21 +13,23 @@ impl Vigenere {
 }
 
 impl Cipher for Vigenere {
-	type Key = Text;
+	type Key = String;
 
-	fn encipher(&self, plaintext: Text, key: Self::Key) -> Text
+	fn encipher(&self, plaintext: String, key: Self::Key) -> String
 	{
-		let mut ciphertext = Text{t: Vec::with_capacity(plaintext.t.len())};
-		for pair in plaintext.t.iter().zip(key.t.iter().cycle()) {
-			ciphertext.t.push(*pair.0 + *pair.1);
+		let mut ciphertext = String::with_capacity(plaintext.len());
+		for pair in plaintext.chars().zip(key.chars().cycle()) {
+			ciphertext.push(
+				char::from(Alphabet::try_from(pair.0).unwrap() + Alphabet::try_from(pair.1).unwrap()));
 		}
 		ciphertext
 	}
-	fn decipher(&self, ciphertext: Text, key: Self::Key) -> Text
+	fn decipher(&self, ciphertext: String, key: Self::Key) -> String
 	{
-		let mut plaintext = Text{t: Vec::with_capacity(ciphertext.t.len())};
-		for pair in ciphertext.t.iter().zip(key.t.iter().cycle()) {
-			plaintext.t.push(*pair.0 - *pair.1);
+		let mut plaintext = String::with_capacity(ciphertext.len());
+		for pair in ciphertext.chars().zip(key.chars().cycle()) {
+			plaintext.push(
+				char::from(Alphabet::try_from(pair.0).unwrap() - Alphabet::try_from(pair.1).unwrap()));
 		}
 		plaintext
 	}
