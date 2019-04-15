@@ -1,5 +1,5 @@
 use super::*;
-use alphabet::*;
+use pallet::alphabet::*;
 use std::iter::Iterator;
 
 use std::convert::TryFrom;

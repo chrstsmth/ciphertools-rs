@@ -1,21 +1,15 @@
 use std::fmt;
 use std::convert::TryFrom;
-use std::error;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
 use std::ops::Add;
 use std::ops::Sub;
+use super::try_from_err::*;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Alphabet {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
-
-#[derive(Debug,Clone)]
-pub struct TryFromCharError;
-
-#[derive(Debug,Clone)]
-pub struct TryFromIntError;
 
 impl From<Alphabet> for char {
 	fn from(a: Alphabet) -> char {
@@ -46,39 +40,6 @@ impl From<Alphabet> for char {
 			Alphabet::X => 'x',
 			Alphabet::Y => 'y',
 			Alphabet::Z => 'z',
-		}
-	}
-}
-
-impl From<Alphabet> for usize {
-	fn from(a: Alphabet) -> usize {
-		match a {
-			Alphabet::A => 0,
-			Alphabet::B => 1,
-			Alphabet::C => 2,
-			Alphabet::D => 3,
-			Alphabet::E => 4,
-			Alphabet::F => 5,
-			Alphabet::G => 6,
-			Alphabet::H => 7,
-			Alphabet::I => 8,
-			Alphabet::J => 9,
-			Alphabet::K => 10,
-			Alphabet::L => 11,
-			Alphabet::M => 12,
-			Alphabet::N => 13,
-			Alphabet::O => 14,
-			Alphabet::P => 15,
-			Alphabet::Q => 16,
-			Alphabet::R => 17,
-			Alphabet::S => 18,
-			Alphabet::T => 19,
-			Alphabet::U => 20,
-			Alphabet::V => 21,
-			Alphabet::W => 22,
-			Alphabet::X => 23,
-			Alphabet::Y => 24,
-			Alphabet::Z => 25,
 		}
 	}
 }
@@ -144,6 +105,39 @@ impl TryFrom<char> for Alphabet {
 	}
 }
 
+impl From<Alphabet> for usize {
+	fn from(a: Alphabet) -> usize {
+		match a {
+			Alphabet::A => 0,
+			Alphabet::B => 1,
+			Alphabet::C => 2,
+			Alphabet::D => 3,
+			Alphabet::E => 4,
+			Alphabet::F => 5,
+			Alphabet::G => 6,
+			Alphabet::H => 7,
+			Alphabet::I => 8,
+			Alphabet::J => 9,
+			Alphabet::K => 10,
+			Alphabet::L => 11,
+			Alphabet::M => 12,
+			Alphabet::N => 13,
+			Alphabet::O => 14,
+			Alphabet::P => 15,
+			Alphabet::Q => 16,
+			Alphabet::R => 17,
+			Alphabet::S => 18,
+			Alphabet::T => 19,
+			Alphabet::U => 20,
+			Alphabet::V => 21,
+			Alphabet::W => 22,
+			Alphabet::X => 23,
+			Alphabet::Y => 24,
+			Alphabet::Z => 25,
+		}
+	}
+}
+
 impl TryFrom<usize> for Alphabet {
 	type Error = TryFromIntError;
 	fn try_from(i: usize) -> Result<Alphabet, TryFromIntError> {
@@ -190,7 +184,7 @@ impl Add for Alphabet {
 impl Sub for Alphabet {
 	type Output = Alphabet;
 	fn sub(self, other: Alphabet) -> Alphabet {
-		let a = (usize::from(self) + usize::from(other)) % 26;
+		let a = (usize::from(self) - usize::from(other) + 26) % 26;
 		Alphabet::try_from(a).unwrap()
 	}
 }
@@ -235,37 +229,5 @@ impl<'de> Deserialize<'de> for Alphabet {
 impl fmt::Display for Alphabet {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "{}", char::from(*self))
-	}
-}
-
-impl error::Error for TryFromCharError {
-	fn description(&self) -> &str {
-		"no conversion available"
-	}
-
-	fn cause(&self) -> Option<&error::Error> {
-		None
-	}
-}
-
-impl fmt::Display for TryFromCharError {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "no conversion available")
-	}
-}
-
-impl error::Error for TryFromIntError {
-	fn description(&self) -> &str {
-		"no conversion available"
-	}
-
-	fn cause(&self) -> Option<&error::Error> {
-		None
-	}
-}
-
-impl fmt::Display for TryFromIntError  {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "no conversion available")
 	}
 }
