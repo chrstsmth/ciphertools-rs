@@ -9,10 +9,10 @@ use std::io::prelude::*;
 use std::convert::TryFrom;
 
 mod language_model;
-mod alphabet;
+mod pallet;
 
 use language_model::*;
-use alphabet::*;
+use pallet::alphabet::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();
