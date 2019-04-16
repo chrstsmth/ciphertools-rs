@@ -12,7 +12,7 @@ mod language_model;
 mod pallet;
 
 use language_model::*;
-use pallet::alphabet::*;
+use pallet::alph::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();
@@ -32,7 +32,7 @@ fn main() {
 
 		let mut i = s.chars()
 			.filter(|x| *x != '\n')
-			.map(|x| Alphabet::try_from(x).unwrap());
+			.map(|x| Alph::try_from(x).unwrap());
 		l.insert_words(&mut i, 5);
 		println!("{}", serde_json::to_string(&l).unwrap());
 	}

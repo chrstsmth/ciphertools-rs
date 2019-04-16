@@ -49,9 +49,9 @@ impl LanguageModel {
 	}
 
 	pub fn insert_words<S>(&mut self, s: &mut S, depth: usize) where
-		S: Iterator<Item = Alphabet>,
+		S: Iterator<Item = Alph>,
 	{
-		let mut v: VecDeque<Alphabet> = VecDeque::with_capacity(depth);
+		let mut v: VecDeque<Alph> = VecDeque::with_capacity(depth);
 
 		for c in s.take(v.capacity()).by_ref() {
 			v.push_back(c);
@@ -67,7 +67,7 @@ impl LanguageModel {
 	}
 
 	pub fn insert_word<S: Iterator>(&mut self, s: &mut S) where
-		S: Iterator<Item = Alphabet>,
+		S: Iterator<Item = Alph>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
 
@@ -103,7 +103,7 @@ impl Serialize for NextNode {
 		for (i, n) in self.node.iter().enumerate() {
 			match n {
 				Some(x) => {
-					m.serialize_entry(&Alphabet::try_from(i).unwrap(), x)?;
+					m.serialize_entry(&Alph::try_from(i).unwrap(), x)?;
 				}
 				_ => (),
 			}
@@ -158,7 +158,7 @@ impl<'de> Visitor<'de> for NextNodeVisitor {
 		M: MapAccess<'de>,
 	{
 		let mut next = NextNode::new();
-		while let Some((key, value)) = access.next_entry::<Alphabet, Node>()? {
+		while let Some((key, value)) = access.next_entry::<Alph, Node>()? {
 			let i = usize::from(key);
 			next.node[i] = Some(Box::new(value));
 			next.pop += 1;
