@@ -1,8 +1,6 @@
 use super::*;
-use pallet::alph::*;
+use pallet::cipher_char::*;
 use std::iter::Iterator;
-
-use std::convert::TryFrom;
 
 pub struct Vigenere;
 
@@ -19,8 +17,7 @@ impl Cipher for Vigenere {
 	{
 		let mut ciphertext = String::with_capacity(plaintext.len());
 		for pair in plaintext.chars().zip(key.chars().cycle()) {
-			ciphertext.push(
-				char::from(Alph::try_from(pair.0).unwrap() + Alph::try_from(pair.1).unwrap()));
+			ciphertext.push(char::from(CipherChar::from(pair.0) + CipherChar::from(pair.1)));
 		}
 		ciphertext
 	}
@@ -28,8 +25,7 @@ impl Cipher for Vigenere {
 	{
 		let mut plaintext = String::with_capacity(ciphertext.len());
 		for pair in ciphertext.chars().zip(key.chars().cycle()) {
-			plaintext.push(
-				char::from(Alph::try_from(pair.0).unwrap() - Alph::try_from(pair.1).unwrap()));
+			plaintext.push(char::from(CipherChar::from(pair.0) - CipherChar::from(pair.1)));
 		}
 		plaintext
 	}
