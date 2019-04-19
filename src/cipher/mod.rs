@@ -1,4 +1,5 @@
 pub mod vigenere;
+pub mod caesar;
 
 pub trait Cipher {
 	type Key;
