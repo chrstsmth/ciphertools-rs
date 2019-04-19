@@ -5,6 +5,7 @@ pub trait Cipher {
 
 	fn encipher(plaintext: String, k: Self::Key) -> String;
 	fn decipher(ciphertext: String, k: Self::Key) -> String;
-}
 
+	fn parse(key: &str) -> Option<Self::Key>;
+}
 
