@@ -7,7 +7,7 @@ pub struct Vigenere;
 impl Cipher for Vigenere {
 	type Key = String;
 
-	fn encipher(&self, plaintext: String, key: Self::Key) -> String
+	fn encipher(plaintext: String, key: Self::Key) -> String
 	{
 		let mut ciphertext = String::with_capacity(plaintext.len());
 		for pair in plaintext.chars().zip(key.chars().cycle()) {
@@ -15,7 +15,7 @@ impl Cipher for Vigenere {
 		}
 		ciphertext
 	}
-	fn decipher(&self, ciphertext: String, key: Self::Key) -> String
+	fn decipher(ciphertext: String, key: Self::Key) -> String
 	{
 		let mut plaintext = String::with_capacity(ciphertext.len());
 		for pair in ciphertext.chars().zip(key.chars().cycle()) {
