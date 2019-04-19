@@ -4,12 +4,6 @@ use std::iter::Iterator;
 
 pub struct Vigenere;
 
-impl Vigenere {
-	pub fn new() -> Vigenere {
-		Vigenere
-	}
-}
-
 impl Cipher for Vigenere {
 	type Key = String;
 
