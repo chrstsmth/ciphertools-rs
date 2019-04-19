@@ -73,25 +73,28 @@ macro_rules! decipher {
 }
 
 fn main() {
+	let vigenere = "vigenere";
+	let caesar = "caesar";
+
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(SubCommand::with_name("vigenere")
+		.subcommand(SubCommand::with_name(vigenere)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!()))
 
-		.subcommand(SubCommand::with_name("caesar")
+		.subcommand(SubCommand::with_name(caesar)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!()))
 		.get_matches();
 
-	if let Some(matches) = matches.subcommand_matches("vigenere") {
+	if let Some(matches) = matches.subcommand_matches(vigenere) {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
 	}
 
-	if let Some(matches) = matches.subcommand_matches("caesar") {
+	if let Some(matches) = matches.subcommand_matches(caesar) {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
 	}
