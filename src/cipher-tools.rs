@@ -17,9 +17,9 @@ fn main() {
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(SubCommand::with_name("encipher")
 				.about("Encipher plaintext")
-				.arg(Arg::with_name("ciphertext")
-					.short("c")
-					.value_name("CIPHERTEXT")
+				.arg(Arg::with_name("plaintext")
+					.short("p")
+					.value_name("PLAINTEXT")
 					.required(true))
 				.arg(Arg::with_name("key")
 					.short("k")
@@ -27,9 +27,9 @@ fn main() {
 					.required(true)))
 			.subcommand(SubCommand::with_name("decipher")
 				.about("Decipher ciphertext")
-				.arg(Arg::with_name("plaintext")
-					.short("p")
-					.value_name("PLAINTEXT")
+				.arg(Arg::with_name("ciphertext")
+					.short("c")
+					.value_name("CIPHERTEXT")
 					.required(true))
 				.arg(Arg::with_name("key")
 					.short("k")
@@ -39,13 +39,13 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches("vigenere") {
 		if let Some(matches) = matches.subcommand_matches("encipher") {
-			let ciphertext = matches.value_of("ciphertext").unwrap();
-			let key = matches.value_of("key").unwrap();
-			println!("{:}", Vigenere::encipher(String::from(ciphertext), String::from(key)));
-		} else if let Some(matches) = matches.subcommand_matches("deciphier") {
 			let plaintext = matches.value_of("plaintext").unwrap();
 			let key = matches.value_of("key").unwrap();
 			println!("{:}", Vigenere::encipher(String::from(plaintext), String::from(key)));
+		} else if let Some(matches) = matches.subcommand_matches("decipher") {
+			let ciphertext = matches.value_of("ciphertext").unwrap();
+			let key = matches.value_of("key").unwrap();
+			println!("{:}", Vigenere::encipher(String::from(ciphertext), String::from(key)));
 		}
 	}
 }
