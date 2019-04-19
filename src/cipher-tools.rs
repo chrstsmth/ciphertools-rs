@@ -11,8 +11,6 @@ use cipher::vigenere::*;
 use cipher::Cipher;
 
 fn main() {
-	let v = Vigenere;
-
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(SubCommand::with_name("vigenere")
@@ -43,11 +41,11 @@ fn main() {
 		if let Some(matches) = matches.subcommand_matches("encipher") {
 			let ciphertext = matches.value_of("ciphertext").unwrap();
 			let key = matches.value_of("key").unwrap();
-			println!("{:}", v.encipher(String::from(ciphertext), String::from(key)));
+			println!("{:}", Vigenere::encipher(String::from(ciphertext), String::from(key)));
 		} else if let Some(matches) = matches.subcommand_matches("deciphier") {
 			let plaintext = matches.value_of("plaintext").unwrap();
 			let key = matches.value_of("key").unwrap();
-			println!("{:}", v.encipher(String::from(plaintext), String::from(key)));
+			println!("{:}", Vigenere::encipher(String::from(plaintext), String::from(key)));
 		}
 	}
 }
