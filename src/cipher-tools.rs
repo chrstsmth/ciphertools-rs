@@ -11,7 +11,7 @@ use cipher::vigenere::*;
 use cipher::Cipher;
 
 fn main() {
-	let v = Vigenere::new();
+	let v = Vigenere;
 
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
