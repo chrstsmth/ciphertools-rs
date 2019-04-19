@@ -23,4 +23,9 @@ impl Cipher for Vigenere {
 		}
 		plaintext
 	}
+
+	fn parse(key: &str) -> Option<Self::Key>
+	{
+		Some(String::from(key))
+	}
 }

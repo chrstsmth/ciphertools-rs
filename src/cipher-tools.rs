@@ -39,13 +39,21 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches("vigenere") {
 		if let Some(matches) = matches.subcommand_matches("encipher") {
-			let plaintext = matches.value_of("plaintext").unwrap();
-			let key = matches.value_of("key").unwrap();
-			println!("{:}", Vigenere::encipher(String::from(plaintext), String::from(key)));
+			let plaintext = String::from(matches.value_of("plaintext").unwrap());
+			let key = Vigenere::parse(matches.value_of("key").unwrap());
+
+			match key {
+				Some(key) => println!("{:}", Vigenere::encipher(plaintext, key)),
+				_ => println!("Parse key failed"),
+			}
 		} else if let Some(matches) = matches.subcommand_matches("decipher") {
-			let ciphertext = matches.value_of("ciphertext").unwrap();
-			let key = matches.value_of("key").unwrap();
-			println!("{:}", Vigenere::encipher(String::from(ciphertext), String::from(key)));
+			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
+			let key = Vigenere::parse(matches.value_of("key").unwrap());
+
+			match key {
+				Some(key) => println!("{:}", Vigenere::encipher(ciphertext, key)),
+				_ => println!("Parse key failed"),
+			}
 		}
 	}
 }
