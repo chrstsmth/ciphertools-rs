@@ -17,6 +17,16 @@ impl Cipher for Caesar {
 
 	fn parse(key: &str) -> Option<Self::Key>
 	{
-		key.chars().next()
+		let mut chars = key.chars();
+
+		match chars.next() {
+			Some(first) => {
+				match chars.next() {
+					None => Some(first),
+					_ => None,
+				}
+			}
+			_ => None,
+		}
 	}
 }
