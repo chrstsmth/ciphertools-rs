@@ -8,6 +8,7 @@ mod cipher;
 mod pallet;
 
 use cipher::vigenere::*;
+use cipher::caesar::*;
 use cipher::Cipher;
 
 macro_rules! key_arg {
@@ -78,10 +79,20 @@ fn main() {
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!()))
+
+		.subcommand(SubCommand::with_name("caesar")
+			.setting(AppSettings::ArgRequiredElseHelp)
+			.subcommand(encipher_subcommand!())
+			.subcommand(decipher_subcommand!()))
 		.get_matches();
 
 	if let Some(matches) = matches.subcommand_matches("vigenere") {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
+	}
+
+	if let Some(matches) = matches.subcommand_matches("caesar") {
+		encipher!(matches, Caesar);
+		decipher!(matches, Caesar);
 	}
 }
