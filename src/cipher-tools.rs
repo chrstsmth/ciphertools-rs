@@ -4,6 +4,7 @@ extern crate clap;
 
 use clap::{Arg, App, SubCommand, AppSettings};
 
+mod try_from_err;
 mod cipher;
 mod pallet;
 

@@ -10,6 +10,7 @@ use std::convert::TryFrom;
 
 mod language_model;
 mod pallet;
+mod try_from_err;
 
 use language_model::*;
 use pallet::alph::*;
