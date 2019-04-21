@@ -11,11 +11,11 @@ impl Cipher for Caesar {
 
 	fn encipher(plaintext: String, key: Self::Key) -> String
 	{
-		Vigenere::encipher(plaintext, VigenereKey::from(key.0.to_string().as_str()))
+		Vigenere::encipher(plaintext, VigenereKey::from(key.0.to_string()))
 	}
 	fn decipher(ciphertext: String, key: Self::Key) -> String
 	{
-		Vigenere::decipher(ciphertext, VigenereKey::from(key.0.to_string().as_str()))
+		Vigenere::decipher(ciphertext, VigenereKey::from(key.0.to_string()))
 	}
 }
 
