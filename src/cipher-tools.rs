@@ -3,6 +3,7 @@ extern crate serde_json;
 extern crate clap;
 
 use clap::{Arg, App, SubCommand, AppSettings};
+use std::convert::TryFrom;
 
 mod try_from_err;
 mod cipher;
@@ -49,10 +50,10 @@ macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
 			let plaintext = String::from(matches.value_of("plaintext").unwrap());
-			let key = $Cipher::parse(matches.value_of("key").unwrap());
+			let key = <$Cipher as Cipher>::Key::try_from(matches.value_of("key").unwrap());
 
 			match key {
-				Some(key) => println!("{:}", $Cipher::encipher(plaintext, key)),
+				Ok(key) => println!("{:}", $Cipher::encipher(plaintext, key)),
 				_ => println!("Parse key failed"),
 			}
 		}
@@ -63,10 +64,10 @@ macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
-			let key = $Cipher::parse(matches.value_of("key").unwrap());
+			let key = <$Cipher as Cipher>::Key::try_from(matches.value_of("key").unwrap());
 
 			match key {
-				Some(key) => println!("{:}", $Cipher::encipher(ciphertext, key)),
+				Ok(key) => println!("{:}", $Cipher::encipher(ciphertext, key)),
 				_ => println!("Parse key failed"),
 			}
 		}
