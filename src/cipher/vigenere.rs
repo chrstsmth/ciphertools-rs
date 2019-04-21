@@ -32,3 +32,10 @@ impl From<&str> for VigenereKey {
 		VigenereKey(String::from(key))
 	}
 }
+
+impl From<String> for VigenereKey {
+	fn from(key: String) -> VigenereKey
+	{
+		VigenereKey(key)
+	}
+}
