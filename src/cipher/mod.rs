@@ -1,3 +1,5 @@
+pub mod pallet;
+
 pub mod vigenere;
 pub mod caesar;
 

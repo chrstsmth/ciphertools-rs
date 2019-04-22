@@ -7,11 +7,10 @@ use std::convert::TryFrom;
 
 mod try_from_err;
 mod cipher;
-mod pallet;
 
+use cipher::*;
 use cipher::vigenere::*;
 use cipher::caesar::*;
-use cipher::Cipher;
 
 macro_rules! key_arg {
 	() => (

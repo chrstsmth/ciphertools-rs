@@ -1,6 +1,6 @@
 use std::ops::Add;
 use std::ops::Sub;
-use pallet::alph::*;
+use cipher::pallet::alph::*;
 
 use std::convert::TryFrom;
 

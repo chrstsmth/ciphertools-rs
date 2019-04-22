@@ -9,11 +9,11 @@ use std::io::prelude::*;
 use std::convert::TryFrom;
 
 mod language_model;
-mod pallet;
+mod cipher;
 mod try_from_err;
 
 use language_model::*;
-use pallet::alph::*;
+use cipher::pallet::alph::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();
