@@ -1,5 +1,5 @@
-use cipher::*;
-use cipher::pallet::cipher_char::*;
+use crate::cipher::*;
+use crate::pallet::cipher_char::*;
 use std::iter::Iterator;
 
 pub struct Vigenere;

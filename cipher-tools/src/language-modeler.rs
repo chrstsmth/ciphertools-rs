@@ -2,6 +2,7 @@
 
 extern crate serde;
 extern crate serde_json;
+extern crate cipher_lib;
 
 use std::fs::File;
 use std::error::Error;
@@ -9,11 +10,10 @@ use std::io::prelude::*;
 use std::convert::TryFrom;
 
 mod language_model;
-mod cipher;
 mod try_from_err;
 
 use language_model::*;
-use cipher::pallet::alph::*;
+use cipher_lib::pallet::alph::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();

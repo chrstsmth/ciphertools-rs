@@ -1,16 +1,16 @@
 extern crate serde;
 extern crate serde_json;
 extern crate clap;
+extern crate cipher_lib;
 
 use clap::{Arg, App, SubCommand, AppSettings};
 use std::convert::TryFrom;
 
 mod try_from_err;
-mod cipher;
 
-use cipher::*;
-use cipher::vigenere::*;
-use cipher::caesar::*;
+use cipher_lib::cipher::*;
+use cipher_lib::cipher::vigenere::*;
+use cipher_lib::cipher::caesar::*;
 
 macro_rules! key_arg {
 	() => (

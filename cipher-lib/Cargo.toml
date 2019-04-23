@@ -1,0 +1,9 @@
+[package]
+name = "cipher-lib"
+version = "0.1.0"
+authors = ["Christopher T Smith <git@chrstsmth.ca>"]
+edition = "2018"
+
+[dependencies]
+serde = "*"
+serde_json = "*"
