@@ -1,7 +1,7 @@
 use super::*;
 use super::vigenere::*;
 use std::convert::TryFrom;
-use try_from_err::*;
+use crate::try_from_err::*;
 
 pub struct Caesar;
 pub struct CaesarKey(char);

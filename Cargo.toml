@@ -1,17 +1,5 @@
-[package]
-name = "language-modeler"
-version = "0.1.0"
-authors = ["Christopher T Smith <git@chrstsmth.ca>"]
-
-[dependencies]
-serde = "*"
-serde_json = "*"
-clap = "*"
-
-[[bin]]
-name = "langauge-modeler"
-path = "src/language-modeler.rs"
-
-[[bin]]
-name = "cipher-tools"
-path = "src/cipher-tools.rs"
+[workspace]
+members = [
+	"cipher-lib",
+	"cipher-tools",
+]
