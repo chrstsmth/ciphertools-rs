@@ -1,6 +1,9 @@
 pub mod vigenere;
 pub mod caesar;
 
-pub trait Key {
-	type Cipher;
+use std::convert::TryFrom;
+use crate::cipher::*;
+
+pub trait Key: TryFrom<String> {
+	type Cipher: Cipher;
 }
