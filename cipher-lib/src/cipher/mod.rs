@@ -1,6 +1,8 @@
 pub mod vigenere;
 pub mod caesar;
 
+use crate::key::*;
+
 pub trait Cipher {
 	type Key;
 
