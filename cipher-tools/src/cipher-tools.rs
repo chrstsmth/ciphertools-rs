@@ -49,7 +49,7 @@ macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
 			let plaintext = String::from(matches.value_of("plaintext").unwrap());
-			let key = <$Cipher as Cipher>::Key::try_from(matches.value_of("key").unwrap());
+			let key = <$Cipher as Cipher>::Key::try_from(String::from(matches.value_of("key").unwrap()));
 
 			match key {
 				Ok(key) => println!("{:}", $Cipher::encipher(plaintext, key)),
@@ -63,7 +63,7 @@ macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
-			let key = <$Cipher as Cipher>::Key::try_from(matches.value_of("key").unwrap());
+			let key = <$Cipher as Cipher>::Key::try_from(String::from(matches.value_of("key").unwrap()));
 
 			match key {
 				Ok(key) => println!("{:}", $Cipher::encipher(ciphertext, key)),
