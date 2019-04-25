@@ -1,7 +1,13 @@
 use std::convert::TryFrom;
 use crate::try_from_err::*;
+use crate::key::*;
+use crate::cipher::caesar::*;
 
 pub struct CaesarKey(pub char);
+
+impl Key for CaesarKey {
+	type Cipher = Caesar;
+}
 
 impl TryFrom<&str> for CaesarKey {
 	type Error = TryFromCharError;
