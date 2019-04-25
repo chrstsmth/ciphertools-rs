@@ -1,9 +1,9 @@
 use crate::cipher::*;
+use crate::key::vigenere::*;
 use crate::pallet::cipher_char::*;
 use std::iter::Iterator;
 
 pub struct Vigenere;
-pub struct VigenereKey(String);
 
 impl Cipher for Vigenere {
 	type Key = VigenereKey;
@@ -23,19 +23,5 @@ impl Cipher for Vigenere {
 			plaintext.push(char::from(CipherChar::from(pair.0) - CipherChar::from(pair.1)));
 		}
 		plaintext
-	}
-}
-
-impl From<&str> for VigenereKey {
-	fn from(key: &str) -> VigenereKey
-	{
-		VigenereKey(String::from(key))
-	}
-}
-
-impl From<String> for VigenereKey {
-	fn from(key: String) -> VigenereKey
-	{
-		VigenereKey(key)
 	}
 }

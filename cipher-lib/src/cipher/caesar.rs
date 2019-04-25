@@ -1,10 +1,9 @@
 use super::*;
-use super::vigenere::*;
-use std::convert::TryFrom;
-use crate::try_from_err::*;
+use crate::cipher::vigenere::*;
+use crate::key::caesar::*;
+use crate::key::vigenere::*;
 
 pub struct Caesar;
-pub struct CaesarKey(char);
 
 impl Cipher for Caesar {
 	type Key = CaesarKey;
@@ -16,31 +15,5 @@ impl Cipher for Caesar {
 	fn decipher(ciphertext: String, key: Self::Key) -> String
 	{
 		Vigenere::decipher(ciphertext, VigenereKey::from(key.0.to_string()))
-	}
-}
-
-impl TryFrom<&str> for CaesarKey {
-	type Error = TryFromCharError;
-
-	fn try_from(key: &str) -> Result<CaesarKey, TryFromCharError>
-	{
-		let mut chars = key.chars();
-
-		match chars.next() {
-			Some(first) => {
-				match chars.next() {
-					None => Ok(CaesarKey(first)),
-					_ => Err(TryFromCharError),
-				}
-			}
-			_ => Err(TryFromCharError),
-		}
-	}
-}
-
-impl From<char> for CaesarKey{
-	fn from(key: char) -> CaesarKey
-	{
-		CaesarKey(key)
 	}
 }
