@@ -9,10 +9,10 @@ impl Key for CaesarKey {
 	type Cipher = Caesar;
 }
 
-impl TryFrom<&str> for CaesarKey {
+impl TryFrom<String> for CaesarKey {
 	type Error = TryFromCharError;
 
-	fn try_from(key: &str) -> Result<CaesarKey, TryFromCharError>
+	fn try_from(key: String) -> Result<CaesarKey, TryFromCharError>
 	{
 		let mut chars = key.chars();
 
