@@ -1,5 +1,11 @@
+use crate::key::*;
+use crate::cipher::vigenere::*;
 
 pub struct VigenereKey(pub String);
+
+impl Key for VigenereKey {
+	type Cipher = Vigenere;
+}
 
 impl From<&str> for VigenereKey {
 	fn from(key: &str) -> VigenereKey
