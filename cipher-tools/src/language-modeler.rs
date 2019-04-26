@@ -9,10 +9,7 @@ use std::error::Error;
 use std::io::prelude::*;
 use std::convert::TryFrom;
 
-mod language_model;
-mod try_from_err;
-
-use language_model::*;
+use cipher_lib::language_model::*;
 use cipher_lib::pallet::alph::*;
 
 fn main() {
