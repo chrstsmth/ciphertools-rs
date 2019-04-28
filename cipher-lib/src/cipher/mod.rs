@@ -6,7 +6,7 @@ use crate::key::*;
 pub trait Cipher {
 	type Key: Key;
 
-	fn encipher(plaintext: String, k: Self::Key) -> String;
-	fn decipher(ciphertext: String, k: Self::Key) -> String;
+	fn encipher(plaintext: &String, k: &Self::Key) -> String;
+	fn decipher(ciphertext: &String, k: &Self::Key) -> String;
 }
 
