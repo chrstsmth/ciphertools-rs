@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::key::*;
 use crate::cipher::vigenere::*;
 
@@ -11,5 +12,11 @@ impl From<String> for VigenereKey {
 	fn from(key: String) -> VigenereKey
 	{
 		VigenereKey(key)
+	}
+}
+
+impl fmt::Display for VigenereKey {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{}", self.0)
 	}
 }
