@@ -184,7 +184,7 @@ impl Add for Alph {
 impl Sub for Alph {
 	type Output = Alph;
 	fn sub(self, other: Alph) -> Alph {
-		let a = (usize::from(self) - usize::from(other) + 26) % 26;
+		let a = (26 + usize::from(self) - usize::from(other)) % 26;
 		Alph::try_from(a).unwrap()
 	}
 }
