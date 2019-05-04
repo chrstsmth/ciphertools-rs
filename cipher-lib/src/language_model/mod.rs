@@ -66,7 +66,7 @@ impl LanguageModel {
 		()
 	}
 
-	pub fn insert_word<S: Iterator>(&mut self, s: &mut S) where
+	pub fn insert_word<S>(&mut self, s: &mut S) where
 		S: Iterator<Item = Alph>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
