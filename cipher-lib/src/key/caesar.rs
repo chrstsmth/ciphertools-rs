@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 use crate::try_from_err::*;
 use crate::key::*;
 use crate::cipher::caesar::*;
@@ -32,5 +33,11 @@ impl From<char> for CaesarKey{
 	fn from(key: char) -> CaesarKey
 	{
 		CaesarKey(key)
+	}
+}
+
+impl fmt::Display for CaesarKey {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{}", self.0)
 	}
 }
