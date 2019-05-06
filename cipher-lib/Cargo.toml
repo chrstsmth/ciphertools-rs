@@ -7,3 +7,5 @@ edition = "2018"
 [dependencies]
 serde = "*"
 serde_json = "*"
+min-max-heap = "*"
+cipher-derive = { version = "*", path = "../cipher-derive" }

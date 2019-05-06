@@ -2,7 +2,13 @@ use crate::cipher::*;
 use crate::key::vigenere::*;
 use crate::pallet::cipher_char::*;
 use std::iter::Iterator;
+use cipher_derive::*;
 
+use std::convert::TryFrom;
+use crate::pallet::alph::*;
+use min_max_heap::*;
+
+#[derive(DictionaryAttack)]
 pub struct Vigenere;
 
 impl Cipher for Vigenere {
