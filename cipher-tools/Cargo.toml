@@ -8,6 +8,7 @@ clap = "*"
 serde = "*"
 serde_json = "*"
 cipher-lib = { version = "*", path = "../cipher-lib" }
+cipher-derive = { version = "*", path = "../cipher-derive" }
 
 [[bin]]
 name = "langauge-modeler"
