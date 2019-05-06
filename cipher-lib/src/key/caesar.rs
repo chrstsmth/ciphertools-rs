@@ -4,6 +4,7 @@ use crate::try_from_err::*;
 use crate::key::*;
 use crate::cipher::caesar::*;
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct CaesarKey(pub char);
 
 impl Key for CaesarKey {

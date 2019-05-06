@@ -2,6 +2,7 @@ use std::fmt;
 use crate::key::*;
 use crate::cipher::vigenere::*;
 
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct VigenereKey(pub String);
 
 impl Key for VigenereKey {
