@@ -1,5 +1,6 @@
 [workspace]
 members = [
 	"cipher-lib",
+	"cipher-derive",
 	"cipher-tools",
 ]
