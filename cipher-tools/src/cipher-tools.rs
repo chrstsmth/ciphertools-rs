@@ -90,7 +90,7 @@ macro_rules! decipher {
 			let key = <$Cipher as Cipher>::Key::try_from(String::from(matches.value_of("key").unwrap()));
 
 			match key {
-				Ok(key) => println!("{:}", $Cipher::encipher(&ciphertext, &key)),
+				Ok(key) => println!("{:}", $Cipher::decipher(&ciphertext, &key)),
 				_ => println!("Parse key failed"),
 			}
 		}
