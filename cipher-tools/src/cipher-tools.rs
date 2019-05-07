@@ -120,12 +120,18 @@ macro_rules! dictionary_attack {
 						process::exit(1);
 					})
 					)
-				.map(|x| <$Cipher as Cipher>::Key::try_from(String::from(x))
-					 .unwrap_or_else(|e| {
-						eprintln!("{}", e.description());
-						process::exit(1);
-					 }
-					 ));
+				.enumerate()
+				.map(|x| {
+					let (num, line) = x;
+					let line_num = num + 1;
+					match <$Cipher as Cipher>::Key::try_from(line.clone()) {
+						Err(why) => {
+							eprintln!("Error in {}:{}\n{}: {}", dictionary, line_num, line, why.description());
+							process::exit(1);
+						}
+						Ok(key) => key
+					}
+					});
 
 			let mut language_file = match File::open(&language) {
 				Err(why) => {
