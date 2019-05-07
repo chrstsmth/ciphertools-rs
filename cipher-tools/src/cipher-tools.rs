@@ -5,6 +5,11 @@ extern crate cipher_lib;
 
 use clap::{Arg, App, SubCommand, AppSettings};
 use std::convert::TryFrom;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::*;
+use std::error::Error;
+use std::process;
 
 mod try_from_err;
 
@@ -45,6 +50,25 @@ macro_rules! encipher_subcommand {
 	)
 }
 
+macro_rules! dictionary_attack_subcommand {
+	() => (
+		SubCommand::with_name("dictionary")
+					.about("Dictionary attack")
+					.arg(Arg::with_name("ciphertext")
+						 .short("c")
+						 .value_name("CIPHERTEXT")
+						 .required(true))
+					.arg(Arg::with_name("dictionary")
+						 .short("d")
+						 .value_name("DICTIONARY")
+						 .required(true))
+					.arg(Arg::with_name("language")
+						 .short("l")
+						 .value_name("LANGUAGE")
+						 .required(true))
+	)
+}
+
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
@@ -73,6 +97,63 @@ macro_rules! decipher {
 	)
 }
 
+macro_rules! dictionary_attack {
+	($matches:ident, $Cipher:ident) => (
+		if let Some(matches) = $matches.subcommand_matches("dictionary") {
+			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
+			let dictionary = String::from(matches.value_of("dictionary").unwrap());
+			let language = String::from(matches.value_of("language").unwrap());
+
+			let mut dictionary_file = match File::open(&dictionary) {
+				Err(why) => {
+					eprintln!("{}: {}", dictionary, why);
+					process::exit(1);
+				}
+				Ok(file) => file,
+			};
+
+			let mut dict = BufReader::new(dictionary_file)
+				.lines()
+				.map(|x| x.unwrap_or_else(|e|
+					{
+						eprintln!("{}", e.description());
+						process::exit(1);
+					})
+					)
+				.map(|x| <$Cipher as Cipher>::Key::try_from(String::from(x))
+					 .unwrap_or_else(|e| {
+						eprintln!("{}", e.description());
+						process::exit(1);
+					 }
+					 ));
+
+			let mut language_file = match File::open(&language) {
+				Err(why) => {
+					eprintln!("{}: {}", language, why);
+					process::exit(1);
+				}
+				Ok(file) => file,
+			};
+
+			let mut language_reader = BufReader::new(language_file);
+
+			let lang = match serde_json::from_reader(language_reader) {
+				Err(why) => {
+					eprintln!("{}: {}", language, why);
+					process::exit(1);
+				}
+				Ok(language) => language,
+			};
+
+			let candidates = $Cipher::dictionary_attack(ciphertext, dict, 10, lang);
+
+			for candidate in candidates {
+				println!("{}", candidate);
+			}
+		}
+	)
+}
+
 fn main() {
 	let vigenere = "vigenere";
 	let caesar = "caesar";
@@ -82,21 +163,25 @@ fn main() {
 		.subcommand(SubCommand::with_name(vigenere)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
-			.subcommand(decipher_subcommand!()))
+			.subcommand(decipher_subcommand!())
+			.subcommand(dictionary_attack_subcommand!()))
 
 		.subcommand(SubCommand::with_name(caesar)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
-			.subcommand(decipher_subcommand!()))
+			.subcommand(decipher_subcommand!())
+			.subcommand(dictionary_attack_subcommand!()))
 		.get_matches();
 
 	if let Some(matches) = matches.subcommand_matches(vigenere) {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
+		dictionary_attack!(matches, Vigenere);
 	}
 
 	if let Some(matches) = matches.subcommand_matches(caesar) {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
+		dictionary_attack!(matches, Caesar);
 	}
 }
