@@ -7,7 +7,7 @@ use super::*;
 #[test]
 fn test_encipher_wehavebeendiscoveredfleeatonce_password() {
 	let plaintext = String::from("wehavebeendiscoveredfleeatonce");
-	let key = VigenereKey::from(String::from("password"));
+	let key = VigenereKey::try_from(String::from("password")).unwrap();
 	let ciphertext = Vigenere::encipher(&plaintext, &key);
 	assert!(ciphertext == "lezsrsshtnvaoqfytrwvbzvhptgfys");
 }
@@ -15,7 +15,7 @@ fn test_encipher_wehavebeendiscoveredfleeatonce_password() {
 #[test]
 fn test_decipher_lezsrsshtnvaoqfytrwvbzvhptgfys_password() {
 	let ciphertext = String::from("lezsrsshtnvaoqfytrwvbzvhptgfys");
-	let key = VigenereKey::from(String::from("password"));
+	let key = VigenereKey::try_from(String::from("password")).unwrap();
 	let plaintext = Vigenere::decipher(&ciphertext, &key);
 	assert!(plaintext == "wehavebeendiscoveredfleeatonce");
 }
@@ -40,5 +40,5 @@ fn test_dictionary_lezsrsshtnvaoqfytrwvbzvhptgfys_password() {
 
 	let candidates = Vigenere::dictionary_attack(ciphertext, dictionary, 1, lang);
 	assert!(candidates[0].text == "wehavebeendiscoveredfleeatonce");
-	assert!(candidates[0].key == VigenereKey::from(String::from("password")));
+	assert!(candidates[0].key == VigenereKey::try_from(String::from("password")).unwrap());
 }

@@ -19,10 +19,10 @@ impl Cipher for Caesar {
 
 	fn encipher(plaintext: &String, key: &Self::Key) -> String
 	{
-		Vigenere::encipher(plaintext, &VigenereKey::from(key.0.to_string()))
+		Vigenere::encipher(plaintext, &VigenereKey::from(VigenereKey(vec!(key.0))))
 	}
 	fn decipher(ciphertext: &String, key: &Self::Key) -> String
 	{
-		Vigenere::decipher(ciphertext, &VigenereKey::from(key.0.to_string()))
+		Vigenere::decipher(ciphertext, &VigenereKey::from(VigenereKey(vec!(key.0))))
 	}
 }
