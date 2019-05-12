@@ -8,6 +8,9 @@ use crate::candidate::*;
 use cipher_derive::*;
 use min_max_heap::*;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(DictionaryAttack)]
 pub struct Caesar;
 
