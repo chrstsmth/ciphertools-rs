@@ -26,6 +26,22 @@ impl fmt::Display for TryFromCharError {
 	}
 }
 
+impl error::Error for TryFromStringError {
+	fn description(&self) -> &str {
+		"no conversion available"
+	}
+
+	fn cause(&self) -> Option<&error::Error> {
+		None
+	}
+}
+
+impl fmt::Display for TryFromStringError {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "no conversion available")
+	}
+}
+
 impl error::Error for TryFromIntError {
 	fn description(&self) -> &str {
 		"no conversion available"
