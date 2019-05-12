@@ -8,6 +8,9 @@ use std::convert::TryFrom;
 use crate::pallet::alph::*;
 use min_max_heap::*;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(DictionaryAttack)]
 pub struct Vigenere;
 
