@@ -15,5 +15,5 @@ pub trait Cipher {
 pub trait DictionaryAttack<S>: Cipher where
 	S: Iterator<Item = Self::Key>,
 {
-	fn dictionary_attack(ciphertext: String, dictionary: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>;
+	fn dictionary_attack(ciphertext: &String, dictionary: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>;
 }
