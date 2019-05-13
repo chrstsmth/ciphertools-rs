@@ -11,6 +11,10 @@ pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 
+impl Alph {
+	pub const SIZE: usize = 26;
+}
+
 impl From<Alph> for char {
 	fn from(a: Alph) -> char {
 		match a {
@@ -176,7 +180,7 @@ impl TryFrom<usize> for Alph {
 impl Add for Alph {
 	type Output = Alph;
 	fn add(self, other: Alph) -> Alph {
-		let a = (usize::from(self) + usize::from(other)) % 26;
+		let a = (usize::from(self) + usize::from(other)) % Self::SIZE;
 		Alph::try_from(a).unwrap()
 	}
 }
@@ -184,7 +188,7 @@ impl Add for Alph {
 impl Sub for Alph {
 	type Output = Alph;
 	fn sub(self, other: Alph) -> Alph {
-		let a = (26 + usize::from(self) - usize::from(other)) % 26;
+		let a = (Self::SIZE + usize::from(self) - usize::from(other)) % Self::SIZE;
 		Alph::try_from(a).unwrap()
 	}
 }
