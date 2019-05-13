@@ -11,7 +11,7 @@ use min_max_heap::*;
 #[cfg(test)]
 mod tests;
 
-#[derive(DictionaryAttack)]
+#[derive(DictionaryAttack, BruteForce)]
 pub struct Caesar;
 
 impl Cipher for Caesar {
