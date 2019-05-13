@@ -5,7 +5,7 @@ use super::alph::*; //TODO figure out path
 use std::convert::TryFrom;
 
 #[derive(Copy, Clone, PartialEq)]
-pub struct CipherChar(char);
+pub struct CipherChar(pub char);
 
 impl Add for CipherChar {
 	type Output = CipherChar ;
