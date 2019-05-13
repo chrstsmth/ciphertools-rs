@@ -55,3 +55,31 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	};
 	TokenStream::from(expanded)
 }
+
+#[proc_macro_derive(BruteForce)]
+pub fn brute_force(input: TokenStream) -> TokenStream {
+	let ast = syn::parse_macro_input!(input as DeriveInput);
+	impl_brute_force(&ast)
+}
+
+fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
+	let name = &ast.ident;
+	let expanded = quote! {
+		impl<S> BruteForce<S> for #name where
+			S: Iterator<Item = Self::Key>,
+		{
+			type BruteForceKey = Self::Key;
+
+			fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
+			{
+				Self::dictionary_attack(ciphertext, Self::BruteForceKey::START, n, lang)
+			}
+
+			fn brute_force_starting(ciphertext: &String, it: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
+			{
+				Self::dictionary_attack(ciphertext, it, n, lang)
+			}
+		}
+	};
+	TokenStream::from(expanded)
+}
