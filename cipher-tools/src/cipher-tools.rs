@@ -104,7 +104,7 @@ macro_rules! dictionary_attack {
 			let dictionary = String::from(matches.value_of("dictionary").unwrap());
 			let language = String::from(matches.value_of("language").unwrap());
 
-			let mut dictionary_file = match File::open(&dictionary) {
+			let dictionary_file = match File::open(&dictionary) {
 				Err(why) => {
 					eprintln!("{}: {}", dictionary, why);
 					process::exit(1);
@@ -112,7 +112,7 @@ macro_rules! dictionary_attack {
 				Ok(file) => file,
 			};
 
-			let mut dict = BufReader::new(dictionary_file)
+			let dict = BufReader::new(dictionary_file)
 				.lines()
 				.map(|x| x.unwrap_or_else(|e|
 					{
@@ -133,7 +133,7 @@ macro_rules! dictionary_attack {
 					}
 					});
 
-			let mut language_file = match File::open(&language) {
+			let language_file = match File::open(&language) {
 				Err(why) => {
 					eprintln!("{}: {}", language, why);
 					process::exit(1);
@@ -141,7 +141,7 @@ macro_rules! dictionary_attack {
 				Ok(file) => file,
 			};
 
-			let mut language_reader = BufReader::new(language_file);
+			let language_reader = BufReader::new(language_file);
 
 			let lang = match serde_json::from_reader(language_reader) {
 				Err(why) => {
