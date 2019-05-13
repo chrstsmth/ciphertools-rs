@@ -21,7 +21,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 		impl<S> DictionaryAttack<S> for #name where
 			S: Iterator<Item = Self::Key>,
 		{
-			fn dictionary_attack(ciphertext: String, dict: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>
+			fn dictionary_attack(ciphertext: &String, dict: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>
 			{
 				type Can = Candidate<<#name as Cipher>::Key>;
 

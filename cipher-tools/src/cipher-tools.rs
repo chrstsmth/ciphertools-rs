@@ -151,7 +151,7 @@ macro_rules! dictionary_attack {
 				Ok(language) => language,
 			};
 
-			let candidates = $Cipher::dictionary_attack(ciphertext, dict, 10, lang);
+			let candidates = $Cipher::dictionary_attack(&ciphertext, dict, 10, lang);
 
 			for candidate in candidates {
 				println!("{}", candidate);
