@@ -23,6 +23,6 @@ pub trait BruteForce<S>: DictionaryAttack<S> where
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 
-	fn brute_force_starting(ciphertext: &String, it: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>;
+	fn brute_force_starting(ciphertext: &String, key: Self::BruteForceKey, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>;
 	fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>;
 }
