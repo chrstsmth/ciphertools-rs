@@ -16,6 +16,7 @@ mod try_from_err;
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
+use cipher_lib::key::*;
 
 macro_rules! key_arg {
 	() => (
@@ -55,17 +56,32 @@ macro_rules! dictionary_attack_subcommand {
 		SubCommand::with_name("dictionary")
 					.about("Dictionary attack")
 					.arg(Arg::with_name("ciphertext")
-						 .short("c")
-						 .value_name("CIPHERTEXT")
-						 .required(true))
+						.short("c")
+						.value_name("CIPHERTEXT")
+						.required(true))
 					.arg(Arg::with_name("dictionary")
-						 .short("d")
-						 .value_name("DICTIONARY")
-						 .required(true))
+						.short("d")
+						.value_name("DICTIONARY")
+						.required(true))
 					.arg(Arg::with_name("language")
-						 .short("l")
-						 .value_name("LANGUAGE")
-						 .required(true))
+						.short("l")
+						.value_name("LANGUAGE")
+						.required(true))
+	)
+}
+
+macro_rules! brute_force_subcommand {
+	() => (
+		SubCommand::with_name("brute")
+					.about("Brute force")
+					.arg(Arg::with_name("ciphertext")
+						.short("c")
+						.value_name("CIPHERTEXT")
+						.required(true))
+					.arg(Arg::with_name("language")
+						.short("l")
+						.value_name("LANGUAGE")
+						.required(true))
 	)
 }
 
@@ -160,6 +176,41 @@ macro_rules! dictionary_attack {
 	)
 }
 
+macro_rules! brute_force {
+	($matches:ident, $Cipher:ident) => (
+		if let Some(matches) = $matches.subcommand_matches("brute") {
+			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
+			let language = String::from(matches.value_of("language").unwrap());
+
+			let language_file = match File::open(&language) {
+				Err(why) => {
+					eprintln!("{}: {}", language, why);
+					process::exit(1);
+				}
+				Ok(file) => file,
+			};
+
+			let language_reader = BufReader::new(language_file);
+
+			let lang = match serde_json::from_reader(language_reader) {
+				Err(why) => {
+					eprintln!("{}: {}", language, why);
+					process::exit(1);
+				}
+				Ok(language) => language,
+			};
+
+			type Key = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
+			let candidates = <$Cipher as BruteForce<Key>>::brute_force(&ciphertext, 10, lang);
+
+			for candidate in candidates {
+				println!("{}", candidate);
+			}
+		}
+	)
+}
+
+
 fn main() {
 	let vigenere = "vigenere";
 	let caesar = "caesar";
@@ -176,7 +227,8 @@ fn main() {
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!())
-			.subcommand(dictionary_attack_subcommand!()))
+			.subcommand(dictionary_attack_subcommand!())
+			.subcommand(brute_force_subcommand!()))
 		.get_matches();
 
 	if let Some(matches) = matches.subcommand_matches(vigenere) {
@@ -189,5 +241,6 @@ fn main() {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
 		dictionary_attack!(matches, Caesar);
+		brute_force!(matches, Caesar);
 	}
 }
