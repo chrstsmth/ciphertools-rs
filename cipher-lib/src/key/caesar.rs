@@ -46,11 +46,12 @@ let alph = match  Alph::try_from(first) {
 impl IntoBruteForceIterator for CaesarKey {
 	type BruteForceIter = CaesarKeyIterator;
 
-	const START: Self::BruteForceIter =
+	fn start() -> Self::BruteForceIter {
 		CaesarKeyIterator {
 			start: CaesarKey(Alph::A),
 			i: 0,
-		};
+		}
+	}
 
 	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
 		CaesarKeyIterator {

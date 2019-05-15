@@ -12,7 +12,7 @@ pub trait Key: TryFrom<String> + fmt::Display + Eq + Ord {
 pub trait IntoBruteForceIterator: Key {
 	type BruteForceIter: Iterator;
 
-	const START: Self::BruteForceIter;
+	fn start() -> Self::BruteForceIter;
 	fn into_brute_force_iterator(self) -> Self::BruteForceIter;
 }
 
