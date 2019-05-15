@@ -34,7 +34,7 @@ impl TryFrom<String> for CaesarKey {
 			Some(_) => return Err(TryFromStringError),
 			_ => (),
 		};
-let alph = match  Alph::try_from(first) {
+		let alph = match  Alph::try_from(first) {
 			Ok(alph) => alph,
 			_ => return Err(TryFromStringError),
 		};
