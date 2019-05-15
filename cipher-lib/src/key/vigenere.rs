@@ -8,6 +8,10 @@ use crate::pallet::alph::*;
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VigenereKey(pub Vec<Alph>);
 
+pub struct VegenereKeyIterator {
+	it: VigenereKey,
+}
+
 impl Key for VigenereKey {
 	type Cipher = Vigenere;
 }
@@ -38,6 +42,47 @@ impl fmt::Display for VigenereKey {
 		}
 
 		write!(f, "{}", s)
+	}
+}
+
+impl IntoBruteForceIterator for VigenereKey {
+	type BruteForceIter = VegenereKeyIterator;
+
+	fn start() -> Self::BruteForceIter {
+		VegenereKeyIterator {
+			it: VigenereKey(vec![Alph::A]),
+		}
+	}
+
+	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
+		VegenereKeyIterator {
+			it: self.clone(),
+		}
+	}
+}
+
+impl Iterator for VegenereKeyIterator {
+	type Item = VigenereKey;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let r = self.it.clone();
+		let mut overflow = true;
+
+		for a in &mut self.it.0 {
+			let mut i: usize = usize::from(*a);
+			i = (i + 1) % Alph::SIZE;
+			*a = Alph::try_from(i).unwrap();
+
+			if i != 0 {
+				overflow = false;
+				break;
+			}
+		}
+
+		if overflow {
+			self.it.0.push(Alph::A);
+		}
+		Some(r)
 	}
 }
 
