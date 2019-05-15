@@ -221,7 +221,8 @@ fn main() {
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!())
-			.subcommand(dictionary_attack_subcommand!()))
+			.subcommand(dictionary_attack_subcommand!())
+			.subcommand(brute_force_subcommand!()))
 
 		.subcommand(SubCommand::with_name(caesar)
 			.setting(AppSettings::ArgRequiredElseHelp)
@@ -235,6 +236,7 @@ fn main() {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
 		dictionary_attack!(matches, Vigenere);
+		brute_force!(matches, Vigenere);
 	}
 
 	if let Some(matches) = matches.subcommand_matches(caesar) {
