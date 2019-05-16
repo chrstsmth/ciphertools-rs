@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::convert::TryFrom;
 use crate::cipher::*;
 use crate::cipher::vigenere::*;

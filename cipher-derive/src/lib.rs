@@ -21,7 +21,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 		impl<S> DictionaryAttack<S> for #name where
 			S: Iterator<Item = Self::Key>,
 		{
-			fn dictionary_attack(ciphertext: &String, dict: S, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::Key>>
+			fn dictionary_attack(ciphertext: &String, dict: S, n: usize, lang: LanguageModel, exit: AtomicBool) -> Vec<Candidate<Self::Key>>
 			{
 				type Can = Candidate<<#name as Cipher>::Key>;
 
@@ -47,6 +47,11 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 					} else if *candidates.peek_min().unwrap() < can {
 						candidates.replace_min(can);
 					}
+
+					if exit.load(Ordering::Relaxed) {
+						break;
+					}
+
 				}
 
 				candidates.into_vec_desc()
@@ -72,12 +77,12 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 
 			fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
 			{
-				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), n, lang)
+				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), n, lang, AtomicBool::new(false))
 			}
 
 			fn brute_force_starting(ciphertext: &String, key: Self::Key, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
 			{
-				Self::dictionary_attack(ciphertext, key.into_brute_force_iterator(), n, lang)
+				Self::dictionary_attack(ciphertext, key.into_brute_force_iterator(), n, lang, AtomicBool::new(false))
 			}
 		}
 	};
