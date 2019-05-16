@@ -4,6 +4,7 @@ extern crate clap;
 extern crate cipher_lib;
 
 use clap::{Arg, App, SubCommand, AppSettings};
+use std::sync::atomic::AtomicBool;
 use std::convert::TryFrom;
 use std::fs::File;
 use std::io::prelude::*;
@@ -167,7 +168,7 @@ macro_rules! dictionary_attack {
 				Ok(language) => language,
 			};
 
-			let candidates = $Cipher::dictionary_attack(&ciphertext, dict, 10, lang);
+			let candidates = $Cipher::dictionary_attack(&ciphertext, dict, 10, lang, AtomicBool::new(false));
 
 			for candidate in candidates {
 				println!("{}", candidate);
