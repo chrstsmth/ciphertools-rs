@@ -17,6 +17,7 @@ mod tests;
 pub struct Caesar;
 
 impl Cipher for Caesar {
+	const NAME: &'static str = "caesar";
 	type Key = CaesarKey;
 
 	fn encipher(plaintext: &String, key: &Self::Key) -> String

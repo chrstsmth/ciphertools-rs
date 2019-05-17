@@ -8,6 +8,7 @@ use crate::candidate::*;
 use crate::language_model::*;
 
 pub trait Cipher {
+	const NAME: &'static str;
 	type Key: Key;
 
 	fn encipher(plaintext: &String, k: &Self::Key) -> String;

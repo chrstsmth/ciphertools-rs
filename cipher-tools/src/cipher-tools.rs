@@ -222,19 +222,16 @@ fn main() {
 	}).expect("Error setting SIGINT trap");
 
 
-	let vigenere = "vigenere";
-	let caesar = "caesar";
-
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(SubCommand::with_name(vigenere)
+		.subcommand(SubCommand::with_name(Vigenere::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!())
 			.subcommand(dictionary_attack_subcommand!())
 			.subcommand(brute_force_subcommand!()))
 
-		.subcommand(SubCommand::with_name(caesar)
+		.subcommand(SubCommand::with_name(Caesar::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand!())
 			.subcommand(decipher_subcommand!())
@@ -242,12 +239,12 @@ fn main() {
 			.subcommand(brute_force_subcommand!()))
 		.get_matches();
 
-	if let Some(matches) = matches.subcommand_matches(vigenere) {
+	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
 		dictionary_attack!(matches, Vigenere, exit);
 		brute_force!(matches, Vigenere, exit);
-	} else if let Some(matches) = matches.subcommand_matches(caesar) {
+	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
 		dictionary_attack!(matches, Caesar, exit);
