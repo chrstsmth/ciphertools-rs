@@ -17,6 +17,7 @@ mod tests;
 pub struct Vigenere;
 
 impl Cipher for Vigenere {
+	const NAME: &'static str = "vigenere";
 	type Key = VigenereKey;
 
 	fn encipher(plaintext: &String, key: &Self::Key) -> String
