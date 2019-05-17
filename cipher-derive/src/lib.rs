@@ -48,10 +48,9 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 						candidates.replace_min(can);
 					}
 
-					if exit.load(Ordering::Relaxed) {
+					if exit.load(Ordering::SeqCst) {
 						break;
 					}
-
 				}
 
 				candidates.into_vec_desc()
