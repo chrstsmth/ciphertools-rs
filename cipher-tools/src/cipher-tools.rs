@@ -1,10 +1,11 @@
+extern crate ctrlc;
 extern crate serde;
 extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
 
 use clap::{Arg, App, SubCommand, AppSettings};
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::convert::TryFrom;
 use std::fs::File;
@@ -116,7 +117,7 @@ macro_rules! decipher {
 }
 
 macro_rules! dictionary_attack {
-	($matches:ident, $Cipher:ident) => (
+	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let dictionary = String::from(matches.value_of("dictionary").unwrap());
@@ -169,7 +170,7 @@ macro_rules! dictionary_attack {
 				Ok(language) => language,
 			};
 
-			let candidates = $Cipher::dictionary_attack(&ciphertext, dict, 10, lang, Arc::new(AtomicBool::new(false)));
+			let candidates = $Cipher::dictionary_attack(&ciphertext, dict, 10, lang, $exit.clone());
 
 			for candidate in candidates {
 				println!("{}", candidate);
@@ -179,7 +180,7 @@ macro_rules! dictionary_attack {
 }
 
 macro_rules! brute_force {
-	($matches:ident, $Cipher:ident) => (
+	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("brute") {
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let language = String::from(matches.value_of("language").unwrap());
@@ -203,7 +204,7 @@ macro_rules! brute_force {
 			};
 
 			type Key = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
-			let candidates = <$Cipher as BruteForce<Key>>::brute_force(&ciphertext, 10, lang);
+			let candidates = <$Cipher as BruteForce<Key>>::brute_force(&ciphertext, 10, lang, $exit.clone());
 
 			for candidate in candidates {
 				println!("{}", candidate);
@@ -214,6 +215,13 @@ macro_rules! brute_force {
 
 
 fn main() {
+	let exit = Arc::new(AtomicBool::new(false));
+	let ctrlc_exit = exit.clone();
+	ctrlc::set_handler(move ||  {
+		ctrlc_exit.store(true, Ordering::SeqCst);
+	}).expect("Error setting SIGINT trap");
+
+
 	let vigenere = "vigenere";
 	let caesar = "caesar";
 
@@ -237,14 +245,12 @@ fn main() {
 	if let Some(matches) = matches.subcommand_matches(vigenere) {
 		encipher!(matches, Vigenere);
 		decipher!(matches, Vigenere);
-		dictionary_attack!(matches, Vigenere);
-		brute_force!(matches, Vigenere);
-	}
-
-	if let Some(matches) = matches.subcommand_matches(caesar) {
+		dictionary_attack!(matches, Vigenere, exit);
+		brute_force!(matches, Vigenere, exit);
+	} else if let Some(matches) = matches.subcommand_matches(caesar) {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
-		dictionary_attack!(matches, Caesar);
-		brute_force!(matches, Caesar);
+		dictionary_attack!(matches, Caesar, exit);
+		brute_force!(matches, Caesar, exit);
 	}
 }

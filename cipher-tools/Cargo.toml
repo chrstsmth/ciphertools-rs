@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Christopher T Smith <git@chrstsmth.ca>"]
 
 [dependencies]
+ctrlc = "*"
 clap = "*"
 serde = "*"
 serde_json = "*"
