@@ -75,14 +75,14 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 		{
 			type BruteForceKey = Self::Key;
 
-			fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
+			fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>
 			{
-				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), n, lang, Arc::new(AtomicBool::new(false)))
+				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), n, lang, exit)
 			}
 
-			fn brute_force_starting(ciphertext: &String, key: Self::Key, n: usize, lang: LanguageModel) -> Vec<Candidate<Self::BruteForceKey>>
+			fn brute_force_starting(ciphertext: &String, key: Self::Key, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>
 			{
-				Self::dictionary_attack(ciphertext, key.into_brute_force_iterator(), n, lang, Arc::new(AtomicBool::new(false)))
+				Self::dictionary_attack(ciphertext, key.into_brute_force_iterator(), n, lang, exit)
 			}
 		}
 	};
