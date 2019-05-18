@@ -255,14 +255,12 @@ macro_rules! brute_force {
 	)
 }
 
-
 fn main() {
 	let exit = Arc::new(AtomicBool::new(false));
 	let ctrlc_exit = exit.clone();
 	ctrlc::set_handler(move ||  {
 		ctrlc_exit.store(true, Ordering::SeqCst);
 	}).expect("Error setting SIGINT trap");
-
 
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)

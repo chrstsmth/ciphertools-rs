@@ -1,6 +1,6 @@
 use std::ops::Add;
 use std::ops::Sub;
-use super::alph::*; //TODO figure out path
+use crate::pallet::alph::*;
 
 use std::convert::TryFrom;
 
