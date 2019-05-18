@@ -1,7 +1,6 @@
 use crate::test_util::*;
 use std::fs::File;
 use std::io::*;
-use std::io::prelude::*;
 use super::*;
 
 #[test]
@@ -38,7 +37,7 @@ fn test_dictionary_lezsrsshtnvaoqfytrwvbzvhptgfys_password() {
 	let language_reader = BufReader::new(language_file);
 	let lang: LanguageModel = serde_json::from_reader(language_reader).unwrap();
 
-	let candidates = Vigenere::dictionary_attack(ciphertext, dictionary, 1, lang);
+	let candidates = Vigenere::dictionary_attack(&ciphertext, dictionary, 1, lang, Arc::new(AtomicBool::new(false)));
 	assert!(candidates[0].text == "wehavebeendiscoveredfleeatonce");
 	assert!(candidates[0].key == VigenereKey::try_from(String::from("password")).unwrap());
 }

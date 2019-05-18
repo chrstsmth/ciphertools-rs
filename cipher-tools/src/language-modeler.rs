@@ -10,7 +10,7 @@ use std::io::prelude::*;
 use std::convert::TryFrom;
 
 use cipher_lib::language_model::*;
-use cipher_lib::pallet::alph::*;
+use cipher_lib::pallet::lang::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();
@@ -29,8 +29,9 @@ fn main() {
 		}
 
 		let mut i = s.chars()
-			.filter(|x| *x != '\n')
-			.map(|x| Alph::try_from(x).unwrap());
+			.map(|x| Lang::try_from(x))
+			.filter(|x| x.is_ok())
+			.map(|x| x.unwrap());
 		l.insert_words(&mut i, 5);
 		println!("{}", serde_json::to_string(&l).unwrap());
 	}

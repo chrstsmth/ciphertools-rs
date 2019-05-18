@@ -7,7 +7,7 @@ use cipher_derive::*;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::convert::TryFrom;
-use crate::pallet::alph::*;
+use crate::pallet::lang::*;
 use min_max_heap::*;
 
 #[cfg(test)]
