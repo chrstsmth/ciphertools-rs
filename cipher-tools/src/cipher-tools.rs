@@ -89,6 +89,10 @@ macro_rules! brute_force_subcommand {
 						.short("s")
 						.value_name("START-KEY")
 						.required(false))
+					.arg(Arg::with_name("end")
+						.short("e")
+						.value_name("END-KEY")
+						.required(false))
 	)
 }
 
@@ -202,6 +206,19 @@ macro_rules! brute_force {
 				None => None
 			};
 
+			let end = match matches.value_of("end") {
+				Some(key_str) => {
+					match <$Cipher as Cipher>::Key::try_from(String::from(key_str)) {
+						Ok(key) => Some(key),
+						Err(why) => {
+							eprintln!("{}: {}", key_str, why);
+							process::exit(1);
+						}
+					}
+				}
+				None => None
+			};
+
 			let language_file = match File::open(&language) {
 				Err(why) => {
 					eprintln!("{}: {}", language, why);
@@ -222,7 +239,11 @@ macro_rules! brute_force {
 
 			type Key = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
 			let candidates = if let Some(start) = start {
-				<$Cipher as BruteForce<Key>>::brute_force_starting(&ciphertext, start, 10, lang, $exit.clone())
+				if let Some(end) = end {
+					<$Cipher as BruteForce<Key>>::brute_force_between(&ciphertext, start, end, 10, lang, $exit.clone())
+				} else {
+					<$Cipher as BruteForce<Key>>::brute_force_from(&ciphertext, start, 10, lang, $exit.clone())
+				}
 			} else {
 				<$Cipher as BruteForce<Key>>::brute_force(&ciphertext, 10, lang, $exit.clone())
 			};
