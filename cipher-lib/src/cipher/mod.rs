@@ -26,6 +26,7 @@ pub trait BruteForce<S>: DictionaryAttack<S> where
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 
-	fn brute_force_starting(ciphertext: &String, key: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>;
 	fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::Key>>;
+	fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>;
+	fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>;
 }
