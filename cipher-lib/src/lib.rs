@@ -7,3 +7,6 @@ pub mod cipher;
 pub mod key;
 pub mod language_model;
 pub mod candidate;
+
+#[cfg(test)]
+mod test_util;

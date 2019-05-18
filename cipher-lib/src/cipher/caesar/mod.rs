@@ -5,7 +5,7 @@ use crate::cipher::*;
 use crate::cipher::vigenere::*;
 use crate::key::caesar::*;
 use crate::key::vigenere::*;
-use crate::pallet::alph::*;
+use crate::pallet::lang::*;
 use crate::candidate::*;
 use cipher_derive::*;
 use min_max_heap::*;

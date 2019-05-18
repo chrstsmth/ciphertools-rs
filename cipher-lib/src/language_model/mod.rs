@@ -2,7 +2,7 @@ use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
 use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, SeqAccess};
 use std::convert::TryFrom;
 use std::fmt;
-use crate::pallet::alph::*;
+use crate::pallet::lang::*;
 
 use std::collections::VecDeque;
 
@@ -49,9 +49,9 @@ impl LanguageModel {
 	}
 
 	pub fn insert_words<S>(&mut self, s: &mut S, depth: usize) where
-		S: Iterator<Item = Alph>,
+		S: Iterator<Item = Lang>,
 	{
-		let mut v: VecDeque<Alph> = VecDeque::with_capacity(depth);
+		let mut v: VecDeque<Lang> = VecDeque::with_capacity(depth);
 
 		for c in s.take(v.capacity()).by_ref() {
 			v.push_back(c);
@@ -67,7 +67,7 @@ impl LanguageModel {
 	}
 
 	pub fn insert_word<S>(&mut self, s: &mut S) where
-		S: Iterator<Item = Alph>,
+		S: Iterator<Item = Lang>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
 
@@ -87,7 +87,7 @@ impl LanguageModel {
 	}
 
 	pub fn score<S>(&self, s: &mut S) -> u32 where
-		S: Iterator<Item = Alph> + Clone,
+		S: Iterator<Item = Lang> + Clone,
 	{
 		let mut score: u32 = 0;
 		loop {
@@ -129,7 +129,7 @@ impl Serialize for NextNode {
 		for (i, n) in self.node.iter().enumerate() {
 			match n {
 				Some(x) => {
-					m.serialize_entry(&Alph::try_from(i).unwrap(), x)?;
+					m.serialize_entry(&Lang::try_from(i).unwrap(), x)?;
 				}
 				_ => (),
 			}
@@ -184,7 +184,7 @@ impl<'de> Visitor<'de> for NextNodeVisitor {
 		M: MapAccess<'de>,
 	{
 		let mut next = NextNode::new();
-		while let Some((key, value)) = access.next_entry::<Alph, Node>()? {
+		while let Some((key, value)) = access.next_entry::<Lang, Node>()? {
 			let i = usize::from(key);
 			next.node[i] = Some(Box::new(value));
 			next.pop += 1;

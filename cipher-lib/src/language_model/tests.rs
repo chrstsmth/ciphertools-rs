@@ -3,18 +3,18 @@ use super::*;
 fn langauge_model_abcde() -> LanguageModel {
 	let mut l = LanguageModel::new();
 	let mut i = "abcde".chars()
-		.map(|x| Alph::try_from(x).unwrap());
+		.map(|x| Lang::try_from(x).unwrap());
 	l.insert_word(&mut i);
 	l
 }
 
 fn verify_language_model_abcde(lang: LanguageModel)
 {
-	let a = lang.head.next.node[usize::from(Alph::A)].as_ref().unwrap();
-	let ab = a.next.node[usize::from(Alph::B)].as_ref().unwrap();
-	let abc = ab.next.node[usize::from(Alph::C)].as_ref().unwrap();
-	let abcd = abc.next.node[usize::from(Alph::D)].as_ref().unwrap();
-	let abcde = abcd.next.node[usize::from(Alph::E)].as_ref().unwrap();
+	let a = lang.head.next.node[usize::from(Lang::A)].as_ref().unwrap();
+	let ab = a.next.node[usize::from(Lang::B)].as_ref().unwrap();
+	let abc = ab.next.node[usize::from(Lang::C)].as_ref().unwrap();
+	let abcd = abc.next.node[usize::from(Lang::D)].as_ref().unwrap();
+	let abcde = abcd.next.node[usize::from(Lang::E)].as_ref().unwrap();
 
 	assert!(lang.head.freq == 1);
 	assert!(a.freq == 1);

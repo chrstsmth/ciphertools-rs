@@ -2,12 +2,15 @@ use std::fmt;
 use std::convert::TryFrom;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
-//use try_from_err::*; //TODO
-use super::super::try_from_err::*;
+use crate::try_from_err::*;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Lang {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Space
+}
+
+impl Lang {
+	pub const SIZE: usize = 26;
 }
 
 impl From<Lang> for char {
@@ -102,6 +105,76 @@ impl TryFrom<char> for Lang {
 			'Z' => Ok(Lang::Z),
 			' ' => Ok(Lang::Space),
 			_ => Err(TryFromCharError),
+		}
+	}
+}
+
+impl From<Lang> for usize {
+	fn from(a: Lang) -> usize {
+		match a {
+			Lang::A => 0,
+			Lang::B => 1,
+			Lang::C => 2,
+			Lang::D => 3,
+			Lang::E => 4,
+			Lang::F => 5,
+			Lang::G => 6,
+			Lang::H => 7,
+			Lang::I => 8,
+			Lang::J => 9,
+			Lang::K => 10,
+			Lang::L => 11,
+			Lang::M => 12,
+			Lang::N => 13,
+			Lang::O => 14,
+			Lang::P => 15,
+			Lang::Q => 16,
+			Lang::R => 17,
+			Lang::S => 18,
+			Lang::T => 19,
+			Lang::U => 20,
+			Lang::V => 21,
+			Lang::W => 22,
+			Lang::X => 23,
+			Lang::Y => 24,
+			Lang::Z => 25,
+			Lang::Space => 26,
+		}
+	}
+}
+
+impl TryFrom<usize> for Lang {
+	type Error = TryFromIntError;
+	fn try_from(i: usize) -> Result<Lang, TryFromIntError> {
+		match i {
+			0 => Ok(Lang::A),
+			1 => Ok(Lang::B),
+			2 => Ok(Lang::C),
+			3 => Ok(Lang::D),
+			4 => Ok(Lang::E),
+			5 => Ok(Lang::F),
+			6 => Ok(Lang::G),
+			7 => Ok(Lang::H),
+			8 => Ok(Lang::I),
+			9 => Ok(Lang::J),
+			10 => Ok(Lang::K),
+			11 => Ok(Lang::L),
+			12 => Ok(Lang::M),
+			13 => Ok(Lang::N),
+			14 => Ok(Lang::O),
+			15 => Ok(Lang::P),
+			16 => Ok(Lang::Q),
+			17 => Ok(Lang::R),
+			18 => Ok(Lang::S),
+			19 => Ok(Lang::T),
+			20 => Ok(Lang::U),
+			21 => Ok(Lang::V),
+			22 => Ok(Lang::W),
+			23 => Ok(Lang::X),
+			24 => Ok(Lang::Y),
+			25 => Ok(Lang::Z),
+			26 => Ok(Lang::Space),
+			_ => Err(TryFromIntError),
 		}
 	}
 }

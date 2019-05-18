@@ -32,7 +32,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 					let text = #name::decipher(&ciphertext, &key);
 
 					let mut alph_iter = text.chars()
-						.map(|x| Alph::try_from(x))
+						.map(|x| Lang::try_from(x))
 						.filter(|x| x.is_ok())
 						.map(|x| x.unwrap());
 
