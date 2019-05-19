@@ -5,7 +5,7 @@ use std::convert::TryFrom;
 use crate::cipher::*;
 use std::fmt;
 
-pub trait Key: TryFrom<String> + fmt::Display + Eq + Ord {
+pub trait Key: TryFrom<String> + fmt::Display + Clone + Eq + Ord {
 	type Cipher: Cipher;
 }
 

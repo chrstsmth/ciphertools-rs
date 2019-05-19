@@ -18,16 +18,12 @@ pub fn dictionary_attack(input: TokenStream) -> TokenStream {
 fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<S> DictionaryAttack<S> for #name where
+		impl<S,M> DictionaryAttack<S,M> for #name where
 			S: Iterator<Item = Self::Key>,
+			M: Model<Self::Key>,
 		{
-			fn dictionary_attack(ciphertext: &String, dict: S, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::Key>>
+			fn dictionary_attack(ciphertext: &String, results: &mut M, dict: S, lang: LanguageModel, exit: Arc<AtomicBool>)
 			{
-				type Can = Candidate<<#name as Cipher>::Key>;
-
-				let mut candidates = MinMaxHeap::<Can>::new();
-				candidates.reserve_exact(n);
-
 				for key in dict {
 					let text = #name::decipher(&ciphertext, &key);
 
@@ -42,18 +38,12 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 						key: key,
 					};
 
-					if candidates.len() < candidates.capacity() {
-						candidates.push(can);
-					} else if *candidates.peek_min().unwrap() < can {
-						candidates.replace_min(can);
-					}
+					results.insert_candidate(can);
 
 					if exit.load(Ordering::SeqCst) {
 						break;
 					}
 				}
-
-				candidates.into_vec_desc()
 			}
 		}
 	};
@@ -69,25 +59,26 @@ pub fn brute_force(input: TokenStream) -> TokenStream {
 fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<S> BruteForce<S> for #name where
+		impl<S,M> BruteForce<S,M> for #name where
 			S: Iterator<Item = Self::Key>,
+			M: Model<Self::Key>,
 		{
 			type BruteForceKey = Self::Key;
 
-			fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>
+			fn brute_force(ciphertext: &String, results: &mut M, lang: LanguageModel, exit: Arc<AtomicBool>)
 			{
-				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), n, lang, exit)
+				Self::dictionary_attack(ciphertext, results, Self::BruteForceKey::start(), lang, exit);
 			}
 
-			fn brute_force_from(ciphertext: &String, start: Self::Key, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>
+			fn brute_force_from(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>)
 			{
-				Self::dictionary_attack(ciphertext, start.into_brute_force_iterator(), n, lang, exit)
+				Self::dictionary_attack(ciphertext, results, start.into_brute_force_iterator(), lang, exit);
 			}
 
-			fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>
+			fn brute_force_between(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>)
 			{
 				let it = start.into_brute_force_iterator().take_while(|x| *x != end);
-				Self::dictionary_attack(ciphertext, it, n, lang, exit)
+				Self::dictionary_attack(ciphertext, results, it, lang, exit);
 			}
 		}
 	};
