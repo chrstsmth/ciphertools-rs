@@ -8,7 +8,6 @@ use crate::key::vigenere::*;
 use crate::pallet::lang::*;
 use crate::candidate::*;
 use cipher_derive::*;
-use min_max_heap::*;
 
 #[cfg(test)]
 mod tests;

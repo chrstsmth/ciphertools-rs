@@ -15,18 +15,20 @@ pub trait Cipher {
 	fn decipher(ciphertext: &String, k: &Self::Key) -> String;
 }
 
-pub trait DictionaryAttack<S>: Cipher where
+pub trait DictionaryAttack<S,M>: Cipher where
 	S: Iterator<Item = Self::Key>,
+	M: Model<Self::Key>,
 {
-	fn dictionary_attack(ciphertext: &String, dictionary: S, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::Key>>;
+	fn dictionary_attack(ciphertext: &String, results: &mut M, dict: S, lang: LanguageModel, exit: Arc<AtomicBool>);
 }
 
-pub trait BruteForce<S>: DictionaryAttack<S> where
+pub trait BruteForce<S,M>: DictionaryAttack<S,M> where
 	S: Iterator<Item = Self::Key>,
+	M: Model<Self::Key>,
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 
-	fn brute_force(ciphertext: &String, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::Key>>;
-	fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>;
-	fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, n: usize, lang: LanguageModel, exit: Arc<AtomicBool>) -> Vec<Candidate<Self::BruteForceKey>>;
+	fn brute_force(ciphertext: &String, results: &mut M, lang: LanguageModel, exit: Arc<AtomicBool>);
+	fn brute_force_from(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>);
+	fn brute_force_between(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>);
 }
