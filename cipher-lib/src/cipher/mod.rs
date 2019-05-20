@@ -19,7 +19,7 @@ pub trait DictionaryAttack<S,M>: Cipher where
 	S: Iterator<Item = Self::Key>,
 	M: Model<Self::Key>,
 {
-	fn dictionary_attack(ciphertext: &String, results: &mut M, dict: S, lang: LanguageModel, exit: Arc<AtomicBool>);
+	fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
 }
 
 pub trait BruteForce<S,M>: DictionaryAttack<S,M> where
@@ -28,7 +28,7 @@ pub trait BruteForce<S,M>: DictionaryAttack<S,M> where
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 
-	fn brute_force(ciphertext: &String, results: &mut M, lang: LanguageModel, exit: Arc<AtomicBool>);
-	fn brute_force_from(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>);
-	fn brute_force_between(ciphertext: &String, results: &mut M, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, exit: Arc<AtomicBool>);
+	fn brute_force(ciphertext: &String, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
+	fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
+	fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
 }

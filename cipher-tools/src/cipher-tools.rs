@@ -182,7 +182,7 @@ macro_rules! dictionary_attack {
 			};
 
 			let mut candidates = Candidates::<Key>::with_capacity(10);
-			$Cipher::dictionary_attack(&ciphertext, &mut candidates, dict, lang, $exit.clone());
+			$Cipher::dictionary_attack(&ciphertext, dict, lang, &mut candidates, $exit.clone());
 
 			for candidate in candidates.into_vec() {
 				println!("{}", candidate);
@@ -248,12 +248,12 @@ macro_rules! brute_force {
 			let mut candidates = Candidates::<Key>::with_capacity(10);
 			if let Some(start) = start {
 				if let Some(end) = end {
-					<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force_between(&ciphertext, &mut candidates, start, end, lang, $exit.clone());
+					<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force_between(&ciphertext, start, end, lang, &mut candidates, $exit.clone());
 				} else {
-					<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force_from(&ciphertext, &mut candidates, start, lang, $exit.clone());
+					<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force_from(&ciphertext, start, lang, &mut candidates, $exit.clone());
 				}
 			} else {
-				<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force(&ciphertext, &mut candidates, lang, $exit.clone());
+				<$Cipher as BruteForce<BruteForceIter, Model>>::brute_force(&ciphertext, lang, &mut candidates, $exit.clone());
 			};
 
 			for candidate in candidates.into_vec() {
