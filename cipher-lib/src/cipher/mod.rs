@@ -17,18 +17,18 @@ pub trait Cipher {
 
 pub trait DictionaryAttack<S,M>: Cipher where
 	S: Iterator<Item = Self::Key>,
-	M: Model<Self::Key>,
+	M: FnMut(Candidate<Self::Key>),
 {
-	fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
+	fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>);
 }
 
 pub trait BruteForce<S,M>: DictionaryAttack<S,M> where
 	S: Iterator<Item = Self::Key>,
-	M: Model<Self::Key>,
+	M: FnMut(Candidate<Self::Key>),
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 
-	fn brute_force(ciphertext: &String, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
-	fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
-	fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, results: &mut M, exit: Arc<AtomicBool>);
+	fn brute_force(ciphertext: &String, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>);
+	fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>);
+	fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>);
 }
