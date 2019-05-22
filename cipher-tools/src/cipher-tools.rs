@@ -128,7 +128,6 @@ macro_rules! decipher {
 macro_rules! dictionary_attack {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
-			type Key = <$Cipher as Cipher>::Key;
 
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let dictionary = String::from(matches.value_of("dictionary").unwrap());
@@ -181,8 +180,8 @@ macro_rules! dictionary_attack {
 				Ok(language) => language,
 			};
 
-			let mut candidates = Candidates::<Key>::with_capacity(10);
-			let insert_candidate = |c: Candidate<Key>| {
+			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
+			let insert_candidate = |c: Candidate<$Cipher>| {
 				candidates.insert_candidate(c);
 			};
 
@@ -199,7 +198,6 @@ macro_rules! brute_force {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("brute") {
 			type BruteForceIter = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
-			type Key = <$Cipher as Cipher>::Key;
 
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let language = String::from(matches.value_of("language").unwrap());
@@ -248,8 +246,8 @@ macro_rules! brute_force {
 				Ok(language) => language,
 			};
 
-			let mut candidates = Candidates::<Key>::with_capacity(10);
-			let insert_candidate = |c: Candidate<Key>| {
+			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
+			let insert_candidate = |c: Candidate<$Cipher>| {
 				candidates.insert_candidate(c);
 			};
 

@@ -20,7 +20,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl<S,M> DictionaryAttack<S,M> for #name where
 			S: Iterator<Item = Self::Key>,
-			M: FnMut(Candidate<Self::Key>),
+			M: FnMut(Candidate<Self>),
 		{
 			fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, mut candidates: M, exit: Arc<AtomicBool>)
 			{
@@ -61,7 +61,7 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl<S,M> BruteForce<S,M> for #name where
 			S: Iterator<Item = Self::Key>,
-			M: FnMut(Candidate<Self::Key>),
+			M: FnMut(Candidate<Self>),
 		{
 			type BruteForceKey = Self::Key;
 

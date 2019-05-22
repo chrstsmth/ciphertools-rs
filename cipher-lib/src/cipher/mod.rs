@@ -7,7 +7,7 @@ use crate::key::*;
 use crate::candidate::*;
 use crate::language_model::*;
 
-pub trait Cipher {
+pub trait Cipher: Clone + Eq + Ord {
 	const NAME: &'static str;
 	type Key: Key;
 
@@ -17,14 +17,14 @@ pub trait Cipher {
 
 pub trait DictionaryAttack<S,M>: Cipher where
 	S: Iterator<Item = Self::Key>,
-	M: FnMut(Candidate<Self::Key>),
+	M: FnMut(Candidate<Self>),
 {
 	fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>);
 }
 
 pub trait BruteForce<S,M>: DictionaryAttack<S,M> where
 	S: Iterator<Item = Self::Key>,
-	M: FnMut(Candidate<Self::Key>),
+	M: FnMut(Candidate<Self>),
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
 

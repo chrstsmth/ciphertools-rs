@@ -1,29 +1,29 @@
 use std::fmt;
-use crate::key::*;
+use crate::cipher::*;
 use min_max_heap::*;
 use std::sync::Mutex;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Candidate<K> where
-	K: Key, //TODO cange to cipher?
+pub struct Candidate<C> where
+	C: Cipher,
 {
 	pub score: u32,
-	pub key: K,
+	pub key: C::Key,
 	pub text: String,
 }
 
-pub struct Candidates<K: Key>
+pub struct Candidates<C: Cipher>
 {
-	candidates: Mutex<MinMaxHeap<Candidate<K>>>,
+	candidates: Mutex<MinMaxHeap<Candidate<C>>>,
 }
 
-pub trait Model<K: Key>
+pub trait Model<C: Cipher>
 {
-	fn insert_candidate(&mut self, candidate: Candidate<K>);
+	fn insert_candidate(&mut self, candidate: Candidate<C>);
 }
 
-impl<K: Key> Model<K> for Candidates<K> {
-	fn insert_candidate(&mut self, candidate: Candidate<K>)
+impl<C: Cipher> Model<C> for Candidates<C> {
+	fn insert_candidate(&mut self, candidate: Candidate<C>)
 	{
 		let mut candidates = self.candidates.lock().unwrap();
 
@@ -35,22 +35,21 @@ impl<K: Key> Model<K> for Candidates<K> {
 	}
 }
 
-impl<K> fmt::Display for Candidate<K> where
-	K: Key,
+impl<C: Cipher> fmt::Display for Candidate<C> where
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "{} {} {}", self.score, self.key, self.text)
 	}
 }
 
-impl<K: Key> Candidates<K> {
-	pub fn with_capacity(cap: usize) -> Candidates<K> {
-		Candidates::<K> {
-			candidates: Mutex::new(MinMaxHeap::<Candidate<K>>::with_capacity(cap)),
+impl<C: Cipher> Candidates<C> {
+	pub fn with_capacity(cap: usize) -> Candidates<C> {
+		Candidates::<C> {
+			candidates: Mutex::new(MinMaxHeap::<Candidate<C>>::with_capacity(cap)),
 		}
 	}
 
-	pub fn into_vec(self) -> Vec<Candidate<K>>
+	pub fn into_vec(self) -> Vec<Candidate<C>>
 	{
 		let a = self.candidates.into_inner().unwrap();
 		a.into_vec_desc()
