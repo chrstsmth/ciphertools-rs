@@ -12,7 +12,7 @@ use cipher_derive::*;
 #[cfg(test)]
 mod tests;
 
-#[derive(DictionaryAttack, BruteForce)]
+#[derive(DictionaryAttack, BruteForce, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Caesar;
 
 impl Cipher for Caesar {
