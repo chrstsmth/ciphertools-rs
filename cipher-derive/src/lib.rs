@@ -18,11 +18,12 @@ pub fn dictionary_attack(input: TokenStream) -> TokenStream {
 fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<S,M> DictionaryAttack<S,M> for #name where
+		impl<S,M,E> DictionaryAttack<S,M,E> for #name where
 			S: Iterator<Item = Self::Key>,
 			M: FnMut(Candidate<Self>),
+			E: Fn() -> bool,
 		{
-			fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, mut candidates: M, exit: Arc<AtomicBool>)
+			fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, mut candidates: M, exit: E)
 			{
 				for key in dict {
 					let text = #name::decipher(&ciphertext, &key);
@@ -40,7 +41,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 
 					candidates(can);
 
-					if exit.load(Ordering::SeqCst) {
+					if exit() {
 						break;
 					}
 				}
@@ -59,23 +60,24 @@ pub fn brute_force(input: TokenStream) -> TokenStream {
 fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<S,M> BruteForce<S,M> for #name where
+		impl<S,M,E> BruteForce<S,M,E> for #name where
 			S: Iterator<Item = Self::Key>,
 			M: FnMut(Candidate<Self>),
+			E: Fn() -> bool,
 		{
 			type BruteForceKey = Self::Key;
 
-			fn brute_force(ciphertext: &String, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>)
+			fn brute_force(ciphertext: &String, lang: LanguageModel, candidates: M, exit: E)
 			{
 				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), lang, candidates, exit);
 			}
 
-			fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>)
+			fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
 			{
 				Self::dictionary_attack(ciphertext, start.into_brute_force_iterator(), lang, candidates, exit);
 			}
 
-			fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: Arc<AtomicBool>)
+			fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
 			{
 				let it = start.into_brute_force_iterator().take_while(|x| *x != end);
 				Self::dictionary_attack(ciphertext, it, lang, candidates, exit);

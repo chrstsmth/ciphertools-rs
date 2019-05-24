@@ -7,7 +7,6 @@ extern crate cipher_lib;
 use clap::{Arg, App, SubCommand, AppSettings};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::convert::TryFrom;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::*;
@@ -189,7 +188,11 @@ macro_rules! dictionary_attack {
 				candidates.insert_candidate(c);
 			};
 
-			$Cipher::dictionary_attack(&ciphertext, dict, lang, insert_candidate , $exit.clone());
+			let exit_early = || {
+				$exit.load(Ordering::SeqCst)
+			};
+
+			$Cipher::dictionary_attack(&ciphertext, dict, lang, insert_candidate, exit_early);
 
 			for candidate in candidates.into_vec() {
 				println!("{}", candidate);
@@ -256,14 +259,18 @@ macro_rules! brute_force {
 				candidates.insert_candidate(c);
 			};
 
+			let exit_early = || {
+				$exit.load(Ordering::SeqCst)
+			};
+
 			if let Some(start) = start {
 				if let Some(end) = end {
-					<$Cipher as BruteForce<BruteForceIter, _>>::brute_force_between(&ciphertext, start, end, lang, insert_candidate, $exit.clone());
+					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_between(&ciphertext, start, end, lang, insert_candidate, exit_early);
 				} else {
-					<$Cipher as BruteForce<BruteForceIter, _>>::brute_force_from(&ciphertext, start, lang, insert_candidate, $exit.clone());
+					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_from(&ciphertext, start, lang, insert_candidate, exit_early);
 				}
 			} else {
-				<$Cipher as BruteForce<BruteForceIter, _>>::brute_force(&ciphertext, lang, insert_candidate, $exit.clone());
+				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, lang, insert_candidate, exit_early);
 			};
 
 			for candidate in candidates.into_vec() {
