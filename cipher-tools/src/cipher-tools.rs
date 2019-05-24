@@ -194,9 +194,7 @@ macro_rules! dictionary_attack {
 
 			$Cipher::dictionary_attack(&ciphertext, dict, lang, insert_candidate, exit_early);
 
-			for candidate in candidates.into_vec() {
-				println!("{}", candidate);
-			}
+			println!("{}", candidates);
 		}
 	)
 }
@@ -273,9 +271,7 @@ macro_rules! brute_force {
 				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, lang, insert_candidate, exit_early);
 			};
 
-			for candidate in candidates.into_vec() {
-				println!("{}", candidate);
-			}
+			println!("{}", candidates);
 		}
 	)
 }
