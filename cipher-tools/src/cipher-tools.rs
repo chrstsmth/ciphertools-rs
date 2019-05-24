@@ -13,6 +13,7 @@ use std::io::prelude::*;
 use std::io::*;
 use std::error::Error;
 use std::process;
+use std::str::FromStr;
 
 mod try_from_err;
 
@@ -100,8 +101,9 @@ macro_rules! brute_force_subcommand {
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
+			type Key = <$Cipher as Cipher>::Key;
 			let plaintext = String::from(matches.value_of("plaintext").unwrap());
-			let key = <$Cipher as Cipher>::Key::try_from(String::from(matches.value_of("key").unwrap()));
+			let key = Key::from_str(matches.value_of("key").unwrap());
 
 			match key {
 				Ok(key) => println!("{:}", $Cipher::encipher(&plaintext, &key)),
@@ -114,8 +116,9 @@ macro_rules! encipher {
 macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
+			type Key = <$Cipher as Cipher>::Key;
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
-			let key = <$Cipher as Cipher>::Key::try_from(String::from(matches.value_of("key").unwrap()));
+			let key = Key::from_str(matches.value_of("key").unwrap());
 
 			match key {
 				Ok(key) => println!("{:}", $Cipher::decipher(&ciphertext, &key)),
@@ -128,6 +131,7 @@ macro_rules! decipher {
 macro_rules! dictionary_attack {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
+			type Key = <$Cipher as Cipher>::Key;
 
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let dictionary = String::from(matches.value_of("dictionary").unwrap());
@@ -153,7 +157,7 @@ macro_rules! dictionary_attack {
 				.map(|x| {
 					let (num, line) = x;
 					let line_num = num + 1;
-					match <$Cipher as Cipher>::Key::try_from(line.clone()) {
+					match Key::from_str(line.as_str()) {
 						Err(why) => {
 							eprintln!("Error in {}:{}\n{}: {}", dictionary, line_num, line, why.description());
 							process::exit(1);
@@ -198,13 +202,14 @@ macro_rules! brute_force {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("brute") {
 			type BruteForceIter = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
+			type Key = <$Cipher as Cipher>::Key;
 
 			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
 			let language = String::from(matches.value_of("language").unwrap());
 
 			let start = match matches.value_of("start") {
 				Some(key_str) => {
-					match <$Cipher as Cipher>::Key::try_from(String::from(key_str)) {
+					match Key::from_str(key_str) {
 						Ok(key) => Some(key),
 						Err(why) => {
 							eprintln!("{}: {}", key_str, why);
@@ -217,7 +222,7 @@ macro_rules! brute_force {
 
 			let end = match matches.value_of("end") {
 				Some(key_str) => {
-					match <$Cipher as Cipher>::Key::try_from(String::from(key_str)) {
+					match Key::from_str(key_str) {
 						Ok(key) => Some(key),
 						Err(why) => {
 							eprintln!("{}: {}", key_str, why);

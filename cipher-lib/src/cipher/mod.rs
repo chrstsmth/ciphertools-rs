@@ -2,7 +2,6 @@ pub mod vigenere;
 pub mod caesar;
 
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
 use crate::key::*;
 use crate::candidate::*;
 use crate::language_model::*;
