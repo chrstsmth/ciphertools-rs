@@ -35,13 +35,10 @@ impl FromStr for VigenereKey {
 
 impl fmt::Display for VigenereKey {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		let mut s = String::with_capacity(self.0.len());
-
 		for a in &self.0 {
-			s.push(char::from(*a));
+			write!(f, "{}", *a)?
 		}
-
-		write!(f, "{}", s)
+		Ok(())
 	}
 }
 
