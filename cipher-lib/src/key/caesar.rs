@@ -18,12 +18,12 @@ impl Key for CaesarKey {
 	type Cipher = Caesar;
 }
 
-impl TryFrom<String> for CaesarKey {
-	type Error = TryFromStringError;
+impl FromStr for CaesarKey {
+	type Err = TryFromStringError;
 
-	fn try_from(key: String) -> Result<CaesarKey, TryFromStringError>
+	fn from_str(s: &str) -> Result<CaesarKey, TryFromStringError>
 	{
-		let mut chars = key.chars();
+		let mut chars = s.chars();
 
 		let first = match chars.next() {
 			Some(first) => first,

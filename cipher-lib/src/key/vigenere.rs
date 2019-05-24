@@ -16,13 +16,13 @@ impl Key for VigenereKey {
 	type Cipher = Vigenere;
 }
 
-impl TryFrom<String> for VigenereKey {
-	type Error = TryFromStringError;
+impl FromStr for VigenereKey {
+	type Err = TryFromStringError;
 
-	fn try_from(key: String) -> Result<VigenereKey, TryFromStringError>
+	fn from_str(s: &str) -> Result<VigenereKey, TryFromStringError>
 	{
-		let mut vigenere_key = VigenereKey(Vec::<Alph>::with_capacity(key.len()));
-		for c in key.chars() {
+		let mut vigenere_key = VigenereKey(Vec::<Alph>::with_capacity(s.len()));
+		for c in s.chars() {
 			let alph = match Alph::try_from(c) {
 				Err(_) => return Err(TryFromStringError),
 				Ok(alph) => alph
