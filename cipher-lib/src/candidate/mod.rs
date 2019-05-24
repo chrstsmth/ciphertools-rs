@@ -14,16 +14,25 @@ pub struct Candidate<C> where
 
 pub struct Candidates<C: Cipher>
 {
-	candidates: Mutex<MinMaxHeap<Candidate<C>>>,
+	pub candidates: Mutex<MinMaxHeap<Candidate<C>>>,
 }
 
-pub trait Model<C: Cipher>
+impl<C: Cipher> fmt::Display for Candidate<C>
 {
-	fn insert_candidate(&mut self, candidate: Candidate<C>);
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		write!(f, "{} {} {}", self.score, self.key, self.text)
+	}
 }
 
-impl<C: Cipher> Model<C> for Candidates<C> {
-	fn insert_candidate(&mut self, candidate: Candidate<C>)
+impl<C: Cipher> Candidates<C> {
+	pub fn with_capacity(cap: usize) -> Candidates<C>
+	{
+		Candidates::<C> {
+			candidates: Mutex::new(MinMaxHeap::<Candidate<C>>::with_capacity(cap)),
+		}
+	}
+
+	pub fn insert_candidate(&mut self, candidate: Candidate<C>)
 	{
 		let mut candidates = self.candidates.lock().unwrap();
 
@@ -35,23 +44,12 @@ impl<C: Cipher> Model<C> for Candidates<C> {
 	}
 }
 
-impl<C: Cipher> fmt::Display for Candidate<C> where
+impl<C: Cipher> fmt::Display for Candidates<C>
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		write!(f, "{} {} {}", self.score, self.key, self.text)
-	}
-}
-
-impl<C: Cipher> Candidates<C> {
-	pub fn with_capacity(cap: usize) -> Candidates<C> {
-		Candidates::<C> {
-			candidates: Mutex::new(MinMaxHeap::<Candidate<C>>::with_capacity(cap)),
+		for candidate in &(*self.candidates.lock().unwrap()) {
+			writeln!(f, "{}", candidate)?
 		}
-	}
-
-	pub fn into_vec(self) -> Vec<Candidate<C>>
-	{
-		let a = self.candidates.into_inner().unwrap();
-		a.into_vec_desc()
+		Ok(())
 	}
 }
