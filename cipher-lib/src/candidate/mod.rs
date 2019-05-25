@@ -32,22 +32,29 @@ impl<C: Cipher> Candidates<C> {
 		}
 	}
 
-	pub fn insert_candidate(&mut self, candidate: Candidate<C>)
+	pub fn insert_candidate(&mut self, candidate: Candidate<C>) -> bool
 	{
+		let mut modified = true;
 		let mut candidates = self.candidates.lock().unwrap();
 
 		if candidates.len() < candidates.capacity() {
 			candidates.push(candidate);
 		} else if *candidates.peek_min().unwrap() < candidate {
 			candidates.replace_min(candidate);
+		} else {
+			modified = false;
 		}
+
+		modified
 	}
 }
 
 impl<C: Cipher> fmt::Display for Candidates<C>
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		for candidate in &(*self.candidates.lock().unwrap()) {
+		let candidates = &(*self.candidates.lock().unwrap());
+		let it = candidates.clone().into_vec_desc();
+		for candidate in it {
 			writeln!(f, "{}", candidate)?
 		}
 		Ok(())
