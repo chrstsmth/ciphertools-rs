@@ -185,7 +185,10 @@ macro_rules! dictionary_attack {
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: Candidate<$Cipher>| {
-				candidates.insert_candidate(c);
+				if candidates.insert_candidate(c) {
+					print!("{}[2J", 27 as char);
+					println!("{}", candidates);
+				}
 			};
 
 			let exit_early = || {
@@ -193,8 +196,6 @@ macro_rules! dictionary_attack {
 			};
 
 			$Cipher::dictionary_attack(&ciphertext, dict, lang, insert_candidate, exit_early);
-
-			println!("{}", candidates);
 		}
 	)
 }
@@ -254,7 +255,10 @@ macro_rules! brute_force {
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: Candidate<$Cipher>| {
-				candidates.insert_candidate(c);
+				if candidates.insert_candidate(c) {
+					print!("{}[2J", 27 as char);
+					println!("{}", candidates);
+				}
 			};
 
 			let exit_early = || {
@@ -270,8 +274,6 @@ macro_rules! brute_force {
 			} else {
 				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, lang, insert_candidate, exit_early);
 			};
-
-			println!("{}", candidates);
 		}
 	)
 }
