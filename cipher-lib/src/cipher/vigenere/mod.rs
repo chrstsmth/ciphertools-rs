@@ -10,7 +10,7 @@ use crate::pallet::lang::*;
 #[cfg(test)]
 mod tests;
 
-#[derive(DictionaryAttack, BruteForce, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(DictionaryAttack, BruteForce, HillClimb, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vigenere;
 
 impl Cipher for Vigenere {
