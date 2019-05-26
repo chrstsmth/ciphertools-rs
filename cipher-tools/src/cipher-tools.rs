@@ -244,7 +244,7 @@ macro_rules! dictionary_attack {
 					});
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
-			let insert_candidate = |c: Candidate<$Cipher>| {
+			let insert_candidate = |c: &Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
 					print!("{}[2J", 27 as char);
 					println!("{}", candidates);
@@ -296,7 +296,7 @@ macro_rules! brute_force {
 			};
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
-			let insert_candidate = |c: Candidate<$Cipher>| {
+			let insert_candidate = |c: &Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
 					print!("{}[2J", 27 as char);
 					println!("{}", candidates);
@@ -360,7 +360,7 @@ macro_rules! hill_climb {
 					});
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
-			let insert_candidate = |c: Candidate<$Cipher>| {
+			let insert_candidate = |c: &Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
 					print!("{}[2J", 27 as char);
 					println!("{}", candidates);

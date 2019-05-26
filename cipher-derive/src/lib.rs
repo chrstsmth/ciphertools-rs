@@ -20,7 +20,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl<S,M,E> DictionaryAttack<S,M,E> for #name where
 			S: Iterator<Item = Self::Key>,
-			M: FnMut(Candidate<Self>),
+			M: FnMut(&Candidate<Self>),
 			E: Fn() -> bool,
 		{
 			fn dictionary_attack(ciphertext: &str, dict: S, lang: LanguageModel, mut candidates: M, exit: E)
@@ -39,7 +39,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 						key: key,
 					};
 
-					candidates(can);
+					candidates(&can);
 
 					if exit() {
 						break;
@@ -62,7 +62,7 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl<S,M,E> BruteForce<S,M,E> for #name where
 			S: Iterator<Item = Self::Key>,
-			M: FnMut(Candidate<Self>),
+			M: FnMut(&Candidate<Self>),
 			E: Fn() -> bool,
 		{
 			type BruteForceKey = Self::Key;
@@ -98,7 +98,7 @@ fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl<S,M,E> HillClimb<S,M,E> for #name where
 			S: Iterator<Item = Self::Key>,
-			M: FnMut(Candidate<Self>),
+			M: FnMut(&Candidate<Self>),
 			E: Fn() -> bool,
 		{
 			type MutationKey = Self::Key;
@@ -118,7 +118,7 @@ fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 						text: text,
 						key: key.clone(),
 					};
-					candidates(best_mutation.clone());
+					candidates(&best_mutation);
 
 					let mut climbed = true;
 					while climbed {
@@ -141,7 +141,7 @@ fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 								climbed = true;
 							}
 
-							candidates(best_mutation.clone());
+							candidates(&best_mutation);
 
 							if exit() {
 								return;
