@@ -98,6 +98,18 @@ fn brute_force_subcommand <'a,'b>() -> App<'a,'b>
 			.required(false))
 }
 
+fn hill_climb_subcommand<'a,'b>() -> App<'a,'b>
+{
+	SubCommand::with_name("hill")
+		.about("Hill climb")
+		.arg(ciphertext_arg())
+		.arg(language_model_arg())
+		.arg(Arg::with_name("dictionary")
+			.short("d")
+			.value_name("DICTIONARY")
+			.required(true))
+}
+
 fn parse_language_model_arg<'a>(matches: &ArgMatches<'a>) -> LanguageModel
 {
 	let filename = String::from(matches.value_of("language").unwrap());
@@ -308,6 +320,62 @@ macro_rules! brute_force {
 	)
 }
 
+macro_rules! hill_climb {
+	($matches:ident, $Cipher:ident, $exit:ident) => (
+		if let Some(matches) = $matches.subcommand_matches("hill") {
+			type Key = <$Cipher as Cipher>::Key;
+
+			let ciphertext = parse_ciphertext_arg(matches);
+			let language  = parse_language_model_arg(matches);
+
+			let dictionary = String::from(matches.value_of("dictionary").unwrap());
+
+			let dictionary_file = match File::open(&dictionary) {
+				Err(why) => {
+					eprintln!("{}: {}", dictionary, why);
+					process::exit(1);
+				}
+				Ok(file) => file,
+			};
+
+			let dict = BufReader::new(dictionary_file)
+				.lines()
+				.map(|x| x.unwrap_or_else(|e|
+					{
+						eprintln!("{}", e.description());
+						process::exit(1);
+					})
+					)
+				.enumerate()
+				.map(|x| {
+					let (num, line) = x;
+					let line_num = num + 1;
+					match Key::from_str(line.as_str()) {
+						Err(why) => {
+							eprintln!("Error in {}:{}\n{}: {}", dictionary, line_num, line, why.description());
+							process::exit(1);
+						}
+						Ok(key) => key
+					}
+					});
+
+			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
+			let insert_candidate = |c: Candidate<$Cipher>| {
+				if candidates.insert_candidate(c) {
+					print!("{}[2J", 27 as char);
+					println!("{}", candidates);
+				}
+			};
+
+			let exit_early = || {
+				$exit.load(Ordering::SeqCst)
+			};
+
+			$Cipher::hill_climb(&ciphertext, dict, language, insert_candidate, exit_early);
+		}
+	)
+}
+
 fn main() {
 	let exit = Arc::new(AtomicBool::new(false));
 	let ctrlc_exit = exit.clone();
@@ -322,7 +390,8 @@ fn main() {
 			.subcommand(encipher_subcommand())
 			.subcommand(decipher_subcommand())
 			.subcommand(dictionary_attack_subcommand())
-			.subcommand(brute_force_subcommand()))
+			.subcommand(brute_force_subcommand())
+			.subcommand(hill_climb_subcommand()))
 
 		.subcommand(SubCommand::with_name(Caesar::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
@@ -337,6 +406,7 @@ fn main() {
 		decipher!(matches, Vigenere);
 		dictionary_attack!(matches, Vigenere, exit);
 		brute_force!(matches, Vigenere, exit);
+		hill_climb!(matches, Vigenere, exit);
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		encipher!(matches, Caesar);
 		decipher!(matches, Caesar);
