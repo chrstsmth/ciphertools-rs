@@ -397,7 +397,6 @@ fn main() {
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand())
 			.subcommand(decipher_subcommand())
-			.subcommand(dictionary_attack_subcommand())
 			.subcommand(brute_force_subcommand()))
 		.get_matches();
 
