@@ -15,7 +15,7 @@ pub trait Cipher: Clone + Eq + Ord {
 
 pub trait DictionaryAttack<S,M,E>: Cipher where
 	S: Iterator<Item = Self::Key>,
-	M: FnMut(Candidate<Self>),
+	M: FnMut(&Candidate<Self>),
 	E: Fn() -> bool,
 {
 	fn dictionary_attack(ciphertext: &str, dict: S, lang: LanguageModel, candidates: M, exit: E);
@@ -23,7 +23,7 @@ pub trait DictionaryAttack<S,M,E>: Cipher where
 
 pub trait BruteForce<S,M,E>: DictionaryAttack<S,M,E> where
 	S: Iterator<Item = Self::Key>,
-	M: FnMut(Candidate<Self>),
+	M: FnMut(&Candidate<Self>),
 	E: Fn() -> bool,
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
@@ -35,7 +35,7 @@ pub trait BruteForce<S,M,E>: DictionaryAttack<S,M,E> where
 
 pub trait HillClimb<S,M,E>: DictionaryAttack<S,M,E> where
 	S: Iterator<Item = Self::Key>,
-	M: FnMut(Candidate<Self>),
+	M: FnMut(&Candidate<Self>),
 	E: Fn() -> bool,
 {
 	type MutationKey: Key + IntoMutationIterator;
