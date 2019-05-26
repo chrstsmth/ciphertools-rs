@@ -133,6 +133,43 @@ fn parse_language_model_arg<'a>(matches: &ArgMatches<'a>) -> LanguageModel
 	language
 }
 
+fn parse_dictionary_arg<'a, C>(matches: &ArgMatches<'a>) -> impl Iterator<Item = C::Key> where
+	C: Cipher,
+{
+	let filename = String::from(matches.value_of("dictionary").unwrap());
+
+	let file = match File::open(&filename) {
+		Err(why) => {
+			eprintln!("{}: {}", filename, why);
+			process::exit(1);
+		}
+		Ok(file) => file,
+	};
+
+	let dict = BufReader::new(file)
+		.lines()
+		.map(|x| x.unwrap_or_else(|e|
+			{
+				eprintln!("{}", e.description());
+				process::exit(1);
+			})
+			)
+		.enumerate()
+		.map(move |x| {
+			let (num, line) = x;
+			let line_num = num + 1;
+			match C::Key::from_str(line.as_str()) {
+				Err(_) => {
+					eprintln!("{}:{}: failed to parse \"{}\"", filename, line_num, line);
+					process::exit(1);
+				}
+				Ok(key) => key
+			}
+			});
+
+	dict
+}
+
 fn parse_key_arg<'a, C: Cipher>(matches: &ArgMatches<'a>) -> C::Key
 {
 	let key_str = matches.value_of("key").unwrap();
@@ -207,41 +244,9 @@ macro_rules! decipher {
 macro_rules! dictionary_attack {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
-			type Key = <$Cipher as Cipher>::Key;
-
 			let ciphertext = parse_ciphertext_arg(matches);
 			let language  = parse_language_model_arg(matches);
-
-			let dictionary = String::from(matches.value_of("dictionary").unwrap());
-
-			let dictionary_file = match File::open(&dictionary) {
-				Err(why) => {
-					eprintln!("{}: {}", dictionary, why);
-					process::exit(1);
-				}
-				Ok(file) => file,
-			};
-
-			let dict = BufReader::new(dictionary_file)
-				.lines()
-				.map(|x| x.unwrap_or_else(|e|
-					{
-						eprintln!("{}", e.description());
-						process::exit(1);
-					})
-					)
-				.enumerate()
-				.map(|x| {
-					let (num, line) = x;
-					let line_num = num + 1;
-					match Key::from_str(line.as_str()) {
-						Err(why) => {
-							eprintln!("Error in {}:{}\n{}: {}", dictionary, line_num, line, why.description());
-							process::exit(1);
-						}
-						Ok(key) => key
-					}
-					});
+			let dictionary = parse_dictionary_arg::<$Cipher>(matches);
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: &Candidate<$Cipher>| {
@@ -255,7 +260,7 @@ macro_rules! dictionary_attack {
 				$exit.load(Ordering::SeqCst)
 			};
 
-			$Cipher::dictionary_attack(&ciphertext, dict, language, insert_candidate, exit_early);
+			$Cipher::dictionary_attack(&ciphertext, dictionary, language, insert_candidate, exit_early);
 		}
 	)
 }
@@ -323,41 +328,9 @@ macro_rules! brute_force {
 macro_rules! hill_climb {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("hill") {
-			type Key = <$Cipher as Cipher>::Key;
-
 			let ciphertext = parse_ciphertext_arg(matches);
 			let language  = parse_language_model_arg(matches);
-
-			let dictionary = String::from(matches.value_of("dictionary").unwrap());
-
-			let dictionary_file = match File::open(&dictionary) {
-				Err(why) => {
-					eprintln!("{}: {}", dictionary, why);
-					process::exit(1);
-				}
-				Ok(file) => file,
-			};
-
-			let dict = BufReader::new(dictionary_file)
-				.lines()
-				.map(|x| x.unwrap_or_else(|e|
-					{
-						eprintln!("{}", e.description());
-						process::exit(1);
-					})
-					)
-				.enumerate()
-				.map(|x| {
-					let (num, line) = x;
-					let line_num = num + 1;
-					match Key::from_str(line.as_str()) {
-						Err(why) => {
-							eprintln!("Error in {}:{}\n{}: {}", dictionary, line_num, line, why.description());
-							process::exit(1);
-						}
-						Ok(key) => key
-					}
-					});
+			let dictionary = parse_dictionary_arg::<$Cipher>(matches);
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: &Candidate<$Cipher>| {
@@ -371,7 +344,7 @@ macro_rules! hill_climb {
 				$exit.load(Ordering::SeqCst)
 			};
 
-			$Cipher::hill_climb(&ciphertext, dict, language, insert_candidate, exit_early);
+			$Cipher::hill_climb(&ciphertext, dictionary, language, insert_candidate, exit_early);
 		}
 	)
 }
