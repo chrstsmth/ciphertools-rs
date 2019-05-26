@@ -4,7 +4,7 @@ extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
 
-use clap::{Arg, App, SubCommand, AppSettings};
+use clap::{Arg, App, SubCommand, AppSettings, ArgMatches};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::fs::File;
@@ -21,6 +21,7 @@ use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 use cipher_lib::key::*;
 use cipher_lib::candidate::*;
+use cipher_lib::language_model::*;
 
 fn key_arg<'a,'b>() -> Arg<'a,'b> {
 	Arg::with_name("key")
@@ -97,17 +98,61 @@ fn brute_force_subcommand <'a,'b>() -> App<'a,'b>
 			.required(false))
 }
 
+fn parse_language_model_arg<'a>(matches: &ArgMatches<'a>) -> LanguageModel
+{
+	let filename = String::from(matches.value_of("language").unwrap());
+
+	let file = match File::open(&filename) {
+		Err(why) => {
+			eprintln!("{}: {}", filename, why);
+			process::exit(1);
+		}
+		Ok(file) => file,
+	};
+
+	let language = match serde_json::from_reader(BufReader::new(file)) {
+		Err(why) => {
+			eprintln!("{}: {}", filename, why);
+			process::exit(1);
+		}
+		Ok(language) => language,
+	};
+
+	language
+}
+
+fn parse_key_arg<'a, C: Cipher>(matches: &ArgMatches<'a>) -> C::Key
+{
+	let key_str = matches.value_of("key").unwrap();
+	let key = C::Key::from_str(key_str);
+
+	match key {
+		Ok(key) => key,
+		_ => {
+			println!("{}: Parse key failed", key_str);
+			process::exit(1);
+		}
+	}
+}
+
+fn parse_ciphertext_arg<'a>(matches: &ArgMatches<'a>) -> String
+{
+	String::from(matches.value_of("ciphertext").unwrap())
+}
+
+fn parse_plaintext_arg<'a>(matches: &ArgMatches<'a>) -> String
+{
+	String::from(matches.value_of("ciphertext").unwrap())
+}
+
+
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
-			type Key = <$Cipher as Cipher>::Key;
-			let plaintext = String::from(matches.value_of("plaintext").unwrap());
-			let key = Key::from_str(matches.value_of("key").unwrap());
+			let plaintext = parse_plaintext_arg(matches);
+			let key = parse_key_arg::<$Cipher>(matches);
 
-			match key {
-				Ok(key) => println!("{:}", $Cipher::encipher(&plaintext, &key)),
-				_ => println!("Parse key failed"),
-			}
+			println!("{:}", $Cipher::encipher(&plaintext, &key));
 		}
 	)
 }
@@ -115,14 +160,10 @@ macro_rules! encipher {
 macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
-			type Key = <$Cipher as Cipher>::Key;
-			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
-			let key = Key::from_str(matches.value_of("key").unwrap());
+			let ciphertext = parse_ciphertext_arg(matches);
+			let key = parse_key_arg::<$Cipher>(matches);
 
-			match key {
-				Ok(key) => println!("{:}", $Cipher::decipher(&ciphertext, &key)),
-				_ => println!("Parse key failed"),
-			}
+			println!("{:}", $Cipher::decipher(&ciphertext, &key));
 		}
 	)
 }
@@ -132,9 +173,10 @@ macro_rules! dictionary_attack {
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
 			type Key = <$Cipher as Cipher>::Key;
 
-			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
+			let ciphertext = parse_ciphertext_arg(matches);
+			let language  = parse_language_model_arg(matches);
+
 			let dictionary = String::from(matches.value_of("dictionary").unwrap());
-			let language = String::from(matches.value_of("language").unwrap());
 
 			let dictionary_file = match File::open(&dictionary) {
 				Err(why) => {
@@ -165,24 +207,6 @@ macro_rules! dictionary_attack {
 					}
 					});
 
-			let language_file = match File::open(&language) {
-				Err(why) => {
-					eprintln!("{}: {}", language, why);
-					process::exit(1);
-				}
-				Ok(file) => file,
-			};
-
-			let language_reader = BufReader::new(language_file);
-
-			let lang = match serde_json::from_reader(language_reader) {
-				Err(why) => {
-					eprintln!("{}: {}", language, why);
-					process::exit(1);
-				}
-				Ok(language) => language,
-			};
-
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
@@ -195,7 +219,7 @@ macro_rules! dictionary_attack {
 				$exit.load(Ordering::SeqCst)
 			};
 
-			$Cipher::dictionary_attack(&ciphertext, dict, lang, insert_candidate, exit_early);
+			$Cipher::dictionary_attack(&ciphertext, dict, language, insert_candidate, exit_early);
 		}
 	)
 }
@@ -206,8 +230,8 @@ macro_rules! brute_force {
 			type BruteForceIter = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
 			type Key = <$Cipher as Cipher>::Key;
 
-			let ciphertext = String::from(matches.value_of("ciphertext").unwrap());
-			let language = String::from(matches.value_of("language").unwrap());
+			let ciphertext = parse_ciphertext_arg(matches);
+			let language  = parse_language_model_arg(matches);
 
 			let start = match matches.value_of("start") {
 				Some(key_str) => {
@@ -235,24 +259,6 @@ macro_rules! brute_force {
 				None => None
 			};
 
-			let language_file = match File::open(&language) {
-				Err(why) => {
-					eprintln!("{}: {}", language, why);
-					process::exit(1);
-				}
-				Ok(file) => file,
-			};
-
-			let language_reader = BufReader::new(language_file);
-
-			let lang = match serde_json::from_reader(language_reader) {
-				Err(why) => {
-					eprintln!("{}: {}", language, why);
-					process::exit(1);
-				}
-				Ok(language) => language,
-			};
-
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
@@ -267,12 +273,12 @@ macro_rules! brute_force {
 
 			if let Some(start) = start {
 				if let Some(end) = end {
-					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_between(&ciphertext, start, end, lang, insert_candidate, exit_early);
+					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_between(&ciphertext, start, end, language, insert_candidate, exit_early);
 				} else {
-					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_from(&ciphertext, start, lang, insert_candidate, exit_early);
+					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_from(&ciphertext, start, language, insert_candidate, exit_early);
 				}
 			} else {
-				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, lang, insert_candidate, exit_early);
+				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, language, insert_candidate, exit_early);
 			};
 		}
 	)
