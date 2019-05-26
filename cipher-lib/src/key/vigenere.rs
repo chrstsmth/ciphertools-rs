@@ -59,7 +59,7 @@ impl IntoBruteForceIterator for VigenereKey {
 
 	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
 		VegenereKeyIterator {
-			it: self.clone(),
+			it: self,
 		}
 	}
 }
@@ -68,7 +68,7 @@ impl Iterator for VegenereKeyIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let r = self.it.clone();
+		let item = self.it.clone();
 		let mut overflow = true;
 
 		for a in &mut self.it.0 {
@@ -85,7 +85,9 @@ impl Iterator for VegenereKeyIterator {
 		if overflow {
 			self.it.0.push(Alph::A);
 		}
-		Some(r)
+		Some(item)
+	}
+}
 
 impl Iterator for VegenereKeyMutationIterator {
 	type Item = VigenereKey;
