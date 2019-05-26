@@ -34,17 +34,18 @@ impl<C: Cipher> Candidates<C> {
 
 	pub fn insert_candidate(&mut self, candidate: Candidate<C>) -> bool
 	{
-		let mut modified = true;
+		let mut modified = false;
 		let mut candidates = self.candidates.lock().unwrap();
 
 		if candidates.len() < candidates.capacity() {
 			candidates.push(candidate);
+			modified = true;
 		} else if *candidates.peek_min().unwrap() < candidate {
-			candidates.replace_min(candidate);
-		} else {
-			modified = false;
+			if !candidates.clone().into_vec_desc().contains(&candidate) {
+				candidates.replace_min(candidate);
+				modified = true;
+			}
 		}
-
 		modified
 	}
 }
