@@ -19,11 +19,11 @@ impl Cipher for Caesar {
 	const NAME: &'static str = "caesar";
 	type Key = CaesarKey;
 
-	fn encipher(plaintext: &String, key: &Self::Key) -> String
+	fn encipher(plaintext: &str, key: &Self::Key) -> String
 	{
 		Vigenere::encipher(plaintext, &VigenereKey::from(VigenereKey(vec!(key.0))))
 	}
-	fn decipher(ciphertext: &String, key: &Self::Key) -> String
+	fn decipher(ciphertext: &str, key: &Self::Key) -> String
 	{
 		Vigenere::decipher(ciphertext, &VigenereKey::from(VigenereKey(vec!(key.0))))
 	}

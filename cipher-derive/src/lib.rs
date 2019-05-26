@@ -23,7 +23,7 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 			M: FnMut(Candidate<Self>),
 			E: Fn() -> bool,
 		{
-			fn dictionary_attack(ciphertext: &String, dict: S, lang: LanguageModel, mut candidates: M, exit: E)
+			fn dictionary_attack(ciphertext: &str, dict: S, lang: LanguageModel, mut candidates: M, exit: E)
 			{
 				for key in dict {
 					let text = #name::decipher(&ciphertext, &key);
@@ -67,17 +67,17 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 		{
 			type BruteForceKey = Self::Key;
 
-			fn brute_force(ciphertext: &String, lang: LanguageModel, candidates: M, exit: E)
+			fn brute_force(ciphertext: &str, lang: LanguageModel, candidates: M, exit: E)
 			{
 				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), lang, candidates, exit);
 			}
 
-			fn brute_force_from(ciphertext: &String, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
+			fn brute_force_from(ciphertext: &str, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
 			{
 				Self::dictionary_attack(ciphertext, start.into_brute_force_iterator(), lang, candidates, exit);
 			}
 
-			fn brute_force_between(ciphertext: &String, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
+			fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E)
 			{
 				let it = start.into_brute_force_iterator().take_while(|x| *x != end);
 				Self::dictionary_attack(ciphertext, it, lang, candidates, exit);
