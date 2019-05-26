@@ -12,6 +12,12 @@ pub struct VegenereKeyIterator {
 	it: VigenereKey,
 }
 
+pub struct VegenereKeyMutationIterator {
+	start: VigenereKey,
+	index: usize,
+	increment: usize,
+}
+
 impl Key for VigenereKey {
 	type Cipher = Vigenere;
 }
@@ -80,6 +86,35 @@ impl Iterator for VegenereKeyIterator {
 			self.it.0.push(Alph::A);
 		}
 		Some(r)
+
+impl Iterator for VegenereKeyMutationIterator {
+	type Item = VigenereKey;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		self.increment = (self.increment + 1) % Alph::SIZE;
+
+		if self.increment == 0 {
+			self.increment = 1;
+			self.index += 1;
+			if self.index == self.start.0.len() {
+				return None;
+			}
+		}
+
+		let mut item = self.start.clone();
+		item.0[self.index] = item.0[self.index] + Alph::try_from(self.increment).unwrap();
+		Some(item)
 	}
 }
 
+impl IntoMutationIterator for VigenereKey {
+	type MutationIter = VegenereKeyMutationIterator;
+
+	fn into_mutation_iterator(self) -> Self::MutationIter {
+		VegenereKeyMutationIterator {
+			start: self,
+			index: 0,
+			increment: 0,
+		}
+	}
+}
