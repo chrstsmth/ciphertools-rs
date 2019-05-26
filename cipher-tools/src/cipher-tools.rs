@@ -22,79 +22,79 @@ use cipher_lib::cipher::caesar::*;
 use cipher_lib::key::*;
 use cipher_lib::candidate::*;
 
-macro_rules! key_arg {
-	() => (
-		Arg::with_name("key")
-			.short("k")
-			.value_name("KEY")
-			.required(true)
-		)
+fn key_arg<'a,'b>() -> Arg<'a,'b> {
+	Arg::with_name("key")
+		.short("k")
+		.value_name("KEY")
+		.required(true)
 }
 
-macro_rules! decipher_subcommand {
-	() => (
-		SubCommand::with_name("decipher")
+fn ciphertext_arg<'a,'b>() -> Arg<'a,'b>
+{
+	Arg::with_name("ciphertext")
+		.short("c")
+		.value_name("CIPHERTEXT")
+		.required(true)
+}
+
+fn plaintext_arg<'a,'b>() -> Arg<'a,'b>
+{
+	Arg::with_name("plaintext")
+		.short("p")
+		.value_name("PLAINTEXT")
+		.required(true)
+}
+
+fn language_model_arg<'a,'b>() -> Arg<'a,'b>
+{
+	Arg::with_name("language")
+		.short("l")
+		.value_name("LANGUAGE")
+		.required(true)
+}
+
+fn decipher_subcommand<'a,'b>() -> App<'a,'b>
+{
+	SubCommand::with_name("decipher")
 		.about("Decipher ciphertext")
-		.arg(Arg::with_name("ciphertext")
-			.short("c")
-			.value_name("CIPHERTEXT")
-			.required(true))
-		.arg(key_arg!())
-	)
+		.arg(ciphertext_arg())
+		.arg(key_arg())
 }
 
-macro_rules! encipher_subcommand {
-	() => (
-		SubCommand::with_name("encipher")
+fn encipher_subcommand<'a,'b>() -> App<'a,'b>
+{
+	SubCommand::with_name("encipher")
 		.about("Encipher plaintext")
-		.arg(Arg::with_name("plaintext")
-			.short("p")
-			.value_name("PLAINTEXT")
+		.arg(plaintext_arg())
+		.arg(key_arg())
+}
+
+fn dictionary_attack_subcommand<'a,'b>() -> App<'a,'b>
+{
+	SubCommand::with_name("dictionary")
+		.about("Dictionary attack")
+		.arg(ciphertext_arg())
+		.arg(language_model_arg())
+		.arg(Arg::with_name("dictionary")
+			.short("d")
+			.value_name("DICTIONARY")
 			.required(true))
-		.arg(key_arg!())
-	)
 }
 
-macro_rules! dictionary_attack_subcommand {
-	() => (
-		SubCommand::with_name("dictionary")
-					.about("Dictionary attack")
-					.arg(Arg::with_name("ciphertext")
-						.short("c")
-						.value_name("CIPHERTEXT")
-						.required(true))
-					.arg(Arg::with_name("dictionary")
-						.short("d")
-						.value_name("DICTIONARY")
-						.required(true))
-					.arg(Arg::with_name("language")
-						.short("l")
-						.value_name("LANGUAGE")
-						.required(true))
-	)
-}
-
-macro_rules! brute_force_subcommand {
-	() => (
-		SubCommand::with_name("brute")
-					.about("Brute force")
-					.arg(Arg::with_name("ciphertext")
-						.short("c")
-						.value_name("CIPHERTEXT")
-						.required(true))
-					.arg(Arg::with_name("language")
-						.short("l")
-						.value_name("LANGUAGE")
-						.required(true))
-					.arg(Arg::with_name("start")
-						.short("s")
-						.value_name("START-KEY")
-						.required(false))
-					.arg(Arg::with_name("end")
-						.short("e")
-						.value_name("END-KEY")
-						.required(false))
-	)
+fn brute_force_subcommand <'a,'b>() -> App<'a,'b>
+{
+	SubCommand::with_name("brute")
+		.about("Brute force")
+		.arg(ciphertext_arg())
+		.arg(language_model_arg())
+		.arg(Arg::with_name("start")
+			.short("s")
+			.value_name("START-KEY")
+			.required(false))
+		.arg(Arg::with_name("end")
+			.short("e")
+			.value_name("END-KEY")
+			.required(false))
 }
 
 macro_rules! encipher {
@@ -289,17 +289,17 @@ fn main() {
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(SubCommand::with_name(Vigenere::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
-			.subcommand(encipher_subcommand!())
-			.subcommand(decipher_subcommand!())
-			.subcommand(dictionary_attack_subcommand!())
-			.subcommand(brute_force_subcommand!()))
+			.subcommand(encipher_subcommand())
+			.subcommand(decipher_subcommand())
+			.subcommand(dictionary_attack_subcommand())
+			.subcommand(brute_force_subcommand()))
 
 		.subcommand(SubCommand::with_name(Caesar::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
-			.subcommand(encipher_subcommand!())
-			.subcommand(decipher_subcommand!())
-			.subcommand(dictionary_attack_subcommand!())
-			.subcommand(brute_force_subcommand!()))
+			.subcommand(encipher_subcommand())
+			.subcommand(decipher_subcommand())
+			.subcommand(dictionary_attack_subcommand())
+			.subcommand(brute_force_subcommand()))
 		.get_matches();
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
