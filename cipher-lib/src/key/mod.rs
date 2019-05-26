@@ -19,6 +19,5 @@ pub trait IntoBruteForceIterator: Key {
 pub trait IntoMutationIterator: Key {
 	type MutationIter: Iterator;
 
-	fn into_mutation_iterator() -> Self::MutationIter;
+	fn into_mutation_iterator(self) -> Self::MutationIter;
 }
-

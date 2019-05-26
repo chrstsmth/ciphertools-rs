@@ -32,3 +32,13 @@ pub trait BruteForce<S,M,E>: DictionaryAttack<S,M,E> where
 	fn brute_force_from(ciphertext: &str, start: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E);
 	fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, lang: LanguageModel, candidates: M, exit: E);
 }
+
+pub trait HillClimb<S,M,E>: DictionaryAttack<S,M,E> where
+	S: Iterator<Item = Self::Key>,
+	M: FnMut(Candidate<Self>),
+	E: Fn() -> bool,
+{
+	type MutationKey: Key + IntoMutationIterator;
+
+	fn hill_climb(ciphertext: &str, dict: S, lang: LanguageModel, candidates: M, exit: E);
+}
