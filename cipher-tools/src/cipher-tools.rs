@@ -135,16 +135,40 @@ fn parse_key_arg<'a, C: Cipher>(matches: &ArgMatches<'a>) -> C::Key
 	}
 }
 
+fn parse_text_arg<'a>(matches: &ArgMatches<'a>, text: &str) -> String
+{
+	let filename = String::from(matches.value_of(text).unwrap());
+
+	let file = match File::open(&filename) {
+		Err(why) => {
+			eprintln!("{}: {}", filename, why);
+			process::exit(1);
+		}
+		Ok(file) => file,
+	};
+
+	let mut reader = BufReader::new(file);
+
+	let mut text = String::new();
+	match reader.read_to_string(&mut text) {
+		Err(why) => {
+			eprintln!("{}: {}", filename, why);
+		},
+		Ok(_) => (),
+	}
+
+	text
+}
+
 fn parse_ciphertext_arg<'a>(matches: &ArgMatches<'a>) -> String
 {
-	String::from(matches.value_of("ciphertext").unwrap())
+	parse_text_arg(matches, "ciphertext")
 }
 
 fn parse_plaintext_arg<'a>(matches: &ArgMatches<'a>) -> String
 {
-	String::from(matches.value_of("ciphertext").unwrap())
+	parse_text_arg(matches, "plaintext")
 }
-
 
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
