@@ -4,8 +4,6 @@ use crate::pallet::cipher_char::*;
 use std::iter::Iterator;
 use cipher_derive::*;
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::convert::TryFrom;
 use crate::pallet::lang::*;
 
