@@ -139,6 +139,11 @@ impl LanguageModel {
 	}
 }
 
+impl Node {
+	pub fn freq(&self) -> u32 {
+		self.freq
+	}
+}
 
 impl Serialize for LanguageModel {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where
