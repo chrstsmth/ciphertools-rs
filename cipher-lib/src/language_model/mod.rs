@@ -1,5 +1,6 @@
 use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
 use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, SeqAccess};
+use std::borrow::Borrow;
 use std::convert::TryFrom;
 use std::fmt;
 use crate::pallet::lang::*;
@@ -23,6 +24,11 @@ pub struct LanguageModel {
 	head: Node,
 }
 
+#[derive(Clone)]
+pub struct LanguageModelTraverser<'a> {
+	cursor: &'a Node,
+}
+
 impl Node {
 	pub fn new() -> Node {
 		Node {
@@ -37,6 +43,19 @@ impl NextNode {
 		NextNode{
 			node: Default::default(),
 			pop: 0,
+		}
+	}
+}
+
+impl<'a> LanguageModelTraverser<'a> {
+	pub fn next(&mut self, c: Lang) -> Option<&'a Node> {
+		let next: &Option<Box<Node>> = &self.cursor.next.node[c as usize];
+		match next {
+			None => return None,
+			Some(boxed_node) => {
+				self.cursor = boxed_node.borrow();
+				Some(boxed_node.borrow())
+			}
 		}
 	}
 }
@@ -112,6 +131,14 @@ impl LanguageModel {
 		score
 	}
 }
+
+	pub fn traverse(&self) -> LanguageModelTraverser {
+		LanguageModelTraverser {
+			cursor: &self.head,
+		}
+	}
+}
+
 
 impl Serialize for LanguageModel {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where
