@@ -105,33 +105,6 @@ impl LanguageModel {
 		self.head.freq += 1;
 	}
 
-	pub fn score<S>(&self, s: &mut S) -> u32 where
-		S: Iterator<Item = Lang> + Clone,
-	{
-		let mut score: u32 = 0;
-		loop {
-			let t = s.clone();
-
-			let mut cursor: &Node = &self.head;
-			for (i, c) in t.enumerate() {
-				let next: &Option<Box<Node>> = &cursor.next.node[c as usize];
-				match *next {
-					None => break,
-					_ => {
-						score += u32::try_from(i).unwrap() * cursor.freq;
-						cursor = next.as_ref().unwrap();
-					}
-				}
-			}
-
-			if s.next().is_none() {
-				break;
-			}
-		}
-		score
-	}
-}
-
 	pub fn traverse(&self) -> LanguageModelTraverser {
 		LanguageModelTraverser {
 			cursor: &self.head,

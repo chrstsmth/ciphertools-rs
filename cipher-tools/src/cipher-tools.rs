@@ -24,6 +24,7 @@ use cipher_lib::key::*;
 use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
 use cipher_lib::pallet::lang::*;
+use cipher_lib::score::*;
 
 fn key_arg<'a,'b>() -> Arg<'a,'b> {
 	Arg::with_name("key")
@@ -259,12 +260,13 @@ macro_rules! dictionary_attack {
 			};
 
 			let score = |chars: std::str::Chars| {
-				let mut alph = chars
+				let alph = chars
 					.map(|x| Lang::try_from(x))
 					.filter(|x| x.is_ok())
 					.map(|x| x.unwrap());
 
-					language.score(&mut alph)
+					let tr = language.traverse();
+					score(tr, alph.clone())
 			};
 
 			let exit_early = || {
@@ -324,12 +326,13 @@ macro_rules! brute_force {
 			};
 
 			let score = |chars: std::str::Chars| {
-				let mut alph = chars
+				let alph = chars
 					.map(|x| Lang::try_from(x))
 					.filter(|x| x.is_ok())
 					.map(|x| x.unwrap());
 
-					language.score(&mut alph)
+					let tr = language.traverse();
+					score(tr, alph)
 			};
 
 			if let Some(start) = start {
@@ -365,12 +368,13 @@ macro_rules! hill_climb {
 			};
 
 			let score = |chars: std::str::Chars| {
-				let mut alph = chars
+				let alph = chars
 					.map(|x| Lang::try_from(x))
 					.filter(|x| x.is_ok())
 					.map(|x| x.unwrap());
 
-					language.score(&mut alph)
+					let tr = language.traverse();
+					score(tr, alph)
 			};
 
 			$Cipher::hill_climb(&ciphertext, dictionary, score, insert_candidate, exit_early);

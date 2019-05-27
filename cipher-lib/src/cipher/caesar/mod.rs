@@ -1,11 +1,9 @@
-use std::convert::TryFrom;
 use std::str::Chars;
 
 use crate::cipher::*;
 use crate::cipher::vigenere::*;
 use crate::key::caesar::*;
 use crate::key::vigenere::*;
-use crate::pallet::lang::*;
 use crate::candidate::*;
 use cipher_derive::*;
 
