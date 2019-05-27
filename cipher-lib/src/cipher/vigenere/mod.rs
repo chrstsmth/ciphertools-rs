@@ -4,9 +4,6 @@ use crate::pallet::cipher_char::*;
 use std::iter::Iterator;
 use cipher_derive::*;
 
-use std::convert::TryFrom;
-use crate::pallet::lang::*;
-
 #[cfg(test)]
 mod tests;
 

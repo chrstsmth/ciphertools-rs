@@ -1,4 +1,6 @@
 use std::convert::TryFrom;
+use std::str::Chars;
+
 use crate::cipher::*;
 use crate::cipher::vigenere::*;
 use crate::key::caesar::*;

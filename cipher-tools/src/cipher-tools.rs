@@ -13,6 +13,7 @@ use std::io::*;
 use std::error::Error;
 use std::process;
 use std::str::FromStr;
+use std::convert::TryFrom;
 
 mod try_from_err;
 
@@ -22,6 +23,7 @@ use cipher_lib::cipher::caesar::*;
 use cipher_lib::key::*;
 use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
+use cipher_lib::pallet::lang::*;
 
 fn key_arg<'a,'b>() -> Arg<'a,'b> {
 	Arg::with_name("key")
@@ -256,11 +258,20 @@ macro_rules! dictionary_attack {
 				}
 			};
 
+			let score = |chars: std::str::Chars| {
+				let mut alph = chars
+					.map(|x| Lang::try_from(x))
+					.filter(|x| x.is_ok())
+					.map(|x| x.unwrap());
+
+					language.score(&mut alph)
+			};
+
 			let exit_early = || {
 				$exit.load(Ordering::SeqCst)
 			};
 
-			$Cipher::dictionary_attack(&ciphertext, dictionary, language, insert_candidate, exit_early);
+			$Cipher::dictionary_attack(&ciphertext, dictionary, score, insert_candidate, exit_early);
 		}
 	)
 }
@@ -312,14 +323,23 @@ macro_rules! brute_force {
 				$exit.load(Ordering::SeqCst)
 			};
 
+			let score = |chars: std::str::Chars| {
+				let mut alph = chars
+					.map(|x| Lang::try_from(x))
+					.filter(|x| x.is_ok())
+					.map(|x| x.unwrap());
+
+					language.score(&mut alph)
+			};
+
 			if let Some(start) = start {
 				if let Some(end) = end {
-					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_between(&ciphertext, start, end, language, insert_candidate, exit_early);
+					<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force_between(&ciphertext, start, end, score, insert_candidate, exit_early);
 				} else {
-					<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force_from(&ciphertext, start, language, insert_candidate, exit_early);
+					<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force_from(&ciphertext, start, score, insert_candidate, exit_early);
 				}
 			} else {
-				<$Cipher as BruteForce<BruteForceIter, _, _>>::brute_force(&ciphertext, language, insert_candidate, exit_early);
+				<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force(&ciphertext, score, insert_candidate, exit_early);
 			};
 		}
 	)
@@ -329,7 +349,7 @@ macro_rules! hill_climb {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("hill") {
 			let ciphertext = parse_ciphertext_arg(matches);
-			let language  = parse_language_model_arg(matches);
+			let language = parse_language_model_arg(matches);
 			let dictionary = parse_dictionary_arg::<$Cipher>(matches);
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
@@ -344,7 +364,16 @@ macro_rules! hill_climb {
 				$exit.load(Ordering::SeqCst)
 			};
 
-			$Cipher::hill_climb(&ciphertext, dictionary, language, insert_candidate, exit_early);
+			let score = |chars: std::str::Chars| {
+				let mut alph = chars
+					.map(|x| Lang::try_from(x))
+					.filter(|x| x.is_ok())
+					.map(|x| x.unwrap());
+
+					language.score(&mut alph)
+			};
+
+			$Cipher::hill_climb(&ciphertext, dictionary, score, insert_candidate, exit_early);
 		}
 	)
 }
