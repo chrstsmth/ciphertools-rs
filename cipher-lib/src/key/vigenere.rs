@@ -71,7 +71,7 @@ impl Iterator for VegenereKeyIterator {
 		let item = self.it.clone();
 		let mut overflow = true;
 
-		for a in &mut self.it.0 {
+		for a in &mut self.it.0.iter_mut().rev() {
 			let mut i: usize = usize::from(*a);
 			i = (i + 1) % Alph::SIZE;
 			*a = Alph::try_from(i).unwrap();
