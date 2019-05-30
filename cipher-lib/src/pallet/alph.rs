@@ -3,6 +3,8 @@ use std::convert::TryFrom;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
 use std::ops::{Add, Sub};
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
 use crate::try_from_err::*;
 
 #[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
@@ -172,6 +174,39 @@ impl TryFrom<usize> for Alph {
 			24 => Ok(Alph::Y),
 			25 => Ok(Alph::Z),
 			_ => Err(TryFromIntError),
+		}
+	}
+}
+
+impl Distribution<Alph> for Standard {
+	fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alph {
+		match rng.gen_range(0, Alph::SIZE - 1) {
+			0 => Alph::A,
+			1 => Alph::B,
+			2 => Alph::C,
+			3 => Alph::D,
+			4 => Alph::E,
+			5 => Alph::F,
+			6 => Alph::G,
+			7 => Alph::H,
+			8 => Alph::I,
+			9 => Alph::J,
+			10 => Alph::K,
+			11 => Alph::L,
+			12 => Alph::M,
+			13 => Alph::N,
+			14 => Alph::O,
+			15 => Alph::P,
+			16 => Alph::Q,
+			17 => Alph::R,
+			18 => Alph::S,
+			19 => Alph::T,
+			20 => Alph::U,
+			21 => Alph::V,
+			22 => Alph::W,
+			23 => Alph::X,
+			24 => Alph::Y,
+			_ => Alph::Z,
 		}
 	}
 }
