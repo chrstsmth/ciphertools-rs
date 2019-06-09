@@ -32,6 +32,7 @@ pub trait BruteForce<Dict,Can,Exit,Score>: DictionaryAttack<Dict,Can,Exit,Score>
 
 	fn brute_force(ciphertext: &str, score: Score, candidates: Can, exit: Exit);
 	fn brute_force_from(ciphertext: &str, start: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
+	fn brute_force_to(ciphertext: &str, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
 	fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
 }
 
