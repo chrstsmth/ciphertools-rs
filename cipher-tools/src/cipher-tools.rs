@@ -355,6 +355,8 @@ macro_rules! brute_force {
 				} else {
 					<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force_from(&ciphertext, start, score, insert_candidate, exit_early);
 				}
+			} else if let Some(end) = end {
+				<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force_to(&ciphertext, end, score, insert_candidate, exit_early);
 			} else {
 				<$Cipher as BruteForce<BruteForceIter, _, _, _>>::brute_force(&ciphertext, score, insert_candidate, exit_early);
 			};

@@ -82,6 +82,9 @@ macro_rules! brute_force {
 				} else {
 					run::<_, $Cipher>(start.into_brute_force_iterator());
 				}
+			} else if let Some(end) = end {
+				let it = <Key as IntoBruteForceIterator>::start().take_while(|x| *x != end);
+				run::<_, $Cipher>(it);
 			} else {
 				run::<_, $Cipher>(<Key as IntoBruteForceIterator>::start());
 			};
