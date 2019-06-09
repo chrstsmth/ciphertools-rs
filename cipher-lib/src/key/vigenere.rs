@@ -18,6 +18,31 @@ pub struct VegenereKeyMutationIterator {
 	increment: usize,
 }
 
+pub struct VegenereKeyRandomIterator {
+	len: usize,
+}
+
+impl VigenereKey {
+	fn into_random_iterator(key_len: usize) -> VegenereKeyRandomIterator
+	{
+		VegenereKeyRandomIterator {
+			len: key_len,
+		}
+	}
+}
+
+impl Iterator for VegenereKeyRandomIterator {
+	type Item = VigenereKey;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let mut key = Vec::with_capacity(self.len);
+		for _ in 0..self.len {
+			key.push(rand::random());
+		}
+		Some(VigenereKey(key))
+	}
+}
+
 impl Key for VigenereKey {
 	type Cipher = Vigenere;
 }
