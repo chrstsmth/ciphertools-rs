@@ -15,7 +15,7 @@ impl error::Error for TryFromCharError {
 		"no conversion available"
 	}
 
-	fn cause(&self) -> Option<&error::Error> {
+	fn cause(&self) -> Option<&dyn error::Error> {
 		None
 	}
 }
@@ -31,7 +31,7 @@ impl error::Error for TryFromStringError {
 		"no conversion available"
 	}
 
-	fn cause(&self) -> Option<&error::Error> {
+	fn cause(&self) -> Option<&dyn error::Error> {
 		None
 	}
 }
@@ -47,7 +47,7 @@ impl error::Error for TryFromIntError {
 		"no conversion available"
 	}
 
-	fn cause(&self) -> Option<&error::Error> {
+	fn cause(&self) -> Option<&dyn error::Error> {
 		None
 	}
 }
