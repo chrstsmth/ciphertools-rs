@@ -74,6 +74,12 @@ fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 				Self::dictionary_attack(ciphertext, start.into_brute_force_iterator(), score, candidates, exit);
 			}
 
+			fn brute_force_to(ciphertext: &str, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit)
+			{
+				let it = Self::BruteForceKey::start().take_while(|x| *x != end);
+				Self::dictionary_attack(ciphertext, end.into_brute_force_iterator(), score, candidates, exit);
+			}
+
 			fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit)
 			{
 				let it = start.into_brute_force_iterator().take_while(|x| *x != end);
