@@ -136,9 +136,9 @@ mod subcommand {
 mod parse {
 	use super::*;
 
-	pub fn language_model_parse<'a>(matches: &ArgMatches<'a>) -> LanguageModel
+	pub fn language_model_parse<'a>(matches: &ArgMatches<'a>) -> Option<LanguageModel>
 	{
-		let filename = String::from(matches.value_of("language").unwrap());
+		let filename = String::from(matches.value_of("language")?);
 
 		let file = match File::open(&filename) {
 			Err(why) => {
@@ -156,13 +156,13 @@ mod parse {
 			Ok(language) => language,
 		};
 
-		language
+		Some(language)
 	}
 
-	pub fn dictionary_parse<'a, C>(matches: &ArgMatches<'a>) -> impl Iterator<Item = C::Key> where
+	pub fn dictionary_parse<'a, C>(matches: &ArgMatches<'a>) -> Option<impl Iterator<Item = C::Key>> where
 		C: Cipher,
 	{
-		let filename = String::from(matches.value_of("dictionary").unwrap());
+		let filename = String::from(matches.value_of("dictionary")?);
 
 		let file = match File::open(&filename) {
 			Err(why) => {
@@ -193,36 +193,37 @@ mod parse {
 				}
 				});
 
-		dict
+		Some(dict)
 	}
 
-	pub fn key_parse<'a, C: Cipher>(matches: &ArgMatches<'a>) -> C::Key
+	pub fn key_parse<'a, C: Cipher>(matches: &ArgMatches<'a>) -> Option<C::Key>
 	{
-		let key_str = matches.value_of("key").unwrap();
+		let key_str = matches.value_of("key")?;
 		let key = C::Key::from_str(key_str);
 
 		match key {
-			Ok(key) => key,
+			Ok(key) => Some(key),
 			_ => {
+				//TODO retur as error
 				println!("{}: Parse key failed", key_str);
 				process::exit(1);
 			}
 		}
 	}
 
-	pub fn ciphertext_parse<'a>(matches: &ArgMatches<'a>) -> String
+	pub fn ciphertext_parse<'a>(matches: &ArgMatches<'a>) -> Option<String>
 	{
 		text_parse(matches, "ciphertext")
 	}
 
-	pub fn plaintext_parse<'a>(matches: &ArgMatches<'a>) -> String
+	pub fn plaintext_parse<'a>(matches: &ArgMatches<'a>) -> Option<String>
 	{
 		text_parse(matches, "plaintext")
 	}
 
-	fn text_parse<'a>(matches: &ArgMatches<'a>, text: &str) -> String
+	fn text_parse<'a>(matches: &ArgMatches<'a>, text: &str) -> Option<String>
 	{
-		let filename = String::from(matches.value_of(text).unwrap());
+		let filename = String::from(matches.value_of(text)?);
 
 		let file = match File::open(&filename) {
 			Err(why) => {
@@ -242,15 +243,15 @@ mod parse {
 			Ok(_) => (),
 		}
 
-		text
+		Some(text)
 	}
 }
 
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
-			let plaintext = parse::plaintext_parse(matches);
-			let key = parse::key_parse::<$Cipher>(matches);
+			let plaintext = parse::plaintext_parse(matches).unwrap();
+			let key = parse::key_parse::<$Cipher>(matches).unwrap();
 
 			println!("{:}", $Cipher::encipher(&plaintext, &key));
 		}
@@ -260,8 +261,8 @@ macro_rules! encipher {
 macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
-			let ciphertext = parse::ciphertext_parse(matches);
-			let key = parse::key_parse::<$Cipher>(matches);
+			let ciphertext = parse::ciphertext_parse(matches).unwrap();
+			let key = parse::key_parse::<$Cipher>(matches).unwrap();
 
 			println!("{:}", $Cipher::decipher(&ciphertext, &key));
 		}
@@ -271,9 +272,9 @@ macro_rules! decipher {
 macro_rules! dictionary_attack {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
-			let ciphertext = parse::ciphertext_parse(matches);
-			let language  = parse::language_model_parse(matches);
-			let dictionary = parse::dictionary_parse::<$Cipher>(matches);
+			let ciphertext = parse::ciphertext_parse(matches).unwrap();
+			let language  = parse::language_model_parse(matches).unwrap();
+			let dictionary = parse::dictionary_parse::<$Cipher>(matches).unwrap();
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: &Candidate<$Cipher>| {
@@ -308,8 +309,8 @@ macro_rules! brute_force {
 			type BruteForceIter = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
 			type Key = <$Cipher as Cipher>::Key;
 
-			let ciphertext = parse::ciphertext_parse(matches);
-			let language  = parse::language_model_parse(matches);
+			let ciphertext = parse::ciphertext_parse(matches).unwrap();
+			let language  = parse::language_model_parse(matches).unwrap();
 
 			let start = match matches.value_of("start") {
 				Some(key_str) => {
@@ -377,9 +378,9 @@ macro_rules! brute_force {
 macro_rules! hill_climb {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("hill") {
-			let ciphertext = parse::ciphertext_parse(matches);
-			let language = parse::language_model_parse(matches);
-			let dictionary = parse::dictionary_parse::<$Cipher>(matches);
+			let ciphertext = parse::ciphertext_parse(matches).unwrap();
+			let language = parse::language_model_parse(matches).unwrap();
+			let dictionary = parse::dictionary_parse::<$Cipher>(matches).unwrap();
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: &Candidate<$Cipher>| {
