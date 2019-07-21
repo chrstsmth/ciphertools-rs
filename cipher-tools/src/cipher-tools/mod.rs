@@ -6,27 +6,25 @@ extern crate cipher_lib;
 #[macro_use]
 extern crate lazy_static;
 
-use clap::{App, AppSettings, ArgMatches};
+use clap::{App, AppSettings};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::fs::File;
 use std::io::prelude::*;
 use std::io::*;
 use std::io;
-use std::error::Error;
 use std::process;
 use std::str::FromStr;
 use std::convert::TryFrom;
 
 mod try_from_err;
 mod cli;
+mod parse;
 
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 use cipher_lib::key::*;
 use cipher_lib::candidate::*;
-use cipher_lib::language_model::*;
 use cipher_lib::pallet::lang::*;
 use cipher_lib::score::*;
 
@@ -38,126 +36,11 @@ fn has_stdin() -> bool {
 	BufReader::new(io::stdin()).lines().peekable().next().is_some()
 }
 
-mod parse {
-	use super::*;
-
-	//TODO pass in filename?
-	pub fn language_model_parse<'a>(matches: &ArgMatches<'a>) -> Option<LanguageModel>
-	{
-		let filename = String::from(matches.value_of("language")?);
-
-		let file = match File::open(&filename) {
-			Err(why) => {
-				eprintln!("{}: {}", filename, why);
-				process::exit(1);
-			}
-			Ok(file) => file,
-		};
-
-		let language = match serde_json::from_reader(BufReader::new(file)) {
-			Err(why) => {
-				eprintln!("{}: {}", filename, why);
-				process::exit(1);
-			}
-			Ok(language) => language,
-		};
-
-		Some(language)
-	}
-
-	pub fn dictionary_parse<'a, C>(matches: &ArgMatches<'a>) -> Option<impl Iterator<Item = C::Key>> where
-		C: Cipher,
-	{
-		let filename = String::from(matches.value_of("dictionary")?);
-
-		let file = match File::open(&filename) {
-			Err(why) => {
-				eprintln!("{}: {}", filename, why);
-				process::exit(1);
-			}
-			Ok(file) => file,
-		};
-
-		let dict = BufReader::new(file)
-			.lines()
-			.map(|x| x.unwrap_or_else(|e|
-				{
-					eprintln!("{}", e.description());
-					process::exit(1);
-				})
-				)
-			.enumerate()
-			.map(move |x| {
-				let (num, line) = x;
-				let line_num = num + 1;
-				match C::Key::from_str(line.as_str()) {
-					Err(_) => {
-						eprintln!("{}:{}: failed to parse \"{}\"", filename, line_num, line);
-						process::exit(1);
-					}
-					Ok(key) => key
-				}
-				});
-
-		Some(dict)
-	}
-
-	pub fn key_parse<'a, C: Cipher>(matches: &ArgMatches<'a>) -> Option<C::Key>
-	{
-		let key_str = matches.value_of("key")?;
-		let key = C::Key::from_str(key_str);
-
-		match key {
-			Ok(key) => Some(key),
-			_ => {
-				//TODO retur as error
-				println!("{}: Parse key failed", key_str);
-				process::exit(1);
-			}
-		}
-	}
-
-	pub fn ciphertext_parse<'a>(matches: &ArgMatches<'a>) -> Option<String>
-	{
-		text_parse(matches, "ciphertext")
-	}
-
-	pub fn plaintext_parse<'a>(matches: &ArgMatches<'a>) -> Option<String>
-	{
-		text_parse(matches, "plaintext")
-	}
-
-	fn text_parse<'a>(matches: &ArgMatches<'a>, text: &str) -> Option<String>
-	{
-		let filename = String::from(matches.value_of(text)?);
-
-		let file = match File::open(&filename) {
-			Err(why) => {
-				eprintln!("{}: {}", filename, why);
-				process::exit(1);
-			}
-			Ok(file) => file,
-		};
-
-		let mut reader = BufReader::new(file);
-
-		let mut text = String::new();
-		match reader.read_to_string(&mut text) {
-			Err(why) => {
-				eprintln!("{}: {}", filename, why);
-			},
-			Ok(_) => (),
-		}
-
-		Some(text)
-	}
-}
-
 macro_rules! encipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("encipher") {
-			let plaintext = parse::plaintext_parse(matches).unwrap();
-			let key = parse::key_parse::<$Cipher>(matches).unwrap();
+			let plaintext = parse::plaintext(matches).unwrap();
+			let key = parse::key::<$Cipher>(matches).unwrap();
 
 			println!("{:}", $Cipher::encipher(&plaintext, &key));
 		}
@@ -167,8 +50,8 @@ macro_rules! encipher {
 macro_rules! decipher {
 	($matches:ident, $Cipher:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("decipher") {
-			let ciphertext = parse::ciphertext_parse(matches).unwrap();
-			let key = parse::key_parse::<$Cipher>(matches).unwrap();
+			let ciphertext = parse::ciphertext(matches).unwrap();
+			let key = parse::key::<$Cipher>(matches).unwrap();
 
 			println!("{:}", $Cipher::decipher(&ciphertext, &key));
 		}
@@ -178,9 +61,9 @@ macro_rules! decipher {
 macro_rules! dictionary_attack {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("dictionary") {
-			let ciphertext = parse::ciphertext_parse(matches).unwrap();
-			let language  = parse::language_model_parse(matches).unwrap();
-			let dictionary = parse::dictionary_parse::<$Cipher>(matches).unwrap();
+			let ciphertext = parse::ciphertext(matches).unwrap();
+			let language  = parse::language_model(matches).unwrap();
+			let dictionary = parse::dictionary::<$Cipher>(matches).unwrap();
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10); let insert_candidate = |c: &Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
@@ -214,8 +97,8 @@ macro_rules! brute_force {
 			type BruteForceIter = <<$Cipher as Cipher>::Key as IntoBruteForceIterator>::BruteForceIter;
 			type Key = <$Cipher as Cipher>::Key;
 
-			let ciphertext = parse::ciphertext_parse(matches).unwrap();
-			let language  = parse::language_model_parse(matches).unwrap();
+			let ciphertext = parse::ciphertext(matches).unwrap();
+			let language  = parse::language_model(matches).unwrap();
 
 			let start = match matches.value_of("start") {
 				Some(key_str) => {
@@ -283,9 +166,9 @@ macro_rules! brute_force {
 macro_rules! hill_climb {
 	($matches:ident, $Cipher:ident, $exit:ident) => (
 		if let Some(matches) = $matches.subcommand_matches("hill") {
-			let ciphertext = parse::ciphertext_parse(matches).unwrap();
-			let language = parse::language_model_parse(matches).unwrap();
-			let dictionary = parse::dictionary_parse::<$Cipher>(matches).unwrap();
+			let ciphertext = parse::ciphertext(matches).unwrap();
+			let language = parse::language_model(matches).unwrap();
+			let dictionary = parse::dictionary::<$Cipher>(matches).unwrap();
 
 			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
 			let insert_candidate = |c: &Candidate<$Cipher>| {
