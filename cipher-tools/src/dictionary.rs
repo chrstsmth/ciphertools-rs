@@ -10,7 +10,27 @@ use cipher_lib::key::*;
 
 use std::str::FromStr;
 
-use clap::{Arg, ArgGroup, App, SubCommand, AppSettings, ArgMatches};
+use clap::{Arg, App, SubCommand, AppSettings};
+
+
+mod arg {
+	use super::*;
+
+	pub fn start<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("start")
+			.short("s")
+			.value_name("START-KEY")
+			.required(false)
+	}
+	pub fn end<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("end")
+			.short("e")
+			.value_name("END-KEY")
+			.required(false)
+	}
+}
 
 mod subcommand {
 	use super::*;
@@ -19,14 +39,8 @@ mod subcommand {
 	{
 		SubCommand::with_name("brute")
 			.about("Brute force")
-			.arg(Arg::with_name("start")
-				.short("s")
-				.value_name("START-KEY")
-				.required(false))
-			.arg(Arg::with_name("end")
-				.short("e")
-				.value_name("END-KEY")
-				.required(false))
+			.arg(arg::start())
+			.arg(arg::end())
 	}
 
 }

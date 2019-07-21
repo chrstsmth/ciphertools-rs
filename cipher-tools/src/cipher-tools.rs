@@ -70,6 +70,22 @@ mod arg {
 			.value_name("DICTIONARY")
 			.required(true)
 	}
+
+	pub fn start<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("start")
+			.short("s")
+			.value_name("START-KEY")
+			.required(false)
+	}
+
+	pub fn end<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("end")
+			.short("e")
+			.value_name("END-KEY")
+			.required(false)
+	}
 }
 
 mod subcommand {
@@ -103,14 +119,8 @@ mod subcommand {
 	pub fn brute_force<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("brute") .about("Brute force") .arg(arg::ciphertext()) .arg(arg::language_model())
-			.arg(Arg::with_name("start")
-				.short("s")
-				.value_name("START-KEY")
-				.required(false))
-			.arg(Arg::with_name("end")
-				.short("e")
-				.value_name("END-KEY")
-				.required(false))
+			.arg(arg::start())
+			.arg(arg::end())
 	}
 
 	pub fn hill_climb<'a,'b>() -> App<'a,'b>
