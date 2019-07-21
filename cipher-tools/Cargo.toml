@@ -17,7 +17,7 @@ path = "src/language-modeler.rs"
 
 [[bin]]
 name = "cipher-tools"
-path = "src/cipher-tools.rs"
+path = "src/cipher-tools/mod.rs"
 
 [[bin]]
 name = "dictionary"
