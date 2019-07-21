@@ -3,8 +3,10 @@ extern crate serde;
 extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
+#[macro_use]
+extern crate lazy_static;
 
-use clap::{Arg, ArgGroup, App, SubCommand, AppSettings, ArgMatches};
+use clap::{App, AppSettings, ArgMatches};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::fs::File;
@@ -17,6 +19,7 @@ use std::str::FromStr;
 use std::convert::TryFrom;
 
 mod try_from_err;
+mod cli;
 
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
@@ -27,115 +30,18 @@ use cipher_lib::language_model::*;
 use cipher_lib::pallet::lang::*;
 use cipher_lib::score::*;
 
-
-
-mod arg {
-	use super::*;
-
-	pub fn key<'a,'b>() -> Arg<'a,'b> {
-		Arg::with_name("key")
-			.short("k")
-			.value_name("KEY")
-			.required(true)
-	}
-
-	pub fn ciphertext<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("ciphertext")
-			.short("c")
-			.value_name("CIPHERTEXT")
-			.required(true)
-	}
-
-	pub fn plaintext<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("plaintext")
-			.short("p")
-			.value_name("PLAINTEXT")
-			.required(true)
-	}
-
-	pub fn language_model<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("language")
-			.short("l")
-			.value_name("LANGUAGE")
-			.required(true)
-	}
-
-	pub fn dictionary<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("dictionary")
-			.short("d")
-			.value_name("DICTIONARY")
-			.required(true)
-	}
-
-	pub fn start<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("start")
-			.short("s")
-			.value_name("START-KEY")
-			.required(false)
-	}
-
-	pub fn end<'a,'b>() -> Arg<'a,'b>
-	{
-		Arg::with_name("end")
-			.short("e")
-			.value_name("END-KEY")
-			.required(false)
-	}
+lazy_static! {
+	static ref HAS_STDIN: bool = has_stdin();
 }
 
-mod subcommand {
-	use super::*;
-
-	pub fn dictionary_attack<'a,'b>() -> App<'a,'b>
-	{
-		SubCommand::with_name("dictionary")
-			.about("Dictionary attack")
-			.arg(arg::ciphertext())
-			.arg(arg::language_model())
-			.arg(arg::dictionary())
-	}
-
-	pub fn decipher<'a,'b>() -> App<'a,'b>
-	{
-		SubCommand::with_name("decipher")
-			.about("Decipher ciphertext")
-			.arg(arg::ciphertext())
-			.arg(arg::key())
-	}
-
-	pub fn encipher<'a,'b>() -> App<'a,'b>
-	{
-		SubCommand::with_name("encipher")
-			.about("Encipher plaintext")
-			.arg(arg::plaintext())
-			.arg(arg::key())
-	}
-
-	pub fn brute_force<'a,'b>() -> App<'a,'b>
-	{
-		SubCommand::with_name("brute") .about("Brute force") .arg(arg::ciphertext()) .arg(arg::language_model())
-			.arg(arg::start())
-			.arg(arg::end())
-	}
-
-	pub fn hill_climb<'a,'b>() -> App<'a,'b>
-	{
-		SubCommand::with_name("hill")
-			.about("Hill climb")
-			.arg(arg::ciphertext())
-			.arg(arg::language_model())
-			.arg(arg::dictionary())
-	}
+fn has_stdin() -> bool {
+	BufReader::new(io::stdin()).lines().peekable().next().is_some()
 }
 
 mod parse {
 	use super::*;
 
+	//TODO pass in filename?
 	pub fn language_model_parse<'a>(matches: &ArgMatches<'a>) -> Option<LanguageModel>
 	{
 		let filename = String::from(matches.value_of("language")?);
@@ -276,8 +182,7 @@ macro_rules! dictionary_attack {
 			let language  = parse::language_model_parse(matches).unwrap();
 			let dictionary = parse::dictionary_parse::<$Cipher>(matches).unwrap();
 
-			let mut candidates = Candidates::<$Cipher>::with_capacity(10);
-			let insert_candidate = |c: &Candidate<$Cipher>| {
+			let mut candidates = Candidates::<$Cipher>::with_capacity(10); let insert_candidate = |c: &Candidate<$Cipher>| {
 				if candidates.insert_candidate(c) {
 					print!("{}[2J", 27 as char);
 					println!("{}", candidates);
@@ -409,38 +314,24 @@ macro_rules! hill_climb {
 	)
 }
 
-fn vigenere_subcommand<'a,'b>() -> App<'a,'b>
-{
-	SubCommand::with_name(Vigenere::NAME)
-		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(subcommand::encipher())
-		.subcommand(subcommand::decipher())
-		.subcommand(subcommand::dictionary_attack())
-		.subcommand(subcommand::brute_force())
-		.subcommand(subcommand::hill_climb())
-}
-
-fn caesar_subcommand<'a,'b>() -> App<'a,'b>
-{
-	SubCommand::with_name(Caesar::NAME)
-		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(subcommand::encipher())
-		.subcommand(subcommand::decipher())
-		.subcommand(subcommand::brute_force())
-}
-
 fn main() {
+	//let stdin = BufReader::new(io::stdin()).lines();
+
 	let exit = Arc::new(AtomicBool::new(false));
+
 	let ctrlc_exit = exit.clone();
 	ctrlc::set_handler(move ||  {
 		ctrlc_exit.store(true, Ordering::SeqCst);
 	}).expect("Error setting SIGINT trap");
 
+	//ensures arguments are valid
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(vigenere_subcommand())
-		.subcommand(caesar_subcommand())
+		.subcommand(cli::vigenere_subcommand())
+		.subcommand(cli::caesar_subcommand())
 		.get_matches();
+
+	// TODO Parse arguments given
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		encipher!(matches, Vigenere);
