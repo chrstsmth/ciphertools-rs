@@ -7,8 +7,7 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use crate::try_from_err::*;
 
-#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
-pub enum Alph {
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)] pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 

@@ -23,7 +23,7 @@ pub struct VegenereKeyRandomIterator {
 }
 
 impl VigenereKey {
-	fn into_random_iterator(key_len: usize) -> VegenereKeyRandomIterator
+	pub fn into_random_iterator(key_len: usize) -> VegenereKeyRandomIterator
 	{
 		VegenereKeyRandomIterator {
 			len: key_len,

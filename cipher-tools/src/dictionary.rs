@@ -43,6 +43,15 @@ mod subcommand {
 			.arg(arg::end())
 	}
 
+	pub fn vigenere_random<'a,'b>() -> App<'a,'b>
+	{
+		SubCommand::with_name("random")
+			.about("random")
+			.arg(Arg::with_name("keylen")
+				.long("keylen")
+				.value_name("LENGTH")
+				.required(true))
+	}
 }
 
 fn vigenere_subcommand<'a,'b>() -> App<'a,'b>
@@ -50,6 +59,7 @@ fn vigenere_subcommand<'a,'b>() -> App<'a,'b>
 	SubCommand::with_name(Vigenere::NAME)
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(subcommand::brute_force())
+		.subcommand(subcommand::vigenere_random())
 }
 
 fn caesar_subcommand<'a,'b>() -> App<'a,'b>
@@ -57,6 +67,23 @@ fn caesar_subcommand<'a,'b>() -> App<'a,'b>
 	SubCommand::with_name(Caesar::NAME)
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(subcommand::brute_force())
+}
+
+macro_rules! vigenere_random  {
+	($matches:ident, $exit:ident) => (
+		if let Some($matches) = $matches.subcommand_matches("random") {
+			let keylen_arg = $matches.value_of("keylen").unwrap();
+			let keylen = match usize::from_str(keylen_arg) {
+				Err(why) => {
+					eprintln!("{}: {}", keylen_arg, why);
+					process::exit(1);
+				}
+				Ok(keylen) => keylen
+			};
+
+			run::<_, Vigenere>(<Vigenere as Cipher>::Key::into_random_iterator(keylen));
+		}
+	)
 }
 
 macro_rules! brute_force {
@@ -124,6 +151,7 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		brute_force!(matches, Vigenere, exit);
+		vigenere_random!(matches, exit);
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		brute_force!(matches, Caesar, exit);
 	}
