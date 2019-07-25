@@ -36,21 +36,38 @@ mod arg {
 			.required(true)
 	}
 
-	pub fn dictionary<'a,'b>() -> Arg<'a,'b>
+	pub fn dict_file<'a,'b>() -> Arg<'a,'b>
 	{
-		Arg::with_name("dictionary")
-			.short("d")
-			.value_name("DICTIONARY")
+		Arg::with_name("dict_file")
+			.short("dict_file")
+			.value_name("FILE")
 			.required(true)
 	}
 
-	/*
-	 * TODO
-	dict-file
-	dict-random
-	dict-range
-	dict-stdin
-	*/
+	pub fn dict_random<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("dict_random")
+			.long("dict_random")
+	}
+
+	pub fn dict_range<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("dict_range")
+			.long("dict_range")
+			.value_name("(START, END)")
+	}
+
+	pub fn dict_brute<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("dict_brute")
+			.long("dict_brute")
+	}
+
+	pub fn dict_stdin<'a,'b>() -> Arg<'a,'b>
+	{
+		Arg::with_name("dict_stdin")
+			.long("dict_stdin")
+	}
 
 	pub fn start<'a,'b>() -> Arg<'a,'b>
 	{
@@ -78,7 +95,7 @@ mod subcommand {
 			.about("Dictionary attack")
 			.arg(arg::ciphertext())
 			.arg(arg::language_model())
-			.arg(arg::dictionary())
+			.arg(arg::dict_file())
 	}
 
 	pub fn decipher<'a,'b>() -> App<'a,'b>
@@ -113,7 +130,7 @@ mod subcommand {
 			.about("Hill climb")
 			.arg(arg::ciphertext())
 			.arg(arg::language_model())
-			.arg(arg::dictionary())
+			.arg(arg::dict_file())
 	}
 }
 
