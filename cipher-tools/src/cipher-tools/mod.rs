@@ -22,7 +22,7 @@ mod cli;
 mod commands;
 mod parse;
 
-use cli::Subcommand;
+use cli::Cli;
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
@@ -51,11 +51,12 @@ fn main() {
 
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
-		.subcommand(Vigenere::subcommand())
-		.subcommand(Caesar::subcommand())
+		.subcommand(Vigenere::command())
+		.subcommand(Caesar::command())
 		.get_matches();
 
 	// TODO Parse arguments given
+
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		encipher!(matches, Vigenere);

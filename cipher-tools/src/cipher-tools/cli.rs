@@ -4,17 +4,15 @@ use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 
-mod arg {
-	use super::*;
-
-	pub fn key<'a,'b>() -> Arg<'a,'b> {
+pub trait Cli {
+	fn key_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("key")
 			.short("k")
 			.value_name("KEY")
 			.required(true)
 	}
 
-	pub fn ciphertext<'a,'b>() -> Arg<'a,'b>
+	fn ciphertext_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("ciphertext")
 			.short("c")
@@ -22,21 +20,21 @@ mod arg {
 			.required(true)
 	}
 
-	pub fn plaintext<'a,'b>() -> Arg<'a,'b>
+	fn plaintext_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("plaintext")
 			.short("p")
 			.value_name("PLAINTEXT")
 			.required(true)
 	}
-	pub fn language_model<'a,'b>() -> Arg<'a,'b> {
+	fn language_model_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("language")
 			.short("l")
 			.value_name("LANGUAGE")
 			.required(true)
 	}
 
-	pub fn dict_file<'a,'b>() -> Arg<'a,'b>
+	fn dict_file_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_file")
 			.short("dict_file")
@@ -44,14 +42,14 @@ mod arg {
 			.required(true)
 	}
 
-	pub fn dict_random<'a,'b>() -> Arg<'a,'b>
+	fn dict_random_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_random")
 			.long("dict_random")
 			.required(true)
 	}
 
-	pub fn dict_range<'a,'b>() -> Arg<'a,'b>
+	fn dict_range_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_range")
 			.long("dict_range")
@@ -59,21 +57,21 @@ mod arg {
 			.required(true)
 	}
 
-	pub fn dict_brute<'a,'b>() -> Arg<'a,'b>
+	fn dict_brute_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_brute")
 			.long("dict_brute")
 			.required(true)
 	}
 
-	pub fn dict_stdin<'a,'b>() -> Arg<'a,'b>
+	fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_stdin")
 			.long("dict_stdin")
 			.required(true)
 	}
 
-	pub fn start<'a,'b>() -> Arg<'a,'b>
+	fn start_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("start")
 			.short("s")
@@ -81,86 +79,81 @@ mod arg {
 			.required(true)
 	}
 
-	pub fn end<'a,'b>() -> Arg<'a,'b>
+	fn end_arg<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("end")
 			.short("e")
 			.value_name("END-KEY")
 			.required(true)
 	}
-}
 
-mod subcommand {
-	use super::*;
-
-	pub fn dictionary_attack<'a,'b>() -> App<'a,'b>
+	fn dictionary_attack_subcommand<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("dictionary")
 			.about("Dictionary attack")
-			.arg(arg::ciphertext())
-			.arg(arg::language_model())
-			.arg(arg::dict_file())
+			.arg(Self::ciphertext_arg())
+			.arg(Self::language_model_arg())
+			.arg(Self::dict_file_arg())
 	}
 
-	pub fn decipher<'a,'b>() -> App<'a,'b>
+	fn decipher_subcommand<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("decipher")
 			.about("Decipher ciphertext")
-			.arg(arg::ciphertext())
-			.arg(arg::key())
+			.arg(Self::ciphertext_arg())
+			.arg(Self::key_arg())
 	}
 
-	pub fn encipher<'a,'b>() -> App<'a,'b>
+	fn encipher_subcommand<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("encipher")
 			.about("Encipher plaintext")
-			.arg(arg::plaintext())
-			.arg(arg::key())
+			.arg(Self::plaintext_arg())
+			.arg(Self::key_arg())
 	}
 
-	pub fn brute_force<'a,'b>() -> App<'a,'b>
+	fn brute_force_subcommand<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("brute")
 			.about("Brute force")
-			.arg(arg::ciphertext())
-			.arg(arg::language_model())
-			.arg(arg::start().required(false))
-			.arg(arg::end().required(false))
+			.arg(Self::ciphertext_arg())
+			.arg(Self::language_model_arg())
+			.arg(Self::start_arg().required(false))
+			.arg(Self::end_arg().required(false))
 	}
 
-	pub fn hill_climb<'a,'b>() -> App<'a,'b>
+	fn hill_climb_subcommand<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name("hill")
 			.about("Hill climb")
-			.arg(arg::ciphertext())
-			.arg(arg::language_model())
-			.arg(arg::dict_file())
+			.arg(Self::ciphertext_arg())
+			.arg(Self::language_model_arg())
+			.arg(Self::dict_file_arg())
+	}
+
+	fn command<'a,'b>() -> App<'a,'b>;
+}
+
+impl Cli for Caesar {
+	fn command<'a,'b>() -> App<'a,'b> {
+		SubCommand::with_name(Caesar::NAME)
+			.setting(AppSettings::ArgRequiredElseHelp)
+			.subcommand(Self::encipher_subcommand())
+			.subcommand(Self::decipher_subcommand())
+			.subcommand(Self::brute_force_subcommand())
 	}
 }
 
-pub trait Subcommand {
-	fn subcommand<'a,'b>() -> App<'a,'b>;
-}
-
-impl Subcommand for Vigenere {
-	fn subcommand<'a,'b>() -> App<'a,'b>
+impl Cli for Vigenere {
+	fn command<'a,'b>() -> App<'a,'b>
 	{
 		SubCommand::with_name(Vigenere::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
-			.subcommand(subcommand::encipher())
-			.subcommand(subcommand::decipher())
-			.subcommand(subcommand::dictionary_attack())
-			.subcommand(subcommand::brute_force())
-			.subcommand(subcommand::hill_climb())
+			.subcommand(Self::encipher_subcommand())
+			.subcommand(Self::decipher_subcommand())
+			.subcommand(Self::dictionary_attack_subcommand())
+			.subcommand(Self::brute_force_subcommand())
+			.subcommand(Self::hill_climb_subcommand())
 	}
 }
 
-impl Subcommand for Caesar {
-	fn subcommand<'a,'b>() -> App<'a,'b> {
-		SubCommand::with_name(Caesar::NAME)
-			.setting(AppSettings::ArgRequiredElseHelp)
-			.subcommand(subcommand::encipher())
-			.subcommand(subcommand::decipher())
-			.subcommand(subcommand::brute_force())
-	}
-}
