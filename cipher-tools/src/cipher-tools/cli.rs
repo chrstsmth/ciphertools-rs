@@ -48,6 +48,7 @@ mod arg {
 	{
 		Arg::with_name("dict_random")
 			.long("dict_random")
+			.required(true)
 	}
 
 	pub fn dict_range<'a,'b>() -> Arg<'a,'b>
@@ -55,18 +56,21 @@ mod arg {
 		Arg::with_name("dict_range")
 			.long("dict_range")
 			.value_name("(START, END)")
+			.required(true)
 	}
 
 	pub fn dict_brute<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_brute")
 			.long("dict_brute")
+			.required(true)
 	}
 
 	pub fn dict_stdin<'a,'b>() -> Arg<'a,'b>
 	{
 		Arg::with_name("dict_stdin")
 			.long("dict_stdin")
+			.required(true)
 	}
 
 	pub fn start<'a,'b>() -> Arg<'a,'b>
@@ -74,7 +78,7 @@ mod arg {
 		Arg::with_name("start")
 			.short("s")
 			.value_name("START-KEY")
-			.required(false)
+			.required(true)
 	}
 
 	pub fn end<'a,'b>() -> Arg<'a,'b>
@@ -82,7 +86,7 @@ mod arg {
 		Arg::with_name("end")
 			.short("e")
 			.value_name("END-KEY")
-			.required(false)
+			.required(true)
 	}
 }
 
@@ -120,8 +124,8 @@ mod subcommand {
 			.about("Brute force")
 			.arg(arg::ciphertext())
 			.arg(arg::language_model())
-			.arg(arg::start())
-			.arg(arg::end())
+			.arg(arg::start().required(false))
+			.arg(arg::end().required(false))
 	}
 
 	pub fn hill_climb<'a,'b>() -> App<'a,'b>
@@ -152,8 +156,7 @@ impl Subcommand for Vigenere {
 }
 
 impl Subcommand for Caesar {
-	fn subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name(Caesar::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(subcommand::encipher())
