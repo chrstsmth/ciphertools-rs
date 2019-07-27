@@ -12,16 +12,14 @@ pub trait Cli {
 			.required(true)
 	}
 
-	fn ciphertext_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn ciphertext_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("ciphertext")
 			.short("c")
 			.value_name("CIPHERTEXT")
 			.required(true)
 	}
 
-	fn plaintext_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn plaintext_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("plaintext")
 			.short("p")
 			.value_name("PLAINTEXT")
@@ -34,61 +32,53 @@ pub trait Cli {
 			.required(true)
 	}
 
-	fn dict_file_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn dict_file_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("dict_file")
 			.short("dict_file")
 			.value_name("FILE")
 			.required(true)
 	}
 
-	fn dict_random_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn dict_random_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("dict_random")
 			.long("dict_random")
 			.required(true)
 	}
 
-	fn dict_range_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn dict_range_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("dict_range")
 			.long("dict_range")
 			.value_name("(START, END)")
 			.required(true)
 	}
 
-	fn dict_brute_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn dict_brute_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("dict_brute")
 			.long("dict_brute")
 			.required(true)
 	}
 
-	fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("dict_stdin")
 			.long("dict_stdin")
 			.required(true)
 	}
 
-	fn start_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn start_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("start")
 			.short("s")
 			.value_name("START-KEY")
 			.required(true)
 	}
 
-	fn end_arg<'a,'b>() -> Arg<'a,'b>
-	{
+	fn end_arg<'a,'b>() -> Arg<'a,'b> {
 		Arg::with_name("end")
 			.short("e")
 			.value_name("END-KEY")
 			.required(true)
 	}
 
-	fn dictionary_attack_subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn dictionary_attack_subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name("dictionary")
 			.about("Dictionary attack")
 			.arg(Self::ciphertext_arg())
@@ -96,24 +86,21 @@ pub trait Cli {
 			.arg(Self::dict_file_arg())
 	}
 
-	fn decipher_subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn decipher_subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name("decipher")
 			.about("Decipher ciphertext")
 			.arg(Self::ciphertext_arg())
 			.arg(Self::key_arg())
 	}
 
-	fn encipher_subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn encipher_subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name("encipher")
 			.about("Encipher plaintext")
 			.arg(Self::plaintext_arg())
 			.arg(Self::key_arg())
 	}
 
-	fn brute_force_subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn brute_force_subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name("brute")
 			.about("Brute force")
 			.arg(Self::ciphertext_arg())
@@ -122,8 +109,7 @@ pub trait Cli {
 			.arg(Self::end_arg().required(false))
 	}
 
-	fn hill_climb_subcommand<'a,'b>() -> App<'a,'b>
-	{
+	fn hill_climb_subcommand<'a,'b>() -> App<'a,'b> {
 		SubCommand::with_name("hill")
 			.about("Hill climb")
 			.arg(Self::ciphertext_arg())
