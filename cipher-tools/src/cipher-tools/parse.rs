@@ -9,12 +9,91 @@ use std::io::*;
 use std::error::Error;
 use std::str::FromStr;
 
-//TODO pass in filename?
-pub fn language_model<'a>(matches: &ArgMatches<'a>) -> Option<LanguageModel>
-{
-	let filename = String::from(matches.value_of("language")?);
+pub struct Arguments<C: Cipher> {
+	pub language_model: Option<LanguageModel>,
+	pub dictionary: Option<Box<dyn Iterator<Item = C::Key>>>,
+	pub ciphertext: Option<String>,
+	pub plaintext: Option<String>,
+	pub key: Option<C::Key>,
+	pub start: Option<C::Key>,
+	pub end: Option<C::Key>,
+}
 
-	let file = match File::open(&filename) {
+impl<C: Cipher> Arguments<C> {
+	fn new() -> Arguments<C> {
+		Arguments {
+			language_model: None,
+			dictionary: None,
+			ciphertext: None,
+			plaintext: None,
+			key: None,
+			start: None,
+			end: None,
+		}
+	}
+}
+
+pub fn parse_available<'a, C: Cipher>(matches: &ArgMatches<'a>) -> Arguments<C> {
+	let mut a = Arguments::<C>::new();
+
+	a.language_model = match matches.value_of("language") {
+		None => None,
+		Some(filename) => {
+			Some(language_model(filename))
+		}
+	};
+
+	a.dictionary = match matches.value_of("dict-file") {
+		None => None,
+		Some(filename) => {
+			//TODO string conversion shouldn't be necessary, but lifetimes get
+			//a bit complicated with &str
+			//https://users.rust-lang.org/t/box-lifetime-problem/9030
+			Some(dictionary::<C>(String::from(filename)))
+		}
+	};
+
+	a.ciphertext = match matches.value_of("ciphertext") {
+		None => None,
+		Some(filename) => {
+			Some(text(filename))
+		}
+	};
+
+	a.plaintext = match matches.value_of("plaintext") {
+		None => None,
+		Some(filename) => {
+			Some(text(filename))
+		}
+	};
+
+	a.key = match matches.value_of("key") {
+		None => None,
+		Some(key_str) => {
+			Some(key::<C>(key_str))
+		}
+	};
+
+	a.start = match matches.value_of("start") {
+		None => None,
+		Some(key_str) => {
+			Some(key::<C>(key_str))
+		}
+	};
+
+	a.end = match matches.value_of("end") {
+		None => None,
+		Some(key_str) => {
+			Some(key::<C>(key_str))
+		}
+	};
+
+	a
+}
+
+pub fn language_model(filename: &str) -> LanguageModel
+{
+	let file = match File::open(filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
 			process::exit(1);
@@ -30,14 +109,12 @@ pub fn language_model<'a>(matches: &ArgMatches<'a>) -> Option<LanguageModel>
 		Ok(language) => language,
 	};
 
-	Some(language)
+	language
 }
 
-pub fn dictionary<'a, C>(matches: &ArgMatches<'a>) -> Option<impl Iterator<Item = C::Key>> where
+pub fn dictionary<C>(filename: String) -> Box<dyn Iterator<Item = C::Key>> where
 	C: Cipher,
 {
-	let filename = String::from(matches.value_of("dictionary")?);
-
 	let file = match File::open(&filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
@@ -67,38 +144,22 @@ pub fn dictionary<'a, C>(matches: &ArgMatches<'a>) -> Option<impl Iterator<Item 
 			}
 			});
 
-	Some(dict)
+	Box::new(dict)
 }
 
-pub fn key<'a, C: Cipher>(matches: &ArgMatches<'a>) -> Option<C::Key>
+pub fn key<'a, C: Cipher>(key_str: &str) -> C::Key
 {
-	let key_str = matches.value_of("key")?;
-	let key = C::Key::from_str(key_str);
-
-	match key {
-		Ok(key) => Some(key),
+	match C::Key::from_str(key_str) {
+		Ok(key) => key,
 		_ => {
-			//TODO retur as error
 			println!("{}: Parse key failed", key_str);
 			process::exit(1);
 		}
 	}
 }
 
-pub fn ciphertext<'a>(matches: &ArgMatches<'a>) -> Option<String>
+fn text<'a>(filename: &str) -> String
 {
-	text(matches, "ciphertext")
-}
-
-pub fn plaintext<'a>(matches: &ArgMatches<'a>) -> Option<String>
-{
-	text(matches, "plaintext")
-}
-
-fn text<'a>(matches: &ArgMatches<'a>, text: &str) -> Option<String>
-{
-	let filename = String::from(matches.value_of(text)?);
-
 	let file = match File::open(&filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
@@ -113,10 +174,11 @@ fn text<'a>(matches: &ArgMatches<'a>, text: &str) -> Option<String>
 	match reader.read_to_string(&mut text) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
+			process::exit(1);
 		},
 		Ok(_) => (),
 	}
 
-	Some(text)
+	text
 }
 
