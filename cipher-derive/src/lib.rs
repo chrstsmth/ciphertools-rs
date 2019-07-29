@@ -18,13 +18,13 @@ pub fn dictionary_attack(input: TokenStream) -> TokenStream {
 fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<Dict,Can,Exit,Score> DictionaryAttack<Dict,Can,Exit,Score> for #name where
-			Dict: Iterator<Item = Self::Key>,
-			Can: FnMut(&Candidate<Self>),
-			Exit: Fn() -> bool,
-			Score: Fn(Chars) -> u32,
+		impl DictionaryAttack for #name where
 		{
-			fn dictionary_attack(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit)
+			fn dictionary_attack<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit) where
+				Dict: Iterator<Item = Self::Key>,
+				Can: FnMut(&Candidate<Self>),
+				Exit: Fn() -> bool,
+				Score: Fn(Chars) -> u32,
 			{
 				for key in dict {
 					let text = #name::decipher(&ciphertext, &key);
@@ -56,35 +56,9 @@ pub fn brute_force(input: TokenStream) -> TokenStream {
 fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<Dict,Can,Exit,Score> BruteForce<Dict,Can,Exit,Score> for #name where
-			Dict: Iterator<Item = Self::Key>,
-			Can: FnMut(&Candidate<Self>),
-			Exit: Fn() -> bool,
-			Score: Fn(Chars) -> u32,
+		impl BruteForce for #name
 		{
 			type BruteForceKey = Self::Key;
-
-			fn brute_force(ciphertext: &str, score: Score, candidates: Can, exit: Exit)
-			{
-				Self::dictionary_attack(ciphertext, Self::BruteForceKey::start(), score, candidates, exit);
-			}
-
-			fn brute_force_from(ciphertext: &str, start: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit)
-			{
-				Self::dictionary_attack(ciphertext, start.into_brute_force_iterator(), score, candidates, exit);
-			}
-
-			fn brute_force_to(ciphertext: &str, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit)
-			{
-				let it = Self::BruteForceKey::start().take_while(|x| *x != end);
-				Self::dictionary_attack(ciphertext, end.into_brute_force_iterator(), score, candidates, exit);
-			}
-
-			fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit)
-			{
-				let it = start.into_brute_force_iterator().take_while(|x| *x != end);
-				Self::dictionary_attack(ciphertext, it, score, candidates, exit);
-			}
 		}
 	};
 	TokenStream::from(expanded)
@@ -99,15 +73,15 @@ pub fn hill_climb(input: TokenStream) -> TokenStream {
 fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 	let name = &ast.ident;
 	let expanded = quote! {
-		impl<Dict,Can,Exit,Score> HillClimb<Dict,Can,Exit,Score> for #name where
-			Dict: Iterator<Item = Self::Key>,
-			Can: FnMut(&Candidate<Self>),
-			Exit: Fn() -> bool,
-			Score: Fn(Chars) -> u32,
+		impl HillClimb for #name
 		{
 			type MutationKey = Self::Key;
 
-			fn hill_climb(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit)
+			fn hill_climb<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit) where
+				Dict: Iterator<Item = Self::Key>,
+				Can: FnMut(&Candidate<Self>),
+				Exit: Fn() -> bool,
+				Score: Fn(Chars) -> u32,
 			{
 				for key in dict {
 					let text = #name::decipher(&ciphertext, &key);

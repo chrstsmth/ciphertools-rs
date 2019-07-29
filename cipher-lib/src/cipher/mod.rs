@@ -13,36 +13,27 @@ pub trait Cipher: Clone + Eq + Ord {
 	fn decipher(ciphertext: &str, k: &Self::Key) -> String;
 }
 
-pub trait DictionaryAttack<Dict,Can,Exit,Score>: Cipher where
-	Dict: Iterator<Item = Self::Key>,
-	Can: FnMut(&Candidate<Self>),
-	Exit: Fn() -> bool,
-	Score: Fn(Chars) -> u32,
+pub trait DictionaryAttack: Cipher where
 {
-	fn dictionary_attack(ciphertext: &str, dict: Dict, score: Score, candidates: Can, exit: Exit);
+	fn dictionary_attack<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, candidates: Can, exit: Exit) where
+		Dict: Iterator<Item = Self::Key>,
+		Can: FnMut(&Candidate<Self>),
+		Exit: Fn() -> bool,
+		Score: Fn(Chars) -> u32;
 }
 
-pub trait BruteForce<Dict,Can,Exit,Score>: DictionaryAttack<Dict,Can,Exit,Score> where
-	Dict: Iterator<Item = Self::Key>,
-	Can: FnMut(&Candidate<Self>),
-	Exit: Fn() -> bool,
-	Score: Fn(Chars) -> u32,
+pub trait BruteForce: DictionaryAttack where
 {
 	type BruteForceKey: Key + IntoBruteForceIterator;
-
-	fn brute_force(ciphertext: &str, score: Score, candidates: Can, exit: Exit);
-	fn brute_force_from(ciphertext: &str, start: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
-	fn brute_force_to(ciphertext: &str, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
-	fn brute_force_between(ciphertext: &str, start: Self::BruteForceKey, end: Self::BruteForceKey, score: Score, candidates: Can, exit: Exit);
 }
 
-pub trait HillClimb<Dict,Can,Exit,Score>: DictionaryAttack<Dict,Can,Exit,Score> where
-	Dict: Iterator<Item = Self::Key>,
-	Can: FnMut(&Candidate<Self>),
-	Exit: Fn() -> bool,
-	Score: Fn(Chars) -> u32,
+pub trait HillClimb: DictionaryAttack where
 {
 	type MutationKey: Key + IntoMutationIterator;
 
-	fn hill_climb(ciphertext: &str, dict: Dict, score: Score, candidates: Can, exit: Exit);
+	fn hill_climb<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, candidates: Can, exit: Exit) where
+		Dict: Iterator<Item = Self::Key>,
+		Can: FnMut(&Candidate<Self>),
+		Exit: Fn() -> bool,
+		Score: Fn(Chars) -> u32;
 }

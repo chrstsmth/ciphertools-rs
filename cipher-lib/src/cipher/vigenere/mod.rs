@@ -31,3 +31,4 @@ impl Cipher for Vigenere {
 		plaintext
 	}
 }
+
