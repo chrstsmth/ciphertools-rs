@@ -120,29 +120,26 @@ pub trait Cli {
 	fn command<'a,'b>() -> App<'a,'b>;
 }
 
-macro_rules! command {
-	($($n:ident),*) => {
-			fn command<'a,'b>() -> App<'a,'b> {
-				SubCommand::with_name(Self::NAME)
-					.setting(AppSettings::ArgRequiredElseHelp)
-					$(
-						.subcommand(Self::$n())
-					)*
-			}
-		}
-}
-
 impl Cli for Caesar {
-	command!(encipher_subcommand,
-			 decipher_subcommand,
-			 brute_force_subcommand);
+	fn command<'a,'b>() -> App<'a,'b> {
+		SubCommand::with_name(Caesar::NAME)
+			.setting(AppSettings::ArgRequiredElseHelp)
+			.subcommand(Self::encipher_subcommand())
+			.subcommand(Self::decipher_subcommand())
+			.subcommand(Self::brute_force_subcommand())
+	}
 }
 
 impl Cli for Vigenere {
-	command!(encipher_subcommand,
-			 decipher_subcommand,
-			 dictionary_attack_subcommand,
-			 brute_force_subcommand,
-			 hill_climb_subcommand);
+	fn command<'a,'b>() -> App<'a,'b>
+	{
+		SubCommand::with_name(Vigenere::NAME)
+			.setting(AppSettings::ArgRequiredElseHelp)
+			.subcommand(Self::encipher_subcommand())
+			.subcommand(Self::decipher_subcommand())
+			.subcommand(Self::dictionary_attack_subcommand())
+			.subcommand(Self::brute_force_subcommand())
+			.subcommand(Self::hill_climb_subcommand())
+	}
 }
 
