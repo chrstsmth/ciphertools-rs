@@ -40,7 +40,7 @@ impl Node {
 
 impl NextNode {
 	pub fn new() -> NextNode {
-		NextNode{
+		NextNode {
 			node: Default::default(),
 			pop: 0,
 		}
