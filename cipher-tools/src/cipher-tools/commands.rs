@@ -34,24 +34,31 @@ fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 
 pub fn encipher<C: Cipher>(matches: &clap::ArgMatches)
 {
-	let args = parse_available::<C>(&matches);
-	println!("{}", <C>::encipher(&args.plaintext.unwrap(), &args.key.unwrap()));
+	let ciphertext = ciphertext_option(&matches);
+	let key = key_option::<C>(&matches);
+
+	println!("{}", <C>::encipher(&ciphertext, &key));
 }
 
 pub fn decipher<C: Cipher>(matches: &clap::ArgMatches)
 {
-	let args = parse_available::<C>(&matches);
-	println!("{}", <C>::decipher(&args.plaintext.unwrap(), &args.key.unwrap()));
+	let plaintext = plaintext_option(&matches);
+	let key = key_option::<C>(&matches);
+
+	println!("{}", <C>::decipher(&plaintext, &key));
 }
 
 pub fn dictionary_attack<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
-	C: DictionaryAttack,
+	C: DictionaryAttack + DictionaryOption,
 	Exit: Fn() -> bool,
 {
-	let args = parse_available::<C>(&matches);
-		<C>::dictionary_attack(&args.ciphertext.unwrap(),
-		args.dictionary.unwrap(),
-		score_candidate(args.language_model.unwrap()),
+	let ciphertext = ciphertext_option(&matches);
+	let dictionary = C::dictionary_option(&matches);
+	let language_model = language_model_option(&matches);
+
+	<C>::dictionary_attack(&ciphertext,
+		dictionary,
+		score_candidate(language_model),
 		insert_candidates(),
 		exit);
 }
