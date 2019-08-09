@@ -6,14 +6,15 @@ use std::ops::{Add, Sub};
 use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use crate::try_from_err::*;
+use variant_count::*;
 
-#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, VariantCount)]
 pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 
 impl Alph {
-	pub const SIZE: usize = 26;
+	pub const SIZE: usize = Alph::VARIANT_COUNT;
 }
 
 impl From<Alph> for char {

@@ -3,14 +3,15 @@ use std::convert::TryFrom;
 use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
 use crate::try_from_err::*;
+use variant_count::*;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, VariantCount)]
 pub enum Lang {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Space
 }
 
 impl Lang {
-	pub const SIZE: usize = 26;
+	pub const SIZE: usize = Lang::VARIANT_COUNT;
 }
 
 impl From<Lang> for char {

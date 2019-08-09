@@ -9,4 +9,5 @@ serde = "*"
 serde_json = "*"
 rand = "*"
 min-max-heap = "*"
+variant_count = "*"
 cipher-derive = { version = "*", path = "../cipher-derive" }

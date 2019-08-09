@@ -11,7 +11,7 @@ use std::collections::VecDeque;
 mod tests;
 
 struct NextNode {
-	node: [Option<Box<Node>>; 26],
+	node: [Option<Box<Node>>; Lang::SIZE],
 	pop: usize,
 }
 
