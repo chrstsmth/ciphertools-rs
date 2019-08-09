@@ -56,24 +56,26 @@ fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b> {
 
 fn dictionary_attack_subcommand<'a,'b, C>() -> App<'a,'b>
 where
-	C: DictionaryAttack
+	C: DictionaryAttack + DictionaryArgs
 {
 	SubCommand::with_name("dictionary")
 		.about("Dictionary attack")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.arg(dict_file_arg().required(true))
+		.args(C::dict_args().as_ref())
+		.group(C::dict_group())
 }
 
 fn hill_climb_subcommand<'a,'b, C>() -> App<'a,'b>
 where
-	C: HillClimb
+	C: HillClimb + DictionaryArgs
 {
 	SubCommand::with_name("hill")
 		.about("Hill climb")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.arg(dict_file_arg().required(true))
+		.args(C::dict_args().as_ref())
+		.group(C::dict_group())
 }
 
 fn decipher_subcommand<'a,'b, C>() -> App<'a,'b>
@@ -97,7 +99,7 @@ where
 }
 
 pub trait DictionaryArgs {
-	fn dict_args<'a,'b>() -> Arg<'a,'b>;
+	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>>;
 	fn dict_group<'a>() -> ArgGroup<'a>;
 }
 
@@ -114,6 +116,17 @@ impl Cli for Caesar {
 	}
 }
 
+impl DictionaryArgs for Caesar {
+	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
+		vec![dict_range_arg()]
+	}
+	fn dict_group<'a>() -> ArgGroup<'a> {
+		ArgGroup::with_name("dictionary")
+			.args(&["dict_file"])
+			.required(true)
+	}
+}
+
 impl Cli for Vigenere {
 	fn command<'a,'b>() -> App<'a,'b>
 	{
@@ -122,7 +135,17 @@ impl Cli for Vigenere {
 			.subcommand(encipher_subcommand::<Self>())
 			.subcommand(decipher_subcommand::<Self>())
 			.subcommand(dictionary_attack_subcommand::<Self>())
-			.subcommand(hill_climb_subcommand::<Self>())
+	}
+}
+
+impl DictionaryArgs for Vigenere {
+	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
+		vec![dict_file_arg()]
+	}
+	fn dict_group<'a>() -> ArgGroup<'a> {
+		ArgGroup::with_name("dictionary")
+			.args(&["dict_file"])
+			.required(true)
 	}
 }
 
