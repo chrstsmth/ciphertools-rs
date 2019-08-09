@@ -49,7 +49,7 @@ impl NextNode {
 
 impl<'a> LanguageModelTraverser<'a> {
 	pub fn next(&mut self, c: Lang) -> Option<&'a Node> {
-		let next: &Option<Box<Node>> = &self.cursor.next.node[c as usize];
+		let next: &Option<Box<Node>> = &self.cursor.next.node[usize::from(c)];
 		match next {
 			None => return None,
 			Some(boxed_node) => {
@@ -91,7 +91,7 @@ impl LanguageModel {
 		let mut cursor: &mut Node = &mut self.head;
 
 		for c in s {
-			let next: &mut Option<Box<Node>> = &mut cursor.next.node[c as usize];
+			let next: &mut Option<Box<Node>> = &mut cursor.next.node[usize::from(c)];
 			match *next {
 				None => {
 					*next = Some(Box::new(Node::new()));
