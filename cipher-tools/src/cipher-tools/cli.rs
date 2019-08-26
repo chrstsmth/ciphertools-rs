@@ -33,49 +33,35 @@ fn dict_file_arg<'a,'b>() -> Arg<'a,'b> {
 		.value_name("FILE")
 }
 
-fn dict_random_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dict_random")
-		.long("dict_random")
-}
-
-fn dict_range_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dict_range")
-		.long("dict_range")
-		.value_name("(START, END)")
-}
-
-fn dict_brute_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dict_brute")
-		.long("dict_brute")
-}
-
 fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b> {
 	Arg::with_name("dict_stdin")
 		.long("dict_stdin")
 }
 
+fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
+	vec![dict_file_arg(), dict_stdin_arg()]
+}
+
 fn dictionary_attack_subcommand<'a,'b, C>() -> App<'a,'b>
 where
-	C: DictionaryAttack + DictionaryArgs
+	C: DictionaryAttack
 {
 	SubCommand::with_name("dictionary")
 		.about("Dictionary attack")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.args(C::dict_args().as_ref())
-		.group(C::dict_group())
+		.args(dict_args().as_ref())
 }
 
 fn hill_climb_subcommand<'a,'b, C>() -> App<'a,'b>
 where
-	C: HillClimb + DictionaryArgs
+	C: HillClimb
 {
 	SubCommand::with_name("hill")
 		.about("Hill climb")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.args(C::dict_args().as_ref())
-		.group(C::dict_group())
+		.args(dict_args().as_ref())
 }
 
 fn decipher_subcommand<'a,'b, C>() -> App<'a,'b>
@@ -98,11 +84,6 @@ where
 		.arg(key_arg().required(true))
 }
 
-pub trait DictionaryArgs {
-	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>>;
-	fn dict_group<'a>() -> ArgGroup<'a>;
-}
-
 pub trait Cli {
 	fn command<'a,'b>() -> App<'a,'b>;
 }
@@ -116,17 +97,6 @@ impl Cli for Caesar {
 	}
 }
 
-impl DictionaryArgs for Caesar {
-	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
-		vec![dict_range_arg()]
-	}
-	fn dict_group<'a>() -> ArgGroup<'a> {
-		ArgGroup::with_name("dictionary")
-			.args(&["dict_file"])
-			.required(true)
-	}
-}
-
 impl Cli for Vigenere {
 	fn command<'a,'b>() -> App<'a,'b>
 	{
@@ -135,17 +105,6 @@ impl Cli for Vigenere {
 			.subcommand(encipher_subcommand::<Self>())
 			.subcommand(decipher_subcommand::<Self>())
 			.subcommand(dictionary_attack_subcommand::<Self>())
-	}
-}
-
-impl DictionaryArgs for Vigenere {
-	fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
-		vec![dict_file_arg()]
-	}
-	fn dict_group<'a>() -> ArgGroup<'a> {
-		ArgGroup::with_name("dictionary")
-			.args(&["dict_file"])
-			.required(true)
 	}
 }
 
