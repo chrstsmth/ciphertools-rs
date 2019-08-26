@@ -21,4 +21,4 @@ path = "src/cipher-tools/mod.rs"
 
 [[bin]]
 name = "dictionary"
-path = "src/dictionary.rs"
+path = "src/dictionary/mod.rs"
