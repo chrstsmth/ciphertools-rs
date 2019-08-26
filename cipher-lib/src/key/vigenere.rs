@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
 use crate::try_from_err::*;
@@ -5,7 +6,7 @@ use crate::key::*;
 use crate::cipher::vigenere::*;
 use crate::pallet::alph::*;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd)]
 pub struct VigenereKey(pub Vec<Alph>);
 
 pub struct VegenereKeyIterator {
@@ -142,6 +143,18 @@ impl IntoMutationIterator for VigenereKey {
 			start: self,
 			index: 0,
 			increment: 0,
+		}
+	}
+}
+
+impl Ord for VigenereKey {
+	fn cmp(&self, other: &Self) -> Ordering {
+		if self.0.len() < other.0.len() {
+			Ordering::Less
+		} else if self.0.len() > other.0.len() {
+			Ordering::Greater
+		} else {
+			self.0.cmp(&other.0)
 		}
 	}
 }
