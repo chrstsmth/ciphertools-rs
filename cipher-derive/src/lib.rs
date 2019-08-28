@@ -47,23 +47,6 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	TokenStream::from(expanded)
 }
 
-#[proc_macro_derive(BruteForce)]
-pub fn brute_force(input: TokenStream) -> TokenStream {
-	let ast = syn::parse_macro_input!(input as DeriveInput);
-	impl_brute_force(&ast)
-}
-
-fn impl_brute_force(ast: &syn::DeriveInput) -> TokenStream {
-	let name = &ast.ident;
-	let expanded = quote! {
-		impl BruteForce for #name
-		{
-			type BruteForceKey = Self::Key;
-		}
-	};
-	TokenStream::from(expanded)
-}
-
 #[proc_macro_derive(HillClimb)]
 pub fn hill_climb(input: TokenStream) -> TokenStream {
 	let ast = syn::parse_macro_input!(input as DeriveInput);
