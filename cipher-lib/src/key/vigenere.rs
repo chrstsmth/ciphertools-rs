@@ -9,7 +9,7 @@ use crate::pallet::alph::*;
 #[derive(Clone, PartialEq, Eq, PartialOrd)]
 pub struct VigenereKey(pub Vec<Alph>);
 
-pub struct VegenereKeyIterator {
+pub struct VigenereKeyBruteForceIterator {
 	it: VigenereKey,
 }
 
@@ -23,11 +23,13 @@ pub struct VegenereKeyRandomIterator {
 	len: usize,
 }
 
-impl VigenereKey {
-	pub fn into_random_iterator(key_len: usize) -> VegenereKeyRandomIterator
+impl IntoRandomIterator<usize> for VigenereKey {
+	type RandomIter = VegenereKeyRandomIterator;
+
+	fn into_random_iterator(constraint: usize) -> VegenereKeyRandomIterator
 	{
 		VegenereKeyRandomIterator {
-			len: key_len,
+			len: constraint,
 		}
 	}
 }
@@ -75,22 +77,22 @@ impl fmt::Display for VigenereKey {
 }
 
 impl IntoBruteForceIterator for VigenereKey {
-	type BruteForceIter = VegenereKeyIterator;
+	type BruteForceIter = VigenereKeyBruteForceIterator;
 
 	fn start() -> Self::BruteForceIter {
-		VegenereKeyIterator {
+		VigenereKeyBruteForceIterator {
 			it: VigenereKey(vec![Alph::A]),
 		}
 	}
 
 	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
-		VegenereKeyIterator {
+		VigenereKeyBruteForceIterator {
 			it: self,
 		}
 	}
 }
 
-impl Iterator for VegenereKeyIterator {
+impl Iterator for VigenereKeyBruteForceIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {

@@ -8,10 +8,12 @@ mod parse;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
+use cipher_lib::key::vigenere::*;
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 use cli::*;
+use commands::Random;
 
 use clap::{App, AppSettings};
 
@@ -37,6 +39,8 @@ fn main() {
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {
 			commands::range::<<Vigenere as Cipher>::Key, _>(matches, exit_early);
+		} if let Some(matches) = matches.subcommand_matches("random") {
+			VigenereKey::random(matches, exit_early);
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {

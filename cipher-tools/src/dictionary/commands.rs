@@ -1,4 +1,5 @@
 use std::process;
+use cipher_lib::key::vigenere::*;
 
 use parse::*;
 use cipher_lib::key::*;
@@ -14,6 +15,26 @@ fn run<I, K, Exit>(keys: I, exit: Exit) where
 		if exit() {
 			break;
 		}
+	}
+}
+
+pub trait Random: Key {
+	fn random<Exit>(matches: &clap::ArgMatches, exit: Exit) where
+		Exit: Fn() -> bool;
+}
+
+impl Random for VigenereKey {
+	fn random<Exit>(matches: &clap::ArgMatches, exit: Exit)
+	where
+		Exit: Fn() -> bool
+	{
+		let iter = if let Some(len) = len_option(matches) {
+			Self::into_random_iterator(len)
+		} else {
+			process::exit(1);
+		};
+
+		run(iter, exit);
 	}
 }
 

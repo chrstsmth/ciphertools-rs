@@ -22,8 +22,8 @@ pub trait IntoMutationIterator: Key {
 	fn into_mutation_iterator(self) -> Self::MutationIter;
 }
 
-pub trait IntoRandomIterator: Key {
+pub trait IntoRandomIterator<C>: Key {
 	type RandomIter: Iterator<Item = Self>;
 
-	fn into_random_iterator() -> Self::RandomIter;
+	fn into_random_iterator(constraint: C) -> Self::RandomIter;
 }
