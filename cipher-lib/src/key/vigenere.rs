@@ -6,6 +6,8 @@ use crate::key::*;
 use crate::cipher::vigenere::*;
 use crate::pallet::alph::*;
 
+use rand::seq::SliceRandom;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd)]
 pub struct VigenereKey(pub Vec<Alph>);
 
@@ -20,16 +22,16 @@ pub struct VegenereKeyMutationIterator {
 }
 
 pub struct VegenereKeyRandomIterator {
-	len: usize,
+	lengths: Vec<usize>,
 }
 
-impl IntoRandomIterator<usize> for VigenereKey {
+impl IntoRandomIterator<Vec<usize>> for VigenereKey {
 	type RandomIter = VegenereKeyRandomIterator;
 
-	fn into_random_iterator(constraint: usize) -> VegenereKeyRandomIterator
+	fn into_random_iterator(constraint: Vec<usize>) -> VegenereKeyRandomIterator
 	{
 		VegenereKeyRandomIterator {
-			len: constraint,
+			lengths: constraint,
 		}
 	}
 }
@@ -38,8 +40,10 @@ impl Iterator for VegenereKeyRandomIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let mut key = Vec::with_capacity(self.len);
-		for _ in 0..self.len {
+
+		let key_len = *self.lengths.choose(&mut rand::thread_rng()).unwrap();
+		let mut key = Vec::with_capacity(key_len);
+		for _ in 0..key_len {
 			key.push(rand::random());
 		}
 		Some(VigenereKey(key))

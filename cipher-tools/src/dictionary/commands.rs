@@ -28,8 +28,8 @@ impl Random for VigenereKey {
 	where
 		Exit: Fn() -> bool
 	{
-		let iter = if let Some(len) = len_option(matches) {
-			Self::into_random_iterator(len)
+		let iter = if let Some(lengths) = lengths_option(matches) {
+			Self::into_random_iterator(lengths)
 		} else {
 			process::exit(1);
 		};

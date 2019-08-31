@@ -26,11 +26,11 @@ pub fn end_arg<'a,'b>() -> Arg<'a,'b>
 		.required(false)
 }
 
-pub fn len_arg<'a,'b>() -> Arg<'a,'b>
+pub fn lengths_arg<'a,'b>() -> Arg<'a,'b>
 {
-	Arg::with_name("len")
+	Arg::with_name("lengths")
 		.short("l")
-		.value_name("LENGTH")
+		.value_name("LENGTHS")
 }
 
 pub fn range_subcommand<'a,'b>() -> App<'a,'b>
@@ -54,7 +54,7 @@ pub fn random_subcommand<'a,'b>() -> App<'a,'b>
 impl RandomSubcommand for VigenereKey {
 	fn random_subcommand<'a,'b>() -> App<'a,'b> {
 		random_subcommand()
-			.arg(len_arg().required(true))
+			.arg(lengths_arg().required(true))
 	}
 }
 

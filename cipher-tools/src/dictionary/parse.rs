@@ -18,20 +18,28 @@ pub fn end_key_option<K: Key>(matches: &clap::ArgMatches) -> Option<K>
 	}
 }
 
-pub fn len_option(matches: &clap::ArgMatches) -> Option<usize>
+pub fn lengths_option(matches: &clap::ArgMatches) -> Option<Vec<usize>>
 {
-	match matches.value_of("len") {
-		Some(len_str) => {
-			match len_str.parse() {
-				Ok(len) => Some(len),
-				_ => {
-					println!("{}: Parse len failed", len_str);
-					process::exit(1);
-				}
-			}
-		},
-		None => None,
+	let lengths_str = match matches.value_of("lengths") {
+		Some(lengths_str) => lengths_str,
+		None => return None,
+	};
+
+	let lengths: Vec<usize> = lengths_str.split(',')
+		.filter(|x| !x.is_empty())
+		.map(|x| x.parse()
+			.unwrap_or_else(|_| {
+				println!("Failed to parse length: {}", x);
+				process::exit(1);
+			}))
+		.collect();
+
+	if lengths.is_empty() {
+		println!("No lengths provided: {}", lengths_str);
+		process::exit(1);
 	}
+
+	Some(lengths)
 }
 
 pub fn key<K: Key>(key_str: &str) -> K
