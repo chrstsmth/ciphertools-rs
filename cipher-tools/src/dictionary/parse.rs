@@ -5,7 +5,7 @@ use cipher_lib::key::*;
 pub fn start_key_option<K: Key>(matches: &clap::ArgMatches) -> Option<K>
 {
 	match matches.value_of("start_key") {
-		Some(key_str) => Some(key::<K>(matches.value_of(key_str).unwrap())),
+		Some(key_str) => Some(key::<K>(key_str)),
 		None => None,
 	}
 }
@@ -13,7 +13,7 @@ pub fn start_key_option<K: Key>(matches: &clap::ArgMatches) -> Option<K>
 pub fn end_key_option<K: Key>(matches: &clap::ArgMatches) -> Option<K>
 {
 	match matches.value_of("end_key") {
-		Some(key_str) => Some(key::<K>(matches.value_of(key_str).unwrap())),
+		Some(key_str) => Some(key::<K>(key_str)),
 		None => None,
 	}
 }
