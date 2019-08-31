@@ -3,15 +3,10 @@ extern crate serde;
 extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
-#[macro_use]
-extern crate lazy_static;
 
 use clap::{App, AppSettings};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::io::prelude::*;
-use std::io::*;
-use std::io;
 
 mod try_from_err;
 mod cli;
@@ -24,17 +19,7 @@ use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 
-lazy_static! {
-	static ref HAS_STDIN: bool = has_stdin();
-}
-
-fn has_stdin() -> bool {
-	BufReader::new(io::stdin()).lines().peekable().peek().is_some()
-}
-
 fn main() {
-	//let stdin = BufReader::new(io::stdin()).lines();
-
 	let exit = Arc::new(AtomicBool::new(false));
 	let exit_early = || {
 		exit.load(Ordering::SeqCst)

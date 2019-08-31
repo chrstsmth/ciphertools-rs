@@ -27,19 +27,10 @@ fn language_model_arg<'a,'b>() -> Arg<'a,'b> {
 		.value_name("LANGUAGE")
 }
 
-fn dict_file_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dict_file")
-		.short("dict_file")
-		.value_name("FILE")
-}
-
-fn dict_stdin_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dict_stdin")
-		.long("dict_stdin")
-}
-
-fn dict_args<'a,'b>() -> Vec<Arg<'a,'b>> {
-	vec![dict_file_arg(), dict_stdin_arg()]
+fn dictionary_arg<'a,'b>() -> Arg<'a,'b> {
+	Arg::with_name("dictionary")
+		.short("d")
+		.value_name("DICTIONARY")
 }
 
 fn dictionary_attack_subcommand<'a,'b, C>() -> App<'a,'b>
@@ -50,7 +41,7 @@ where
 		.about("Dictionary attack")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.args(dict_args().as_ref())
+		.arg(dictionary_arg().required(true))
 }
 
 fn hill_climb_subcommand<'a,'b, C>() -> App<'a,'b>
@@ -61,7 +52,7 @@ where
 		.about("Hill climb")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
-		.args(dict_args().as_ref())
+		.arg(dictionary_arg().required(true))
 }
 
 fn decipher_subcommand<'a,'b, C>() -> App<'a,'b>

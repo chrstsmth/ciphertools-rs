@@ -7,7 +7,6 @@ authors = ["Christopher T Smith <git@chrstsmth.ca>"]
 ctrlc = "*"
 clap = "*"
 serde = "*"
-lazy_static = "*"
 serde_json = "*"
 cipher-lib = { version = "*", path = "../cipher-lib" }
 cipher-derive = { version = "*", path = "../cipher-derive" }

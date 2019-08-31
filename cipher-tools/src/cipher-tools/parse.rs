@@ -23,7 +23,7 @@ impl DictionaryOption for Caesar {
 
 impl DictionaryOption for Vigenere {
 	fn dictionary_option(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = Self::Key>> {
-		let dict_file = matches.value_of("dict-file").unwrap();
+		let dict_file = matches.value_of("dictionary").unwrap();
 		dictionary_file::<Self>(&dict_file)
 	}
 }
