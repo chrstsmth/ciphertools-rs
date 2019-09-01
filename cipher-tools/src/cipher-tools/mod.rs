@@ -46,6 +46,8 @@ fn main() {
 			decipher_command::<Vigenere>(&matches);
 		} else if let Some(matches) = matches.subcommand_matches("dictionary") {
 			dictionary_attack_command::<Vigenere,_>(&matches, exit_early);
+		} else if let Some(matches) = matches.subcommand_matches("hillclimb") {
+			hillclimb_command::<Vigenere,_>(&matches, exit_early);
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("encipher") {

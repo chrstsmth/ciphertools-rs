@@ -48,7 +48,7 @@ fn hill_climb_subcommand<'a,'b, C>() -> App<'a,'b>
 where
 	C: HillClimb
 {
-	SubCommand::with_name("hill")
+	SubCommand::with_name("hillclimb")
 		.about("Hill climb")
 		.arg(ciphertext_arg().required(true))
 		.arg(language_model_arg().required(true))
@@ -96,6 +96,7 @@ impl Cli for Vigenere {
 			.subcommand(encipher_subcommand::<Self>())
 			.subcommand(decipher_subcommand::<Self>())
 			.subcommand(dictionary_attack_subcommand::<Self>())
+			.subcommand(hill_climb_subcommand::<Self>())
 	}
 }
 

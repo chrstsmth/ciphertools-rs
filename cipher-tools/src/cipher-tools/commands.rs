@@ -62,3 +62,18 @@ pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit
 		insert_candidates(),
 		exit);
 }
+
+pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+	C: HillClimb,
+	Exit: Fn() -> bool,
+{
+	let ciphertext = ciphertext_option(&matches);
+	let dictionary = dictionary_option::<C>(&matches);
+	let language_model = language_model_option(&matches);
+
+	<C>::hill_climb(&ciphertext,
+		dictionary,
+		score_candidate(language_model),
+		insert_candidates(),
+		exit);
+}
