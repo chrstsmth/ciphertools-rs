@@ -49,11 +49,11 @@ pub fn decipher<C: Cipher>(matches: &clap::ArgMatches)
 }
 
 pub fn dictionary_attack<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
-	C: DictionaryAttack + DictionaryOption,
+	C: DictionaryAttack,
 	Exit: Fn() -> bool,
 {
 	let ciphertext = ciphertext_option(&matches);
-	let dictionary = C::dictionary_option(&matches);
+	let dictionary = dictionary_option::<C>(&matches);
 	let language_model = language_model_option(&matches);
 
 	<C>::dictionary_attack(&ciphertext,

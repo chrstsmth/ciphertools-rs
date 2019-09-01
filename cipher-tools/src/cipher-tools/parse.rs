@@ -3,29 +3,14 @@ use std::process;
 
 use cipher_lib::language_model::*;
 use cipher_lib::cipher::*;
-use cipher_lib::cipher::caesar::*;
-use cipher_lib::cipher::vigenere::*;
 use std::io::prelude::*;
 use std::io::*;
 use std::error::Error;
 use std::str::FromStr;
 
-pub trait DictionaryOption: Cipher {
-	fn dictionary_option(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = Self::Key>>;
-}
-
-impl DictionaryOption for Caesar {
-	fn dictionary_option(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = Self::Key>> {
-		let dict_file = matches.value_of("dict-file").unwrap();
-		dictionary_file::<Self>(&dict_file)
-	}
-}
-
-impl DictionaryOption for Vigenere {
-	fn dictionary_option(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = Self::Key>> {
-		let dict_file = matches.value_of("dictionary").unwrap();
-		dictionary_file::<Self>(&dict_file)
-	}
+pub fn dictionary_option<C: Cipher>(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = C::Key>> {
+	let dict_file = matches.value_of("dictionary").unwrap();
+	dictionary_file::<C>(&dict_file)
 }
 
 pub fn language_model_option(matches: &clap::ArgMatches) -> LanguageModel
