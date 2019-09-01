@@ -22,11 +22,6 @@ pub trait DictionaryAttack: Cipher where
 		Score: Fn(Chars) -> u32;
 }
 
-pub trait BruteForce: DictionaryAttack where
-{
-	type BruteForceKey: Key + IntoBruteForceIterator;
-}
-
 pub trait HillClimb: DictionaryAttack where
 {
 	type MutationKey: Key + IntoMutationIterator;
