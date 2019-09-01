@@ -18,6 +18,7 @@ use cli::*;
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
+use commands::*;
 
 fn main() {
 	let exit = Arc::new(AtomicBool::new(false));
@@ -40,17 +41,17 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		if let Some(matches) = matches.subcommand_matches("encipher") {
-			commands::encipher::<Vigenere>(&matches);
+			encipher_command::<Vigenere>(&matches);
 		} else if let Some(matches) = matches.subcommand_matches("decipher") {
-			commands::decipher::<Vigenere>(&matches);
+			decipher_command::<Vigenere>(&matches);
 		} else if let Some(matches) = matches.subcommand_matches("dictionary") {
-			commands::dictionary_attack::<Vigenere,_>(&matches, exit_early);
+			dictionary_attack_command::<Vigenere,_>(&matches, exit_early);
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("encipher") {
-			commands::encipher::<Caesar>(&matches);
+			encipher_command::<Caesar>(&matches);
 		} else if let Some(matches) = matches.subcommand_matches("decipher") {
-			commands::decipher::<Caesar>(&matches);
+			decipher_command::<Caesar>(&matches);
 		}
 	}
 }

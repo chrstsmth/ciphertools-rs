@@ -13,6 +13,7 @@ use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 use cli::*;
+use commands::*;
 use commands::Random;
 
 use clap::{App, AppSettings};
@@ -38,13 +39,13 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {
-			commands::range::<<Vigenere as Cipher>::Key, _>(matches, exit_early);
-		} if let Some(matches) = matches.subcommand_matches("random") {
-			VigenereKey::random(matches, exit_early);
+			range_command::<<Vigenere as Cipher>::Key, _>(matches, exit_early);
+		} else if let Some(matches) = matches.subcommand_matches("random") {
+			VigenereKey::random_command(matches, exit_early);
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {
-			commands::range::<<Caesar as Cipher>::Key, _>(matches, exit_early)
+			range_command::<<Caesar as Cipher>::Key, _>(matches, exit_early)
 		}
 	}
 }

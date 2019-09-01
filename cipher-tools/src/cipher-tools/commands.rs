@@ -32,7 +32,7 @@ fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 	}
 }
 
-pub fn encipher<C: Cipher>(matches: &clap::ArgMatches)
+pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches)
 {
 	let ciphertext = ciphertext_option(&matches);
 	let key = key_option::<C>(&matches);
@@ -40,7 +40,7 @@ pub fn encipher<C: Cipher>(matches: &clap::ArgMatches)
 	println!("{}", <C>::encipher(&ciphertext, &key));
 }
 
-pub fn decipher<C: Cipher>(matches: &clap::ArgMatches)
+pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches)
 {
 	let plaintext = plaintext_option(&matches);
 	let key = key_option::<C>(&matches);
@@ -48,7 +48,7 @@ pub fn decipher<C: Cipher>(matches: &clap::ArgMatches)
 	println!("{}", <C>::decipher(&plaintext, &key));
 }
 
-pub fn dictionary_attack<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 	C: DictionaryAttack,
 	Exit: Fn() -> bool,
 {

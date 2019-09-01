@@ -19,12 +19,12 @@ fn run<I, K, Exit>(keys: I, exit: Exit) where
 }
 
 pub trait Random: Key {
-	fn random<Exit>(matches: &clap::ArgMatches, exit: Exit) where
+	fn random_command<Exit>(matches: &clap::ArgMatches, exit: Exit) where
 		Exit: Fn() -> bool;
 }
 
 impl Random for VigenereKey {
-	fn random<Exit>(matches: &clap::ArgMatches, exit: Exit)
+	fn random_command<Exit>(matches: &clap::ArgMatches, exit: Exit)
 	where
 		Exit: Fn() -> bool
 	{
@@ -38,7 +38,7 @@ impl Random for VigenereKey {
 	}
 }
 
-pub fn range<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 	K: IntoBruteForceIterator + 'static,
 	Exit: Fn() -> bool,
 {
