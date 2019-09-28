@@ -105,7 +105,7 @@ impl Iterator for VigenereKeyBruteForceIterator {
 
 		for a in &mut self.it.0.iter_mut().rev() {
 			let mut i: usize = usize::from(*a);
-			i = (i + 1) % Alph::SIZE;
+			i = (i + 1) % Alph::VARIANT_COUNT;
 			*a = Alph::try_from(i).unwrap();
 
 			if i != 0 {
@@ -125,7 +125,7 @@ impl Iterator for VegenereKeyMutationIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		self.increment = (self.increment + 1) % Alph::SIZE;
+		self.increment = (self.increment + 1) % Alph::VARIANT_COUNT;
 
 		if self.increment == 0 {
 			self.increment = 1;

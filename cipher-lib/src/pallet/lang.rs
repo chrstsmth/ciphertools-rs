@@ -10,10 +10,6 @@ pub enum Lang {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Space
 }
 
-impl Lang {
-	pub const SIZE: usize = Lang::VARIANT_COUNT;
-}
-
 impl From<Lang> for char {
 	fn from(a: Lang) -> char {
 		match a {

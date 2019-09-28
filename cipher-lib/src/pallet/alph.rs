@@ -13,10 +13,6 @@ pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 
-impl Alph {
-	pub const SIZE: usize = Alph::VARIANT_COUNT;
-}
-
 impl From<Alph> for char {
 	fn from(a: Alph) -> char {
 		match a {
@@ -181,7 +177,7 @@ impl TryFrom<usize> for Alph {
 
 impl Distribution<Alph> for Standard {
 	fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alph {
-		match rng.gen_range(0, Alph::SIZE - 1) {
+		match rng.gen_range(0, Alph::VARIANT_COUNT - 1) {
 			0 => Alph::A,
 			1 => Alph::B,
 			2 => Alph::C,
@@ -215,7 +211,7 @@ impl Distribution<Alph> for Standard {
 impl Add for Alph {
 	type Output = Alph;
 	fn add(self, other: Alph) -> Alph {
-		let a = (usize::from(self) + usize::from(other)) % Self::SIZE;
+		let a = (usize::from(self) + usize::from(other)) % Self::VARIANT_COUNT;
 		Alph::try_from(a).unwrap()
 	}
 }
@@ -223,7 +219,7 @@ impl Add for Alph {
 impl Sub for Alph {
 	type Output = Alph;
 	fn sub(self, other: Alph) -> Alph {
-		let a = (Self::SIZE + usize::from(self) - usize::from(other)) % Self::SIZE;
+		let a = (Self::VARIANT_COUNT + usize::from(self) - usize::from(other)) % Self::VARIANT_COUNT;
 		Alph::try_from(a).unwrap()
 	}
 }

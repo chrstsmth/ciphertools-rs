@@ -65,7 +65,7 @@ impl Iterator for CaesarKeyIterator {
 	type Item = CaesarKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let r = if self.i == Alph::SIZE {
+		let r = if self.i == Alph::VARIANT_COUNT {
 			None
 		} else {
 			let a = CipherChar::from(Alph::try_from(self.i).unwrap());
