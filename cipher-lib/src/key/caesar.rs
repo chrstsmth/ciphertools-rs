@@ -11,7 +11,7 @@ pub struct CaesarKey(pub Alph);
 
 pub struct CaesarKeyIterator {
 	start: CaesarKey,
-	i: usize,
+	i: u32,
 }
 
 impl Key for CaesarKey {
@@ -65,7 +65,7 @@ impl Iterator for CaesarKeyIterator {
 	type Item = CaesarKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let r = if self.i == Alph::VARIANT_COUNT {
+		let r = if self.i == Alph::LENGTH {
 			None
 		} else {
 			let a = CipherChar::from(Alph::try_from(self.i).unwrap());

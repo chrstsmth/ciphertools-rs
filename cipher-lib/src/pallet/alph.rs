@@ -7,10 +7,15 @@ use rand::distributions::{Distribution, Standard};
 use rand::Rng;
 use crate::try_from_err::*;
 use variant_count::*;
+use enum_map::*;
 
-#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, VariantCount)]
+#[derive(Copy, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, VariantCount, Enum)]
 pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+}
+
+impl Alph {
+	pub const LENGTH: u32 = Self::VARIANT_COUNT as u32;
 }
 
 impl From<Alph> for char {
@@ -107,8 +112,8 @@ impl TryFrom<char> for Alph {
 	}
 }
 
-impl From<Alph> for usize {
-	fn from(a: Alph) -> usize {
+impl From<Alph> for u32 {
+	fn from(a: Alph) -> u32 {
 		match a {
 			Alph::A => 0,
 			Alph::B => 1,
@@ -140,9 +145,9 @@ impl From<Alph> for usize {
 	}
 }
 
-impl TryFrom<usize> for Alph {
+impl TryFrom<u32> for Alph {
 	type Error = TryFromIntError;
-	fn try_from(i: usize) -> Result<Alph, TryFromIntError> {
+	fn try_from(i: u32) -> Result<Alph, TryFromIntError> {
 		match i {
 			0 => Ok(Alph::A),
 			1 => Ok(Alph::B),
@@ -211,7 +216,7 @@ impl Distribution<Alph> for Standard {
 impl Add for Alph {
 	type Output = Alph;
 	fn add(self, other: Alph) -> Alph {
-		let a = (usize::from(self) + usize::from(other)) % Self::VARIANT_COUNT;
+		let a = (u32::from(self) + u32::from(other)) % Self::LENGTH;
 		Alph::try_from(a).unwrap()
 	}
 }
@@ -219,7 +224,7 @@ impl Add for Alph {
 impl Sub for Alph {
 	type Output = Alph;
 	fn sub(self, other: Alph) -> Alph {
-		let a = (Self::VARIANT_COUNT + usize::from(self) - usize::from(other)) % Self::VARIANT_COUNT;
+		let a = (Self::LENGTH + u32::from(self) - u32::from(other)) % Self::LENGTH;
 		Alph::try_from(a).unwrap()
 	}
 }

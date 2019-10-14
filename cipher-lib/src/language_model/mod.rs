@@ -1,9 +1,9 @@
 use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
 use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, SeqAccess};
 use std::borrow::Borrow;
-use std::convert::TryFrom;
 use std::fmt;
 use crate::pallet::lang::*;
+use enum_map::*;
 
 use std::collections::VecDeque;
 
@@ -11,7 +11,7 @@ use std::collections::VecDeque;
 mod tests;
 
 struct NextNode {
-	node: [Option<Box<Node>>; Lang::VARIANT_COUNT],
+	node: EnumMap<Lang, Option<Box<Node>>>,
 	pop: usize,
 }
 
@@ -41,7 +41,7 @@ impl Node {
 impl NextNode {
 	pub fn new() -> NextNode {
 		NextNode {
-			node: Default::default(),
+			node: enum_map!{ _ => None},
 			pop: 0,
 		}
 	}
@@ -49,7 +49,7 @@ impl NextNode {
 
 impl<'a> LanguageModelTraverser<'a> {
 	pub fn next(&mut self, c: Lang) -> Option<&'a Node> {
-		let next: &Option<Box<Node>> = &self.cursor.next.node[usize::from(c)];
+		let next: &Option<Box<Node>> = &self.cursor.next.node[c];
 		match next {
 			None => return None,
 			Some(boxed_node) => {
@@ -91,7 +91,7 @@ impl LanguageModel {
 		let mut cursor: &mut Node = &mut self.head;
 
 		for c in s {
-			let next: &mut Option<Box<Node>> = &mut cursor.next.node[usize::from(c)];
+			let next: &mut Option<Box<Node>> = &mut cursor.next.node[c];
 			match *next {
 				None => {
 					*next = Some(Box::new(Node::new()));
@@ -131,10 +131,10 @@ impl Serialize for NextNode {
 		S: Serializer,
 	{
 		let mut m = serializer.serialize_map(Some(self.pop))?;
-		for (i, n) in self.node.iter().enumerate() {
-			match n {
+		for (lang, next) in self.node.iter() {
+			match next {
 				Some(x) => {
-					m.serialize_entry(&Lang::try_from(i).unwrap(), x)?;
+					m.serialize_entry(&lang, x)?;
 				}
 				_ => (),
 			}
@@ -175,7 +175,6 @@ impl<'de> Visitor<'de> for NodeVisitor {
 	}
 }
 
-
 struct NextNodeVisitor;
 
 impl<'de> Visitor<'de> for NextNodeVisitor {
@@ -189,9 +188,8 @@ impl<'de> Visitor<'de> for NextNodeVisitor {
 		M: MapAccess<'de>,
 	{
 		let mut next = NextNode::new();
-		while let Some((key, value)) = access.next_entry::<Lang, Node>()? {
-			let i = usize::from(key);
-			next.node[i] = Some(Box::new(value));
+		while let Some((lang, node)) = access.next_entry::<Lang, Node>()? {
+			next.node[lang] = Some(Box::new(node));
 			next.pop += 1;
 		}
 		Ok(next)

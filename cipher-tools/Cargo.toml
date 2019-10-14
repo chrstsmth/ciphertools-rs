@@ -8,6 +8,7 @@ ctrlc = "*"
 clap = "*"
 serde = "*"
 serde_json = "*"
+enum-map = "*"
 cipher-lib = { version = "*", path = "../cipher-lib" }
 cipher-derive = { version = "*", path = "../cipher-derive" }
 

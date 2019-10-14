@@ -4,10 +4,15 @@ use serde::ser::{Serialize, Serializer};
 use serde::de::{self, Deserialize, Deserializer, Visitor, Unexpected};
 use crate::try_from_err::*;
 use variant_count::*;
+use enum_map::*;
 
-#[derive(Copy, Clone, PartialEq, VariantCount)]
+#[derive(Copy, Clone, PartialEq, VariantCount, Enum)]
 pub enum Lang {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, Space
+}
+
+impl Lang {
+	pub const LENGTH: u32 = Self::VARIANT_COUNT as u32;
 }
 
 impl From<Lang> for char {
@@ -106,8 +111,8 @@ impl TryFrom<char> for Lang {
 	}
 }
 
-impl From<Lang> for usize {
-	fn from(a: Lang) -> usize {
+impl From<Lang> for u32 {
+	fn from(a: Lang) -> u32 {
 		match a {
 			Lang::A => 0,
 			Lang::B => 1,
@@ -140,9 +145,9 @@ impl From<Lang> for usize {
 	}
 }
 
-impl TryFrom<usize> for Lang {
+impl TryFrom<u32> for Lang {
 	type Error = TryFromIntError;
-	fn try_from(i: usize) -> Result<Lang, TryFromIntError> {
+	fn try_from(i: u32) -> Result<Lang, TryFromIntError> {
 		match i {
 			0 => Ok(Lang::A),
 			1 => Ok(Lang::B),

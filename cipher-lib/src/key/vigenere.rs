@@ -18,7 +18,7 @@ pub struct VigenereKeyBruteForceIterator {
 pub struct VegenereKeyMutationIterator {
 	start: VigenereKey,
 	index: usize,
-	increment: usize,
+	increment: u32,
 }
 
 pub struct VegenereKeyRandomIterator {
@@ -101,20 +101,20 @@ impl Iterator for VigenereKeyBruteForceIterator {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		let item = self.it.clone();
-		let mut overflow = true;
+		let mut wrap = true;
 
 		for a in &mut self.it.0.iter_mut().rev() {
-			let mut i: usize = usize::from(*a);
-			i = (i + 1) % Alph::VARIANT_COUNT;
+			let mut i: u32 = u32::from(*a);
+			i = (i + 1) % Alph::LENGTH;
 			*a = Alph::try_from(i).unwrap();
 
 			if i != 0 {
-				overflow = false;
+				wrap = false;
 				break;
 			}
 		}
 
-		if overflow {
+		if wrap {
 			self.it.0.push(Alph::A);
 		}
 		Some(item)
@@ -125,7 +125,7 @@ impl Iterator for VegenereKeyMutationIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		self.increment = (self.increment + 1) % Alph::VARIANT_COUNT;
+		self.increment = (self.increment + 1) % Alph::LENGTH;
 
 		if self.increment == 0 {
 			self.increment = 1;
