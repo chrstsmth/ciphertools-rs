@@ -3,6 +3,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
+extern crate cipher_tools_lib;
 
 use clap::{App, AppSettings};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -12,7 +13,6 @@ mod try_from_err;
 mod cli;
 #[macro_use]
 mod commands;
-mod parse;
 
 use cli::*;
 use cipher_lib::cipher::*;

@@ -1,37 +1,10 @@
-use clap::{Arg, ArgGroup, App, SubCommand, AppSettings};
+use clap::{Arg, App, SubCommand, AppSettings};
+
+use cipher_tools_lib::cli::*;
 
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
-
-fn key_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("key")
-		.short("k")
-		.value_name("KEY")
-}
-
-fn ciphertext_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("ciphertext")
-		.short("c")
-		.value_name("CIPHERTEXT")
-}
-
-fn plaintext_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("plaintext")
-		.short("p")
-		.value_name("PLAINTEXT")
-}
-fn language_model_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("language")
-		.short("l")
-		.value_name("LANGUAGE")
-}
-
-fn dictionary_arg<'a,'b>() -> Arg<'a,'b> {
-	Arg::with_name("dictionary")
-		.short("d")
-		.value_name("DICTIONARY")
-}
 
 fn dictionary_attack_subcommand<'a,'b, C>() -> App<'a,'b>
 where

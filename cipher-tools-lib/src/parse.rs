@@ -28,6 +28,11 @@ pub fn plaintext_option(matches: &clap::ArgMatches) -> String
 	text(matches.value_of("plaintext").unwrap())
 }
 
+pub fn text_option(matches: &clap::ArgMatches) -> String
+{
+	text(matches.value_of("text").unwrap())
+}
+
 pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> C::Key
 {
 	key::<C>(matches.value_of("key").unwrap())
@@ -127,4 +132,3 @@ fn text<'a>(filename: &str) -> String
 
 	text
 }
-
