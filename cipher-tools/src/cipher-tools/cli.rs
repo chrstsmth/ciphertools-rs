@@ -1,4 +1,4 @@
-use clap::{Arg, App, SubCommand, AppSettings};
+use clap::{App, SubCommand, AppSettings};
 
 use cipher_tools_lib::cli::*;
 
