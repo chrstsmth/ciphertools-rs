@@ -3,6 +3,7 @@ extern crate cipher_derive;
 extern crate variant_count;
 extern crate enum_map;
 
+pub mod analysis;
 pub mod pallet;
 pub mod try_from_err;
 pub mod cipher;

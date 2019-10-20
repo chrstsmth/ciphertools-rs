@@ -11,4 +11,5 @@ rand = "*"
 min-max-heap = "*"
 variant_count = "*"
 enum-map = "*"
+colored = "*"
 cipher-derive = { version = "*", path = "../cipher-derive" }
