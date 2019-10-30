@@ -1,137 +1,182 @@
-extern crate colored;
-
+use std::iter;
 use crate::pallet::alph::*;
 use std::cmp;
-use std::fmt;
-use colored::*;
 
-pub struct Coincidence {
+pub struct CoincidencesTable<'a> {
+	coincidences: Vec<CoincidencesData>,
+	m_text: &'a [Alph],
+}
+
+pub struct CoincidencesData {
+	coincidences: Vec<CoincidenceData>,
+}
+
+pub struct CoincidenceData {
 	i: (usize, usize),
 	len: usize,
 }
 
-pub struct CoincidenceFmt<'a> {
-	coincidence: &'a Coincidence,
-	text: &'a [Alph],
+pub struct Coincidences<'a> {
+	coincidences: &'a CoincidencesData,
+	m_offset: usize,
+	m_text: &'a [Alph],
 }
 
-pub struct Coincidences {
-	coincidences: Vec<Vec<Coincidence>>,
+pub struct Coincidence<'a> {
+	coincidence: &'a CoincidenceData,
+	m_text: &'a [Alph],
 }
 
-pub struct CoincidencesFmt<'a> {
-	coincidences: &'a Coincidences,
-	text: &'a [Alph],
+pub struct CoincidencesTableIter<'a> {
+	it: iter::Enumerate<<&'a Vec<CoincidencesData> as IntoIterator>::IntoIter>,
+	m_text: &'a[Alph],
 }
 
-impl Coincidences {
-	pub fn new(text: &[Alph]) -> Self {
-		let mut cs = Coincidences {
+pub struct CoincidencesIter<'a> {
+	it: <&'a Vec<CoincidenceData> as IntoIterator>::IntoIter,
+	m_text: &'a[Alph],
+}
+
+impl<'a> Coincidences<'a> {
+	pub fn offset(&self) -> usize {
+		self.m_offset
+	}
+}
+
+impl<'a> iter::IntoIterator for &'a CoincidencesTable<'a> {
+	type Item = Coincidences<'a>;
+	type IntoIter = CoincidencesTableIter<'a>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		CoincidencesTableIter {
+			it: self.coincidences.iter().enumerate(),
+			m_text: self.m_text,
+		}
+	}
+}
+
+impl<'a> iter::IntoIterator for &'a Coincidences<'a> {
+	type Item = Coincidence<'a>;
+	type IntoIter = CoincidencesIter<'a>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		CoincidencesIter {
+			it: self.coincidences.coincidences.iter(),
+			m_text: self.m_text,
+		}
+	}
+}
+
+impl<'a> iter::Iterator for CoincidencesTableIter<'a> {
+	type Item = Coincidences<'a>;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		match self.it.next() {
+			Some((offset, coincidences)) => {
+				Some(Coincidences {
+					coincidences,
+					m_offset: offset,
+					m_text: self.m_text,
+				})
+			},
+			None => None,
+		}
+	}
+}
+
+impl<'a> iter::Iterator for CoincidencesIter<'a> {
+	type Item = Coincidence<'a>;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let coincidence = self.it.next();
+		match coincidence {
+			Some(coincidence) => {
+				Some(Coincidence {
+					coincidence,
+					m_text: self.m_text,
+				})
+			},
+			None => None,
+		}
+	}
+}
+
+impl<'a> CoincidencesTable<'a> {
+	pub fn new(text: &'a [Alph], n: usize) -> Self {
+		let mut cs = CoincidencesTable {
 			coincidences: Vec::new(),
+			m_text: text,
 		};
 
-		for n in 1..cmp::max(20,text.len()) {
-			cs.coincidences.push(coincidence_count_at_offset(text, n));
+		for i in 1..cmp::min(n,text.len()) {
+			cs.coincidences.push(CoincidencesData::new(text, i));
 		}
 		cs
 	}
+}
 
-	pub fn format<'a>(&'a self, text: &'a [Alph]) -> CoincidencesFmt<'a> {
-		CoincidencesFmt {
-			coincidences: self,
-			text,
+impl CoincidencesData {
+	fn new(text: &[Alph], offset: usize) -> CoincidencesData {
+		let mut c = CoincidencesData {
+			coincidences: Vec::new(),
+		};
+		let mut push = |streak: Option<(usize, usize)>| {
+			if let Some((i, j)) = streak {
+				let len = j - i + 1;
+				if len >= 2 {
+					c.coincidences.push(CoincidenceData::new((i, i + offset), len));
+				}
+			}
+		};
+
+		let mut streak: Option<(usize, usize)> = None;
+		let iter_a = text.iter();
+		let iter_b = iter_a.clone().skip(offset);
+		for (i, (a, b)) in iter_a.zip(iter_b).enumerate() {
+			if *a == *b {
+				streak = match streak {
+					Some((s, _)) => Some((s, i)),
+					None => Some((i, i)),
+				};
+			} else {
+				push(streak);
+				streak = None;
+			}
+		}
+		push(streak);
+		c.coincidences.sort_by(|a, b| {
+			a.len.cmp(&b.len)
+		});
+		c
+	}
+}
+
+impl CoincidenceData {
+	fn new(i: (usize, usize), len: usize) -> Self {
+		CoincidenceData {
+			i,
+			len,
 		}
 	}
 }
 
-impl Coincidence {
+impl<'a> Coincidences<'a> {
+	pub fn get_offset(&self) -> usize {
+		self.m_offset
+	}
+
+}
+
+impl<'a> Coincidence<'a> {
 	pub fn indices(&self) -> (usize, usize) {
-		self.i
+		(self.coincidence.i.0, self.coincidence.i.1)
 	}
 
 	pub fn len(&self) -> usize {
-		self.len
+		self.coincidence.len
 	}
 
-	pub fn format<'a>(&'a self, text: &'a [Alph]) -> CoincidenceFmt<'a> {
-		CoincidenceFmt {
-			coincidence: self,
-			text,
-		}
+	pub fn text(&self) -> &'a [Alph] {
+		self.m_text
 	}
-}
-impl<'a> fmt::Display for CoincidencesFmt<'a> {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		for (i, cs) in self.coincidences.coincidences.iter().enumerate() {
-			if !cs.is_empty() {
-				writeln!(f, "offset: {}", i + 1)?;
-			}
-			for c in cs {
-				write!(f, "{}", c.format(self.text))?;
-			}
-		}
-		Ok(())
-	}
-}
-
-impl<'a> fmt::Display for CoincidenceFmt<'a> {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		let (a, b) = (self.coincidence.i.0, self.coincidence.i.1);
-		let len = self.coincidence.len;
-
-		let r = a..a + len;
-		let s = b..b + len;
-		for (i, c) in self.text.iter().enumerate() {
-			let in_r = r.contains(&i);
-			let in_s = s.contains(&i);
-
-			let style = if in_r && in_s {
-				Some(Color::Magenta)
-			} else if in_r {
-				Some(Color::Red)
-			} else if in_s {
-				Some(Color::Blue)
-			} else {
-				None
-			};
-
-			match style {
-				Some(col) => write!(f, "{}", c.to_string().color(col))?,
-				None => write!(f, "{}", c)?,
-			}
-		}
-		writeln!(f, "")
-	}
-}
-
-fn coincidence_count_at_offset(text: &[Alph], n: usize) -> Vec<Coincidence> {
-	let mut coincidences: Vec<Coincidence> = Vec::new();
-	let mut push = |streak: Option<(usize, usize)>| {
-		if let Some((i, j)) = streak {
-			let len = j - i + 1;
-			if len >= 2 {
-				coincidences.push(Coincidence {
-					i: (i, i + n),
-					len,
-				});
-			}
-		}
-	};
-
-	let mut streak: Option<(usize, usize)> = None;
-	let iter_a = text.iter();
-	let iter_b = iter_a.clone().skip(n);
-	for (i, (a, b)) in iter_a.zip(iter_b).enumerate() {
-		if *a == *b {
-			streak = match streak {
-				Some((s, _)) => Some((s, i)),
-				None => Some((i, i)),
-			};
-		} else {
-			push(streak);
-			streak = None;
-		}
-	}
-	push(streak);
-	coincidences
 }
