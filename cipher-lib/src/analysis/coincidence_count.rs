@@ -4,7 +4,17 @@ use std::cmp;
 
 pub struct CoincidencesTable<'a> {
 	coincidences: Vec<CoincidencesData>,
-	m_text: &'a [Alph],
+	text: &'a [Alph],
+}
+
+pub struct Coincidences<'a> {
+	coincidences: &'a CoincidencesData,
+	text: &'a [Alph],
+}
+
+pub struct Coincidence<'a> {
+	coincidence: &'a CoincidenceData,
+	text: &'a [Alph],
 }
 
 pub struct CoincidencesData {
@@ -16,31 +26,14 @@ pub struct CoincidenceData {
 	len: usize,
 }
 
-pub struct Coincidences<'a> {
-	coincidences: &'a CoincidencesData,
-	m_offset: usize,
-	m_text: &'a [Alph],
-}
-
-pub struct Coincidence<'a> {
-	coincidence: &'a CoincidenceData,
-	m_text: &'a [Alph],
-}
-
 pub struct CoincidencesTableIter<'a> {
-	it: iter::Enumerate<<&'a Vec<CoincidencesData> as IntoIterator>::IntoIter>,
-	m_text: &'a[Alph],
+	it: <&'a Vec<CoincidencesData> as IntoIterator>::IntoIter,
+	text: &'a[Alph],
 }
 
 pub struct CoincidencesIter<'a> {
 	it: <&'a Vec<CoincidenceData> as IntoIterator>::IntoIter,
-	m_text: &'a[Alph],
-}
-
-impl<'a> Coincidences<'a> {
-	pub fn offset(&self) -> usize {
-		self.m_offset
-	}
+	text: &'a[Alph],
 }
 
 impl<'a> iter::IntoIterator for &'a CoincidencesTable<'a> {
@@ -49,8 +42,25 @@ impl<'a> iter::IntoIterator for &'a CoincidencesTable<'a> {
 
 	fn into_iter(self) -> Self::IntoIter {
 		CoincidencesTableIter {
-			it: self.coincidences.iter().enumerate(),
-			m_text: self.m_text,
+			it: self.coincidences.iter(),
+			text: self.text,
+		}
+	}
+}
+
+impl<'a> iter::Iterator for CoincidencesTableIter<'a> {
+	type Item = Coincidences<'a>;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let coincidences = self.it.next();
+		match coincidences {
+			Some(coincidences) => {
+				Some(Coincidences {
+					coincidences,
+					text: self.text,
+				})
+			},
+			None => None,
 		}
 	}
 }
@@ -62,24 +72,7 @@ impl<'a> iter::IntoIterator for &'a Coincidences<'a> {
 	fn into_iter(self) -> Self::IntoIter {
 		CoincidencesIter {
 			it: self.coincidences.coincidences.iter(),
-			m_text: self.m_text,
-		}
-	}
-}
-
-impl<'a> iter::Iterator for CoincidencesTableIter<'a> {
-	type Item = Coincidences<'a>;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		match self.it.next() {
-			Some((offset, coincidences)) => {
-				Some(Coincidences {
-					coincidences,
-					m_offset: offset,
-					m_text: self.m_text,
-				})
-			},
-			None => None,
+			text: self.text,
 		}
 	}
 }
@@ -93,7 +86,7 @@ impl<'a> iter::Iterator for CoincidencesIter<'a> {
 			Some(coincidence) => {
 				Some(Coincidence {
 					coincidence,
-					m_text: self.m_text,
+					text: self.text,
 				})
 			},
 			None => None,
@@ -102,21 +95,40 @@ impl<'a> iter::Iterator for CoincidencesIter<'a> {
 }
 
 impl<'a> CoincidencesTable<'a> {
-	pub fn new(text: &'a [Alph], n: usize) -> Self {
-		let mut cs = CoincidencesTable {
+	pub fn new(text: &'a [Alph]) -> Self {
+		Self::with_length(32, text)
+	}
+
+	pub fn with_length(n: usize, text: &'a [Alph]) -> Self {
+		let mut table = CoincidencesTable {
 			coincidences: Vec::new(),
-			m_text: text,
+			text: text,
 		};
 
-		for i in 1..cmp::min(n,text.len()) {
-			cs.coincidences.push(CoincidencesData::new(text, i));
+		for n in 1..cmp::min(n, text.len() / 2) {
+			table.coincidences.push(CoincidencesData::with_offset(text, n));
 		}
-		cs
+		table
+	}
+
+	pub fn len(&self) -> usize {
+		self.coincidences.len()
+	}
+
+	pub fn at(&'a self, i: usize) -> Coincidences<'a> {
+		Coincidences {
+			coincidences: &self.coincidences[i],
+			text: self.text,
+		}
+	}
+
+	pub fn iter(&'a self) -> <&'a Self as IntoIterator>::IntoIter {
+		self.into_iter()
 	}
 }
 
 impl CoincidencesData {
-	fn new(text: &[Alph], offset: usize) -> CoincidencesData {
+	pub fn with_offset(text: &[Alph], n: usize) -> Self {
 		let mut c = CoincidencesData {
 			coincidences: Vec::new(),
 		};
@@ -124,14 +136,17 @@ impl CoincidencesData {
 			if let Some((i, j)) = streak {
 				let len = j - i + 1;
 				if len >= 2 {
-					c.coincidences.push(CoincidenceData::new((i, i + offset), len));
+					c.coincidences.push(CoincidenceData {
+						i: (i, i + n),
+						len,
+					});
 				}
 			}
 		};
 
 		let mut streak: Option<(usize, usize)> = None;
 		let iter_a = text.iter();
-		let iter_b = iter_a.clone().skip(offset);
+		let iter_b = iter_a.clone().skip(n);
 		for (i, (a, b)) in iter_a.zip(iter_b).enumerate() {
 			if *a == *b {
 				streak = match streak {
@@ -144,39 +159,27 @@ impl CoincidencesData {
 			}
 		}
 		push(streak);
-		c.coincidences.sort_by(|a, b| {
-			a.len.cmp(&b.len)
-		});
+
+		c.coincidences.sort_by(|a, b| a.len.cmp(&b.len));
 		c
 	}
 }
 
-impl CoincidenceData {
-	fn new(i: (usize, usize), len: usize) -> Self {
-		CoincidenceData {
-			i,
-			len,
-		}
-	}
-}
-
 impl<'a> Coincidences<'a> {
-	pub fn get_offset(&self) -> usize {
-		self.m_offset
+	pub fn len(&self) {
+		self.coincidences.coincidences.len();
 	}
 
+	pub fn iter(&'a self) -> <&'a Self as IntoIterator>::IntoIter {
+		self.into_iter()
+	}
 }
 
 impl<'a> Coincidence<'a> {
-	pub fn indices(&self) -> (usize, usize) {
-		(self.coincidence.i.0, self.coincidence.i.1)
-	}
-
 	pub fn len(&self) -> usize {
 		self.coincidence.len
 	}
-
-	pub fn text(&self) -> &'a [Alph] {
-		self.m_text
+	pub fn indices(&self) -> (usize, usize) {
+		self.coincidence.i
 	}
 }
