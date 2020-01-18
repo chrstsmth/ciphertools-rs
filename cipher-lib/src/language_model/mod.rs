@@ -36,6 +36,10 @@ impl Node {
 			next: NextNode::new(),
 		}
 	}
+
+	pub fn freq(&self) -> u32 {
+		self.freq
+	}
 }
 
 impl NextNode {
@@ -109,12 +113,6 @@ impl LanguageModel {
 		LanguageModelTraverser {
 			cursor: &self.head,
 		}
-	}
-}
-
-impl Node {
-	pub fn freq(&self) -> u32 {
-		self.freq
 	}
 }
 
