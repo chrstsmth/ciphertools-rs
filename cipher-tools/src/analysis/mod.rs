@@ -1,5 +1,4 @@
 extern crate clap;
-extern crate colored;
 extern crate enum_map;
 extern crate cipher_lib;
 extern crate cipher_tools_lib;

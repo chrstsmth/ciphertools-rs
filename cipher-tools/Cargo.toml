@@ -9,7 +9,6 @@ clap = "*"
 serde = "*"
 serde_json = "*"
 enum-map = "*"
-colored = "*"
 cipher-lib = { version = "*", path = "../cipher-lib" }
 cipher-tools-lib = { version = "*", path = "../cipher-tools-lib" }
 cipher-derive = { version = "*", path = "../cipher-derive" }

@@ -1,142 +1,68 @@
-use std::iter;
 use crate::pallet::alph::*;
 use std::cmp;
+use std::fmt;
 
-pub struct CoincidencesTable<'a> {
-	coincidences: Vec<CoincidencesData>,
-	text: &'a [Alph],
+pub struct Coincidences<'a>(CoincidencesAllOffets<'a>);
+
+pub struct CoincidencesAllOffets<'a> {
+	c: Vec<CoincidencesAtOffset<'a>>,
 }
 
-pub struct Coincidences<'a> {
-	coincidences: &'a CoincidencesData,
-	text: &'a [Alph],
+pub struct CoincidencesAtOffset<'a> {
+	c: Vec<Coincidence<'a>>,
 }
 
 pub struct Coincidence<'a> {
-	coincidence: &'a CoincidenceData,
-	text: &'a [Alph],
-}
-
-pub struct CoincidencesData {
-	coincidences: Vec<CoincidenceData>,
-}
-
-pub struct CoincidenceData {
+	c: &'a [Alph],
 	i: (usize, usize),
 	len: usize,
 }
 
-pub struct CoincidencesTableIter<'a> {
-	it: <&'a Vec<CoincidencesData> as IntoIterator>::IntoIter,
-	text: &'a[Alph],
-}
-
-pub struct CoincidencesIter<'a> {
-	it: <&'a Vec<CoincidenceData> as IntoIterator>::IntoIter,
-	text: &'a[Alph],
-}
-
-impl<'a> iter::IntoIterator for &'a CoincidencesTable<'a> {
-	type Item = Coincidences<'a>;
-	type IntoIter = CoincidencesTableIter<'a>;
-
-	fn into_iter(self) -> Self::IntoIter {
-		CoincidencesTableIter {
-			it: self.coincidences.iter(),
-			text: self.text,
-		}
-	}
-}
-
-impl<'a> iter::Iterator for CoincidencesTableIter<'a> {
-	type Item = Coincidences<'a>;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		let coincidences = self.it.next();
-		match coincidences {
-			Some(coincidences) => {
-				Some(Coincidences {
-					coincidences,
-					text: self.text,
-				})
-			},
-			None => None,
-		}
-	}
-}
-
-impl<'a> iter::IntoIterator for &'a Coincidences<'a> {
-	type Item = Coincidence<'a>;
-	type IntoIter = CoincidencesIter<'a>;
-
-	fn into_iter(self) -> Self::IntoIter {
-		CoincidencesIter {
-			it: self.coincidences.coincidences.iter(),
-			text: self.text,
-		}
-	}
-}
-
-impl<'a> iter::Iterator for CoincidencesIter<'a> {
-	type Item = Coincidence<'a>;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		let coincidence = self.it.next();
-		match coincidence {
-			Some(coincidence) => {
-				Some(Coincidence {
-					coincidence,
-					text: self.text,
-				})
-			},
-			None => None,
-		}
-	}
-}
-
-impl<'a> CoincidencesTable<'a> {
-	pub fn new(text: &'a [Alph]) -> Self {
-		Self::with_length(32, text)
-	}
-
+impl<'a> Coincidences<'a> {
 	pub fn with_length(n: usize, text: &'a [Alph]) -> Self {
-		let mut table = CoincidencesTable {
-			coincidences: Vec::new(),
-			text: text,
-		};
-
-		for n in 1..cmp::min(n, text.len() / 2) {
-			table.coincidences.push(CoincidencesData::with_offset(text, n));
-		}
-		table
-	}
-
-	pub fn len(&self) -> usize {
-		self.coincidences.len()
-	}
-
-	pub fn at(&'a self, i: usize) -> Coincidences<'a> {
-		Coincidences {
-			coincidences: &self.coincidences[i],
-			text: self.text,
-		}
-	}
-
-	pub fn iter(&'a self) -> <&'a Self as IntoIterator>::IntoIter {
-		self.into_iter()
+		Coincidences(CoincidencesAllOffets::with_length(n, text))
 	}
 }
 
-impl CoincidencesData {
-	pub fn with_offset(text: &[Alph], n: usize) -> Self {
-		let mut c = CoincidencesData {
-			coincidences: Vec::new(),
+impl<'a> fmt::Display for Coincidences<'a> {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+
+		for (i, cs) in self.0.c.iter().enumerate() {
+			write!(f, "{}:", i + 1)?;
+			for c in &cs.c {
+				write!(f, " {}", c.text().into_iter().map(|a| char::from(*a)).collect::<String>())?;
+			}
+			writeln!(f, "")?;
+		}
+		Ok(())
+	}
+}
+
+impl<'a> CoincidencesAllOffets<'a> {
+	fn with_length(n: usize, text: &'a [Alph]) -> Self {
+		let mut all = CoincidencesAllOffets {
+			c: Vec::new(),
 		};
+
+		for n in 1..cmp::min(n + 1, text.len() / 2) {
+			all.c.push(CoincidencesAtOffset::with_offset(text, n));
+		}
+		all
+	}
+}
+
+impl<'a> CoincidencesAtOffset<'a> {
+	fn with_offset(text: &'a [Alph], n: usize) -> Self {
+		let mut c = CoincidencesAtOffset {
+			c: Vec::new(),
+		};
+
 		let mut push = |streak: Option<(usize, usize)>| {
 			if let Some((i, j)) = streak {
 				let len = j - i + 1;
-				if len >= 2 {
-					c.coincidences.push(CoincidenceData {
+				if len >= 3 {
+					c.c.push(Coincidence {
+						c: text.get(i..j+1).unwrap(),
 						i: (i, i + n),
 						len,
 					});
@@ -159,27 +85,20 @@ impl CoincidencesData {
 			}
 		}
 		push(streak);
-
-		c.coincidences.sort_by(|a, b| a.len.cmp(&b.len));
 		c
 	}
 }
 
-impl<'a> Coincidences<'a> {
-	pub fn len(&self) {
-		self.coincidences.coincidences.len();
-	}
-
-	pub fn iter(&'a self) -> <&'a Self as IntoIterator>::IntoIter {
-		self.into_iter()
-	}
-}
-
 impl<'a> Coincidence<'a> {
-	pub fn len(&self) -> usize {
-		self.coincidence.len
+	fn text(&self) -> &'a [Alph] {
+		self.c
 	}
-	pub fn indices(&self) -> (usize, usize) {
-		self.coincidence.i
+
+	fn indices(&self) -> (usize, usize) {
+		self.i
+	}
+
+	fn len(&self) -> usize {
+		self.len
 	}
 }

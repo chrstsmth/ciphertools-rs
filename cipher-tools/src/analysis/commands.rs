@@ -12,18 +12,8 @@ pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 		.map(|x| x.unwrap())
 		.collect();
 
-	let coincidence_table = CoincidencesTable::new(&text_alph);
-	let mut scores = vec![0; coincidence_table.len()];
-
-	for (coincidences, s) in coincidence_table.iter().zip(scores.iter_mut()) {
-		for coincidence in &coincidences {
-			*s += coincidence.len();
-		}
-	}
-
-	for (i, s) in scores.iter().enumerate() {
-		println!("{}: {}", i + 1, s);
-	}
+	let coincidences = Coincidences::with_length(30, &text_alph);
+	println!("{}", coincidences);
 }
 
 pub const FREQUENCY_COMMAND_NAME: &str = "frequency";
