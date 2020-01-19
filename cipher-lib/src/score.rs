@@ -1,10 +1,10 @@
 use std::convert::TryFrom;
 
 use crate::language_model::*;
-use crate::pallet::lang::*;
+use crate::pallet::alph::*;
 
 pub fn score<S>(tr: LanguageModelTraverser, mut s: S) -> u32 where
-	S: Iterator<Item = Lang> + Clone,
+	S: Iterator<Item = Alph> + Clone,
 {
 	let mut score: u32 = 0;
 	loop {

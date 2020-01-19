@@ -8,7 +8,7 @@ use std::io::prelude::*;
 use std::convert::TryFrom;
 
 use cipher_lib::language_model::*;
-use cipher_lib::pallet::lang::*;
+use cipher_lib::pallet::alph::*;
 
 fn main() {
 	let mut l: LanguageModel = LanguageModel::new();
@@ -27,7 +27,7 @@ fn main() {
 		}
 
 		let mut i = s.chars()
-			.map(|x| Lang::try_from(x))
+			.map(|x| Alph::try_from(x))
 			.filter(|x| x.is_ok())
 			.map(|x| x.unwrap());
 		l.insert_words(&mut i, 5);

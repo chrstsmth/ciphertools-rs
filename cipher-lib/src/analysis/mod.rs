@@ -2,7 +2,7 @@ pub mod coincidence_count;
 
 use enum_map::*;
 use crate::language_model::LanguageModel;
-use crate::pallet::lang::Lang;
+use crate::pallet::alph::*;
 use std::collections::HashMap;
 
 pub fn frequency<E>(text: &[E]) -> EnumMap<E,u32> where
@@ -25,7 +25,7 @@ pub fn frequency_ngram<E>(text: &[E], length: usize) -> HashMap<Vec<E>, u32> whe
 	frequency
 }
 
-pub fn frequency_language(language: LanguageModel) -> EnumMap<Lang,u32> where
+pub fn frequency_language(language: LanguageModel) -> EnumMap<Alph,u32> where
 {
 	EnumMap::from(|e|
 		match language.traverse().next(e) {

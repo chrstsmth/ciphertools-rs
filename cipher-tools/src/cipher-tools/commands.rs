@@ -3,7 +3,7 @@ use cipher_tools_lib::parse::*;
 
 use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
-use cipher_lib::pallet::lang::*;
+use cipher_lib::pallet::alph::*;
 use cipher_lib::score::*;
 
 use std::convert::TryFrom;
@@ -22,7 +22,7 @@ fn insert_candidates<C: Cipher>() -> impl FnMut(&Candidate<C>) {
 fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 	move |chars: std::str::Chars| {
 		let alph = chars
-			.map(|x| Lang::try_from(x))
+			.map(|x| Alph::try_from(x))
 			.filter(|x| x.is_ok())
 			.map(|x| x.unwrap());
 
