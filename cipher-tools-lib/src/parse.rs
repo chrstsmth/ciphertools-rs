@@ -7,6 +7,13 @@ use std::io::prelude::*;
 use std::io::*;
 use std::error::Error;
 use std::str::FromStr;
+use std::vec::*;
+
+pub struct ParsedArg<'a, T> {
+	pub value: T,
+	pub args: Vec<&'a str>,
+	pub i: usize,
+}
 
 pub fn dictionary_option<C: Cipher>(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = C::Key>> {
 	let dict_file = matches.value_of("dictionary").unwrap();
@@ -36,6 +43,40 @@ pub fn text_option(matches: &clap::ArgMatches) -> String
 pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> C::Key
 {
 	key::<C>(matches.value_of("key").unwrap())
+}
+
+pub fn language_model_options<'a>(matches: &'a clap::ArgMatches) -> Option<Vec<ParsedArg<'a, LanguageModel>>>
+{
+	let files = matches.values_of("language")?;
+	let indices = matches.indices_of("language")?;
+	let mut language_models = Vec::new();
+
+	for (i, f) in indices.zip(files) {
+		language_models.push(
+			ParsedArg {
+				value: language_model(f),
+				args: vec![f],
+				i,
+			});
+	}
+	Some(language_models)
+}
+
+pub fn text_options<'a>(matches: &'a clap::ArgMatches) -> Option<Vec<ParsedArg<'a, String>>>
+{
+	let files = matches.values_of("text")?;
+	let indices = matches.indices_of("text")?;
+	let mut texts = Vec::new();
+
+	for (i, f) in indices.zip(files) {
+		texts.push(
+			ParsedArg {
+				value: text(f),
+				args: vec![f],
+				i,
+			});
+	}
+	Some(texts)
 }
 
 pub fn dictionary_file<C: Cipher>(filename: &str) -> Box<dyn Iterator<Item = C::Key>>
