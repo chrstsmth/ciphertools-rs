@@ -14,8 +14,19 @@ pub enum Alph {
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 }
 
+#[derive(Clone)]
+pub struct AlphIterator {
+	a: Option<Alph>,
+}
+
 impl Alph {
 	pub const LENGTH: u32 = Self::VARIANT_COUNT as u32;
+
+	pub fn iter() -> AlphIterator {
+		AlphIterator {
+			a: Some(Alph::A),
+		}
+	}
 }
 
 impl From<Alph> for char {
@@ -226,6 +237,25 @@ impl Sub for Alph {
 	fn sub(self, other: Alph) -> Alph {
 		let a = (Self::LENGTH + u32::from(self) - u32::from(other)) % Self::LENGTH;
 		Alph::try_from(a).unwrap()
+	}
+}
+
+impl Iterator for AlphIterator {
+	type Item = Alph;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let result = self.a;
+		match self.a {
+			Some(a) => {
+				if a == Alph::Z {
+					self.a = None;
+				} else {
+					self.a = Some(Alph::try_from(u32::from(a) + 1).unwrap());
+				}
+			}
+			_ => {}
+		}
+		result
 	}
 }
 
