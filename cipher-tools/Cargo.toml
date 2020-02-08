@@ -10,6 +10,7 @@ serde = "*"
 serde_json = "*"
 enum-map = "*"
 itertools = "*"
+num = "*"
 cipher-lib = { version = "*", path = "../cipher-lib" }
 cipher-tools-lib = { version = "*", path = "../cipher-tools-lib" }
 cipher-derive = { version = "*", path = "../cipher-derive" }

@@ -9,6 +9,11 @@ use std::path::Path;
 use std::cmp::Ordering;
 use parse::*;
 use itertools::Itertools;
+use std::collections::HashMap;
+use std::ops::*;
+use cipher_lib::language_model::*;
+use num::Zero;
+use std::fmt::Display;
 
 pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 	let text = text_option(matches);
@@ -21,7 +26,37 @@ pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 	println!("{}", coincidences);
 }
 
-pub fn frequency_command(matches: &clap::ArgMatches) {
+pub fn frequency_analyisis_command(matches: &clap::ArgMatches) {
+
+	let lang_args = language_model_options(matches);
+	let text_args = text_options(matches);
+	let ngram_length = ngram_length_option(matches).unwrap_or(1);
+
+	occurence_analysis(lang_args, text_args,
+		|x| ngram_frequency_language(ngram_length, x),
+		|x| ngram_frequency(ngram_length, x));
+}
+
+pub fn distribution_analysis_command(matches: &clap::ArgMatches) {
+
+	let lang_args = language_model_options(matches);
+	let text_args = text_options(matches);
+	let ngram_length = ngram_length_option(matches).unwrap_or(1);
+
+	occurence_analysis(lang_args, text_args,
+		|x| ngram_distribution(ngram_frequency_language(ngram_length, x)),
+		|x| ngram_distribution(ngram_frequency(ngram_length, x)));
+}
+
+pub fn occurence_analysis<L,T,N>(lang_args: Option<Vec<ParsedArg<LanguageModel>>>,
+						text_args: Option<Vec<ParsedArg<String>>>,
+						map_from_language: L,
+						map_from_text: T)
+where
+	L: Fn(&LanguageModel) -> HashMap<Vec<Alph>,N>,
+	T: Fn(&[Alph]) -> HashMap<Vec<Alph>,N>,
+	N: Add + Sub + PartialOrd + Zero + Clone + Display,
+{
 	#[derive(Clone)]
 	struct Column<'a, T> {
 		val: T,
@@ -29,10 +64,7 @@ pub fn frequency_command(matches: &clap::ArgMatches) {
 		i: usize,
 	}
 
-	let lang_args = language_model_options(matches);
-	let text_args = text_options(matches);
 	let mut columns = Vec::new();
-	let ngram_length = ngram_length_option(matches).unwrap_or(1);
 
 	match lang_args {
 		Some(lang_args) =>
@@ -40,7 +72,7 @@ pub fn frequency_command(matches: &clap::ArgMatches) {
 			for l in lang_args {
 				columns.push(
 					Column {
-						val: ngram_frequency_language(ngram_length, &l.value),
+						val: map_from_language(&l.value),
 						file: l.args[0],
 						i: l.i,
 					});
@@ -59,7 +91,7 @@ pub fn frequency_command(matches: &clap::ArgMatches) {
 					.collect();
 				columns.push(
 					Column {
-						val: ngram_frequency(ngram_length, &text_alph),
+						val: map_from_text(&text_alph),
 						file: t.args[0],
 						i: t.i,
 					});
@@ -70,7 +102,7 @@ pub fn frequency_command(matches: &clap::ArgMatches) {
 	columns.sort_by(|a, b| a.i.cmp(&b.i));
 
 	let num_columns = columns.len();
-	let mut rows = BTreeMap::<Vec<Alph>, Vec<u32>>::new();
+	let mut rows = BTreeMap::<Vec<Alph>, Vec<_>>::new();
 	let mut header = vec![""; num_columns];
 
 	for (i, column) in columns.into_iter().enumerate() {
@@ -78,16 +110,21 @@ pub fn frequency_command(matches: &clap::ArgMatches) {
 			.file_name().unwrap()
 			.to_str().unwrap();
 		for (key, freq) in column.val {
-			(*rows.entry(key).or_insert(vec![0;num_columns]))[i] = freq;
+			(*rows.entry(key).or_insert(vec![N::zero();num_columns]))[i] = freq;
 		}
 	}
 
 	let mut rows: Vec<_> = rows.iter().collect();
 	rows.sort_by(|x, y| {
 		for (x, y) in x.1.iter().zip(y.1.iter()) {
-			let cmp = y.cmp(&x);
-			if cmp != Ordering::Equal {
-				return cmp;
+			let cmp = y.partial_cmp(&x);
+			match cmp {
+				Some(cmp) => {
+					if cmp != Ordering::Equal {
+						return cmp;
+					}
+				},
+				_ => (),
 			}
 		}
 		return x.0.cmp(y.0);
