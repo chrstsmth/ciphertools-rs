@@ -52,4 +52,3 @@ pub fn key<K: Key>(key_str: &str) -> K
 		}
 	}
 }
-

@@ -1,13 +1,14 @@
 use cipher_lib::pallet::alph::*;
+
 use std::convert::TryFrom;
 use cipher_lib::analysis::*;
-use cipher_tools_lib::parse::*;
 use cipher_lib::analysis::coincidence_count::*;
 use std::collections::BTreeMap;
 use std::cmp::Ord;
 use std::path::Path;
 use std::cmp::Ordering;
 use parse::*;
+use common::parse::*;
 use cli::*;
 use itertools::Itertools;
 use std::collections::HashMap;

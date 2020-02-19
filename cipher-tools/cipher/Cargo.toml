@@ -1,0 +1,17 @@
+[package]
+name = "cipher"
+version = "0.1.0"
+authors = ["Christopher T Smith <git@chrstsmth.ca>"]
+
+[dependencies]
+ctrlc = "*"
+serde = "*"
+serde_json = "*"
+clap = "*"
+itertools = "*"
+common = { version = "*", path = "../common" }
+cipher-lib = { version = "*", path = "../../cipher-lib" }
+
+[[bin]]
+name = "cipher"
+path = "src/main.rs"

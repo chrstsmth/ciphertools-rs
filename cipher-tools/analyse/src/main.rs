@@ -1,18 +1,18 @@
 extern crate clap;
+extern crate common;
 extern crate enum_map;
 extern crate cipher_lib;
-extern crate cipher_tools_lib;
 extern crate itertools;
 extern crate num;
 
-mod commands;
+mod command;
 mod cli;
 mod parse;
 
 use clap::{App, SubCommand, AppSettings};
-use commands::*;
+use command::*;
 use cli::*;
-use cipher_tools_lib::cli::*;
+use common::cli::*;
 
 fn main() {
 	let matches = App::new("Analysis")

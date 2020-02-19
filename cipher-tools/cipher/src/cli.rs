@@ -1,6 +1,6 @@
 use clap::{App, SubCommand, AppSettings};
 
-use cipher_tools_lib::cli::*;
+use common::cli::*;
 
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;

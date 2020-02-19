@@ -1,6 +1,10 @@
 [workspace]
 members = [
-	"cipher-lib",
 	"cipher-derive",
-	"cipher-tools",
+	"cipher-lib",
+	"cipher-tools/analyse",
+	"cipher-tools/language-modeler",
+	"cipher-tools/dictionary",
+	"cipher-tools/cipher",
+	"cipher-tools/common",
 ]

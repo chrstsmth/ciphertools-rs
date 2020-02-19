@@ -15,7 +15,7 @@ fn main() {
 
 	for arg in std::env::args().skip(1) {
 
-		let mut file =  match File::open(&arg) {
+		let mut file = match File::open(&arg) {
 			Err(why) => panic!("couldn't open {}: {}", arg, why.description()),
 			Ok(file) => file,
 		};

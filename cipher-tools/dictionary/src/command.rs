@@ -71,4 +71,3 @@ pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 
 	run(iter, exit);
 }
-

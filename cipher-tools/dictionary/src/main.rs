@@ -2,7 +2,7 @@ extern crate clap;
 extern crate cipher_lib;
 
 mod cli;
-mod commands;
+mod command;
 mod parse;
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -13,8 +13,7 @@ use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
 use cli::*;
-use commands::*;
-use commands::Random;
+use command::*;
 
 use clap::{App, AppSettings};
 

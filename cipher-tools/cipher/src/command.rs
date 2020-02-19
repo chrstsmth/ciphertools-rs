@@ -1,11 +1,11 @@
 use cipher_lib::cipher::*;
-use cipher_tools_lib::parse::*;
 
 use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
 use cipher_lib::pallet::alph::*;
 use cipher_lib::score::*;
 
+use common::parse::*;
 use std::convert::TryFrom;
 use std::str::Chars;
 

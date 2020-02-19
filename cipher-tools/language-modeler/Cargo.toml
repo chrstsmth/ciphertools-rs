@@ -1,0 +1,13 @@
+[package]
+name = "language_model"
+version = "0.1.0"
+authors = ["Christopher T Smith <git@chrstsmth.ca>"]
+
+[dependencies]
+serde = "*"
+serde_json = "*"
+cipher-lib = { version = "*", path = "../../cipher-lib" }
+
+[[bin]]
+name = "language"
+path = "src/main.rs"

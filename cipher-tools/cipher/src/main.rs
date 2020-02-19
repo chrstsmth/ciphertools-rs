@@ -3,7 +3,8 @@ extern crate serde;
 extern crate serde_json;
 extern crate clap;
 extern crate cipher_lib;
-extern crate cipher_tools_lib;
+extern crate itertools;
+extern crate common;
 
 use clap::{App, AppSettings};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -12,13 +13,13 @@ use std::sync::Arc;
 mod try_from_err;
 mod cli;
 #[macro_use]
-mod commands;
+mod command;
 
-use cli::*;
 use cipher_lib::cipher::*;
 use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
-use commands::*;
+use command::*;
+use cli::*;
 
 fn main() {
 	let exit = Arc::new(AtomicBool::new(false));

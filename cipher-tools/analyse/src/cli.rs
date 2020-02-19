@@ -1,5 +1,5 @@
 use clap::{App, Arg, SubCommand, ArgGroup};
-use cipher_tools_lib::cli::*;
+use common::cli::*;
 
 pub const NGRAM_LENGTH_ARG_NAME: &str = "ngram-length";
 pub fn ngram_length_arg<'a,'b>() -> Arg<'a,'b> {
