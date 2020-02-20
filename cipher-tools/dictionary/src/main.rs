@@ -1,5 +1,5 @@
-extern crate clap;
 extern crate cipher_lib;
+extern crate clap;
 
 mod cli;
 mod command;
@@ -8,10 +8,10 @@ mod parse;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use cipher_lib::key::vigenere::*;
-use cipher_lib::cipher::*;
-use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
+use cipher_lib::cipher::vigenere::*;
+use cipher_lib::cipher::*;
+use cipher_lib::key::vigenere::*;
 use cli::*;
 use command::*;
 
@@ -19,15 +19,14 @@ use clap::{App, AppSettings};
 
 fn main() {
 	let exit = Arc::new(AtomicBool::new(false));
-	let exit_early = || {
-		exit.load(Ordering::SeqCst)
-	};
+	let exit_early = || exit.load(Ordering::SeqCst);
 
 	{
 		let ctrlc_exit = exit.clone();
-		ctrlc::set_handler(move ||  {
+		ctrlc::set_handler(move || {
 			ctrlc_exit.store(true, Ordering::SeqCst);
-		}).expect("Error setting SIGINT trap");
+		})
+		.expect("Error setting SIGINT trap");
 	}
 
 	let matches = App::new("Dictionary")

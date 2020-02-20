@@ -1,11 +1,11 @@
 use std::fs::File;
 use std::process;
 
-use cipher_lib::language_model::*;
 use cipher_lib::cipher::*;
+use cipher_lib::language_model::*;
+use std::error::Error;
 use std::io::prelude::*;
 use std::io::*;
-use std::error::Error;
 use std::str::FromStr;
 use std::vec::*;
 
@@ -15,73 +15,66 @@ pub struct ParsedArg<'a, T> {
 	pub i: usize,
 }
 
-pub fn dictionary_option<C: Cipher>(matches: &clap::ArgMatches) -> Box<dyn Iterator<Item = C::Key>> {
+pub fn dictionary_option<C: Cipher>(
+	matches: &clap::ArgMatches,
+) -> Box<dyn Iterator<Item = C::Key>> {
 	let dict_file = matches.value_of("dictionary").unwrap();
 	dictionary_file::<C>(&dict_file)
 }
 
-pub fn language_model_option(matches: &clap::ArgMatches) -> LanguageModel
-{
+pub fn language_model_option(matches: &clap::ArgMatches) -> LanguageModel {
 	language_model(matches.value_of("language").unwrap())
 }
 
-pub fn ciphertext_option(matches: &clap::ArgMatches) -> String
-{
+pub fn ciphertext_option(matches: &clap::ArgMatches) -> String {
 	text(matches.value_of("ciphertext").unwrap())
 }
 
-pub fn plaintext_option(matches: &clap::ArgMatches) -> String
-{
+pub fn plaintext_option(matches: &clap::ArgMatches) -> String {
 	text(matches.value_of("plaintext").unwrap())
 }
 
-pub fn text_option(matches: &clap::ArgMatches) -> String
-{
+pub fn text_option(matches: &clap::ArgMatches) -> String {
 	text(matches.value_of("text").unwrap())
 }
 
-pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> C::Key
-{
+pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> C::Key {
 	key::<C>(matches.value_of("key").unwrap())
 }
 
-pub fn language_model_options<'a>(matches: &'a clap::ArgMatches) -> Option<Vec<ParsedArg<'a, LanguageModel>>>
-{
+pub fn language_model_options<'a>(
+	matches: &'a clap::ArgMatches,
+) -> Option<Vec<ParsedArg<'a, LanguageModel>>> {
 	let files = matches.values_of("language")?;
 	let indices = matches.indices_of("language")?;
 	let mut language_models = Vec::new();
 
 	for (i, f) in indices.zip(files) {
-		language_models.push(
-			ParsedArg {
-				value: language_model(f),
-				args: vec![f],
-				i,
-			});
+		language_models.push(ParsedArg {
+			value: language_model(f),
+			args: vec![f],
+			i,
+		});
 	}
 	Some(language_models)
 }
 
-pub fn text_options<'a>(matches: &'a clap::ArgMatches) -> Option<Vec<ParsedArg<'a, String>>>
-{
+pub fn text_options<'a>(matches: &'a clap::ArgMatches) -> Option<Vec<ParsedArg<'a, String>>> {
 	let files = matches.values_of("text")?;
 	let indices = matches.indices_of("text")?;
 	let mut texts = Vec::new();
 
 	for (i, f) in indices.zip(files) {
-		texts.push(
-			ParsedArg {
-				value: text(f),
-				args: vec![f],
-				i,
-			});
+		texts.push(ParsedArg {
+			value: text(f),
+			args: vec![f],
+			i,
+		});
 	}
 	Some(texts)
 }
 
-pub fn dictionary_file<C: Cipher>(filename: &str) -> Box<dyn Iterator<Item = C::Key>>
-{
-
+pub fn dictionary_file<C: Cipher>(filename: &str) -> Box<dyn Iterator<Item = C::Key>> {
 	let file = match File::open(filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
@@ -96,30 +89,32 @@ pub fn dictionary_file<C: Cipher>(filename: &str) -> Box<dyn Iterator<Item = C::
 
 	let dict = BufReader::new(file)
 		.lines()
-		.map(|x| x.unwrap_or_else(|e|
-			{
+		.map(|x| {
+			x.unwrap_or_else(|e| {
 				eprintln!("{}", e.description());
 				process::exit(1);
 			})
-			)
+		})
 		.enumerate()
 		.map(move |x| {
 			let (num, line) = x;
 			let line_num = num + 1;
 			match C::Key::from_str(line.as_str()) {
 				Err(_) => {
-					eprintln!("{}:{}: failed to parse \"{}\"", filename_clone, line_num, line);
+					eprintln!(
+						"{}:{}: failed to parse \"{}\"",
+						filename_clone, line_num, line
+					);
 					process::exit(1);
 				}
-				Ok(key) => key
+				Ok(key) => key,
 			}
-			});
+		});
 
 	Box::new(dict)
 }
 
-pub fn language_model(filename: &str) -> LanguageModel
-{
+pub fn language_model(filename: &str) -> LanguageModel {
 	let file = match File::open(filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
@@ -139,8 +134,7 @@ pub fn language_model(filename: &str) -> LanguageModel
 	language
 }
 
-pub fn key<'a, C: Cipher>(key_str: &str) -> C::Key
-{
+pub fn key<'a, C: Cipher>(key_str: &str) -> C::Key {
 	match C::Key::from_str(key_str) {
 		Ok(key) => key,
 		_ => {
@@ -150,8 +144,7 @@ pub fn key<'a, C: Cipher>(key_str: &str) -> C::Key
 	}
 }
 
-fn text<'a>(filename: &str) -> String
-{
+fn text<'a>(filename: &str) -> String {
 	let file = match File::open(&filename) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
@@ -167,7 +160,7 @@ fn text<'a>(filename: &str) -> String
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
 			process::exit(1);
-		},
+		}
 		Ok(_) => (),
 	}
 

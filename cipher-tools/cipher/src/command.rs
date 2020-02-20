@@ -26,28 +26,27 @@ fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 			.filter(|x| x.is_ok())
 			.map(|x| x.unwrap());
 
-			let tr = language_model.traverse();
-			score(tr, alph)
+		let tr = language_model.traverse();
+		score(tr, alph)
 	}
 }
 
-pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches)
-{
+pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches) {
 	let ciphertext = ciphertext_option(&matches);
 	let key = key_option::<C>(&matches);
 
 	println!("{}", <C>::encipher(&ciphertext, &key));
 }
 
-pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches)
-{
+pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches) {
 	let plaintext = plaintext_option(&matches);
 	let key = key_option::<C>(&matches);
 
 	println!("{}", <C>::decipher(&plaintext, &key));
 }
 
-pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
+where
 	C: DictionaryAttack,
 	Exit: Fn() -> bool,
 {
@@ -55,14 +54,17 @@ pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit
 	let dictionary = dictionary_option::<C>(&matches);
 	let language_model = language_model_option(&matches);
 
-	<C>::dictionary_attack(&ciphertext,
+	<C>::dictionary_attack(
+		&ciphertext,
 		dictionary,
 		score_candidate(language_model),
 		insert_candidates(),
-		exit);
+		exit,
+	);
 }
 
-pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
+where
 	C: HillClimb,
 	Exit: Fn() -> bool,
 {
@@ -70,9 +72,11 @@ pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 	let dictionary = dictionary_option::<C>(&matches);
 	let language_model = language_model_option(&matches);
 
-	<C>::hill_climb(&ciphertext,
+	<C>::hill_climb(
+		&ciphertext,
 		dictionary,
 		score_candidate(language_model),
 		insert_candidates(),
-		exit);
+		exit,
+	);
 }

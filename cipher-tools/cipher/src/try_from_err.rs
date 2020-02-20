@@ -1,13 +1,13 @@
 use std::error;
 use std::fmt;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct TryFromCharError;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct TryFromIntError;
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct TryFromStringError;
 
 impl error::Error for TryFromCharError {
@@ -52,7 +52,7 @@ impl error::Error for TryFromIntError {
 	}
 }
 
-impl fmt::Display for TryFromIntError  {
+impl fmt::Display for TryFromIntError {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "no conversion available")
 	}

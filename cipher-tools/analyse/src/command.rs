@@ -1,26 +1,28 @@
 use cipher_lib::pallet::alph::*;
 
-use std::convert::TryFrom;
-use cipher_lib::analysis::*;
 use cipher_lib::analysis::coincidence_count::*;
-use std::collections::BTreeMap;
-use std::cmp::Ord;
-use std::path::Path;
-use std::cmp::Ordering;
-use parse::*;
-use common::parse::*;
-use cli::*;
-use itertools::Itertools;
-use std::collections::HashMap;
-use std::ops::*;
+use cipher_lib::analysis::*;
 use cipher_lib::language_model::*;
+use cli::*;
+use common::parse::*;
+use itertools::Itertools;
 use num::Zero;
+use parse::*;
+use std::cmp::Ord;
+use std::cmp::Ordering;
+use std::collections::BTreeMap;
+use std::collections::HashMap;
+use std::convert::TryFrom;
 use std::fmt;
+use std::ops::*;
+use std::path::Path;
 
 pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 	let text = text_option(matches);
-	let text_alph: Vec<Alph> = text.chars()
-		.map(|x| Alph::try_from(x)) .filter(|x| x.is_ok())
+	let text_alph: Vec<Alph> = text
+		.chars()
+		.map(|x| Alph::try_from(x))
+		.filter(|x| x.is_ok())
 		.map(|x| x.unwrap())
 		.collect();
 
@@ -29,28 +31,32 @@ pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 }
 
 pub fn frequency_analyisis_command(matches: &clap::ArgMatches) {
-
 	let lang_args = language_model_options(matches);
 	let text_args = text_options(matches);
 	let ngram_length = ngram_length_option(matches).unwrap_or(1);
 
-	let table = occurrence_analysis(lang_args, text_args,
+	let table = occurrence_analysis(
+		lang_args,
+		text_args,
 		|x| ngram_frequency_language(ngram_length, x),
-		|x| ngram_frequency(ngram_length, x));
+		|x| ngram_frequency(ngram_length, x),
+	);
 
 	print!("{}", table);
 }
 
 pub fn distribution_analysis_command(matches: &clap::ArgMatches) {
-
 	let lang_args = language_model_options(matches);
 	let text_args = text_options(matches);
 	let ngram_length = ngram_length_option(matches).unwrap_or(1);
 	let difference = matches.is_present(DIFFERENCE_ARG_NAME);
 
-	let mut table = occurrence_analysis(lang_args, text_args,
+	let mut table = occurrence_analysis(
+		lang_args,
+		text_args,
 		|x| ngram_distribution(ngram_frequency_language(ngram_length, x)),
-		|x| ngram_distribution(ngram_frequency(ngram_length, x)));
+		|x| ngram_distribution(ngram_frequency(ngram_length, x)),
+	);
 
 	if difference {
 		for row in &mut table.rows {
@@ -69,12 +75,14 @@ pub struct OccurrenceTable<'a, N> {
 	rows: Vec<(Vec<Alph>, Vec<N>)>,
 }
 
-impl<'a, N> fmt::Display for OccurrenceTable<'a, N> where
+impl<'a, N> fmt::Display for OccurrenceTable<'a, N>
+where
 	N: fmt::Display,
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, ", ")?;
-		self.header.iter()
+		self.header
+			.iter()
 			.map(|x| (*x).to_string())
 			.intersperse(", ".to_string())
 			.fold(Ok(()), |_, x| write!(f, "{}", x))?;
@@ -87,7 +95,8 @@ impl<'a, N> fmt::Display for OccurrenceTable<'a, N> where
 			}
 			write!(f, ", ")?;
 
-			freqs.iter()
+			freqs
+				.iter()
 				.map(|x| (*x).to_string())
 				.intersperse(", ".to_string())
 				.fold(Ok(()), |_, x| write!(f, "{}", x))?;
@@ -97,13 +106,15 @@ impl<'a, N> fmt::Display for OccurrenceTable<'a, N> where
 	}
 }
 
-pub fn occurrence_analysis<'a,L,T,N>(lang_args: Option<Vec<ParsedArg<'a, LanguageModel>>>,
+pub fn occurrence_analysis<'a, L, T, N>(
+	lang_args: Option<Vec<ParsedArg<'a, LanguageModel>>>,
 	text_args: Option<Vec<ParsedArg<'a, String>>>,
 	map_from_language: L,
-	map_from_text: T) -> OccurrenceTable<'a,N>
+	map_from_text: T,
+) -> OccurrenceTable<'a, N>
 where
-	L: Fn(&LanguageModel) -> HashMap<Vec<Alph>,N>,
-	T: Fn(&[Alph]) -> HashMap<Vec<Alph>,N>,
+	L: Fn(&LanguageModel) -> HashMap<Vec<Alph>, N>,
+	T: Fn(&[Alph]) -> HashMap<Vec<Alph>, N>,
 	N: Add + Sub + PartialOrd + Zero + Clone + fmt::Display,
 {
 	#[derive(Clone)]
@@ -118,12 +129,11 @@ where
 	match lang_args {
 		Some(lang_args) => {
 			for l in lang_args {
-				columns.push(
-					Column {
-						val: map_from_language(&l.value),
-						file: l.args[0],
-						i: l.i,
-					});
+				columns.push(Column {
+					val: map_from_language(&l.value),
+					file: l.args[0],
+					i: l.i,
+				});
 			}
 		}
 		_ => {}
@@ -132,16 +142,18 @@ where
 	match text_args {
 		Some(text_args) => {
 			for t in text_args {
-				let text_alph: Vec<Alph> = t.value.chars()
-					.map(|x| Alph::try_from(x)) .filter(|x| x.is_ok())
+				let text_alph: Vec<Alph> = t
+					.value
+					.chars()
+					.map(|x| Alph::try_from(x))
+					.filter(|x| x.is_ok())
 					.map(|x| x.unwrap())
 					.collect();
-				columns.push(
-					Column {
-						val: map_from_text(&text_alph),
-						file: t.args[0],
-						i: t.i,
-					});
+				columns.push(Column {
+					val: map_from_text(&text_alph),
+					file: t.args[0],
+					i: t.i,
+				});
 			}
 		}
 		_ => {}
@@ -154,14 +166,16 @@ where
 
 	for (i, column) in columns.into_iter().enumerate() {
 		header[i] = Path::new(column.file)
-			.file_name().unwrap()
-			.to_str().unwrap();
+			.file_name()
+			.unwrap()
+			.to_str()
+			.unwrap();
 		for (key, freq) in column.val {
 			(*rows.entry(key).or_insert(vec![N::zero(); num_columns]))[i] = freq;
 		}
 	}
 
-	let mut table: OccurrenceTable<'a, N> = OccurrenceTable::<'a,N> {
+	let mut table: OccurrenceTable<'a, N> = OccurrenceTable::<'a, N> {
 		header,
 		rows: rows.into_iter().collect(),
 	};
@@ -174,7 +188,7 @@ where
 					if cmp != Ordering::Equal {
 						return cmp;
 					}
-				},
+				}
 				_ => (),
 			}
 		}
@@ -183,4 +197,3 @@ where
 
 	return table;
 }
-

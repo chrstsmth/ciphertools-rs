@@ -1,17 +1,17 @@
+extern crate cipher_lib;
 extern crate clap;
 extern crate common;
 extern crate enum_map;
-extern crate cipher_lib;
 extern crate itertools;
 extern crate num;
 
-mod command;
 mod cli;
+mod command;
 mod parse;
 
-use clap::{App, SubCommand, AppSettings};
-use command::*;
+use clap::{App, AppSettings, SubCommand};
 use cli::*;
+use command::*;
 use common::cli::*;
 
 fn main() {
@@ -19,9 +19,11 @@ fn main() {
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(frequency_analysis_subcommand())
 		.subcommand(distribution_analysis_subcommand())
-		.subcommand(SubCommand::with_name(COINCIDENCE_COUNT_COMMAND_NAME)
-			.about("Coincidence count")
-			.arg(text_arg().required(true)))
+		.subcommand(
+			SubCommand::with_name(COINCIDENCE_COUNT_COMMAND_NAME)
+				.about("Coincidence count")
+				.arg(text_arg().required(true)),
+		)
 		.get_matches();
 
 	if let Some(matches) = matches.subcommand_matches(FREQUENCY_COMMAND_NAME) {

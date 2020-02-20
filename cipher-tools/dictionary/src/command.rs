@@ -1,10 +1,11 @@
-use std::process;
 use cipher_lib::key::vigenere::*;
+use std::process;
 
-use parse::*;
 use cipher_lib::key::*;
+use parse::*;
 
-fn run<I, K, Exit>(keys: I, exit: Exit) where
+fn run<I, K, Exit>(keys: I, exit: Exit)
+where
 	I: Iterator<Item = K>,
 	K: Key,
 	Exit: Fn() -> bool,
@@ -19,14 +20,15 @@ fn run<I, K, Exit>(keys: I, exit: Exit) where
 }
 
 pub trait Random: Key {
-	fn random_command<Exit>(matches: &clap::ArgMatches, exit: Exit) where
+	fn random_command<Exit>(matches: &clap::ArgMatches, exit: Exit)
+	where
 		Exit: Fn() -> bool;
 }
 
 impl Random for VigenereKey {
 	fn random_command<Exit>(matches: &clap::ArgMatches, exit: Exit)
 	where
-		Exit: Fn() -> bool
+		Exit: Fn() -> bool,
 	{
 		let iter = if let Some(lengths) = lengths_option(matches) {
 			Self::into_random_iterator(lengths)
@@ -38,7 +40,8 @@ impl Random for VigenereKey {
 	}
 }
 
-pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
+pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit)
+where
 	K: IntoBruteForceIterator + 'static,
 	Exit: Fn() -> bool,
 {
@@ -49,7 +52,11 @@ pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 	if let Some(start) = start_key.clone() {
 		if let Some(end) = end_key.clone() {
 			if start > end {
-				println!("Start must be less than end: {} > {}", start_key.unwrap(), end_key.unwrap());
+				println!(
+					"Start must be less than end: {} > {}",
+					start_key.unwrap(),
+					end_key.unwrap()
+				);
 				process::exit(1);
 			}
 		}
@@ -60,11 +67,10 @@ pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit) where
 		None => K::start(),
 	};
 
-	let iter: Box<dyn Iterator<Item = K>>
-		= match end_key {
+	let iter: Box<dyn Iterator<Item = K>> = match end_key {
 		Some(key) => {
 			let key_clone = key.clone();
-			Box::new(start_iter .take_while(move |x| *x != key_clone))
+			Box::new(start_iter.take_while(move |x| *x != key_clone))
 		}
 		None => Box::new(start_iter),
 	};

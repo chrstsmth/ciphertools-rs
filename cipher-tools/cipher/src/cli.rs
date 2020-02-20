@@ -1,14 +1,14 @@
-use clap::{App, SubCommand, AppSettings};
+use clap::{App, AppSettings, SubCommand};
 
 use common::cli::*;
 
-use cipher_lib::cipher::*;
-use cipher_lib::cipher::vigenere::*;
 use cipher_lib::cipher::caesar::*;
+use cipher_lib::cipher::vigenere::*;
+use cipher_lib::cipher::*;
 
-fn dictionary_attack_subcommand<'a,'b, C>() -> App<'a,'b>
+fn dictionary_attack_subcommand<'a, 'b, C>() -> App<'a, 'b>
 where
-	C: DictionaryAttack
+	C: DictionaryAttack,
 {
 	SubCommand::with_name("dictionary")
 		.about("Dictionary attack")
@@ -17,9 +17,9 @@ where
 		.arg(dictionary_arg().required(true))
 }
 
-fn hill_climb_subcommand<'a,'b, C>() -> App<'a,'b>
+fn hill_climb_subcommand<'a, 'b, C>() -> App<'a, 'b>
 where
-	C: HillClimb
+	C: HillClimb,
 {
 	SubCommand::with_name("hillclimb")
 		.about("Hill climb")
@@ -28,9 +28,9 @@ where
 		.arg(dictionary_arg().required(true))
 }
 
-fn decipher_subcommand<'a,'b, C>() -> App<'a,'b>
+fn decipher_subcommand<'a, 'b, C>() -> App<'a, 'b>
 where
-	C: Cipher
+	C: Cipher,
 {
 	SubCommand::with_name("decipher")
 		.about("Decipher ciphertext")
@@ -38,9 +38,9 @@ where
 		.arg(key_arg().required(true))
 }
 
-fn encipher_subcommand<'a,'b, C>() -> App<'a,'b>
+fn encipher_subcommand<'a, 'b, C>() -> App<'a, 'b>
 where
-	C: Cipher
+	C: Cipher,
 {
 	SubCommand::with_name("encipher")
 		.about("Encipher plaintext")
@@ -49,11 +49,11 @@ where
 }
 
 pub trait Cli {
-	fn command<'a,'b>() -> App<'a,'b>;
+	fn command<'a, 'b>() -> App<'a, 'b>;
 }
 
 impl Cli for Caesar {
-	fn command<'a,'b>() -> App<'a,'b> {
+	fn command<'a, 'b>() -> App<'a, 'b> {
 		SubCommand::with_name(Caesar::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand::<Self>())
@@ -62,8 +62,7 @@ impl Cli for Caesar {
 }
 
 impl Cli for Vigenere {
-	fn command<'a,'b>() -> App<'a,'b>
-	{
+	fn command<'a, 'b>() -> App<'a, 'b> {
 		SubCommand::with_name(Vigenere::NAME)
 			.setting(AppSettings::ArgRequiredElseHelp)
 			.subcommand(encipher_subcommand::<Self>())
@@ -72,4 +71,3 @@ impl Cli for Vigenere {
 			.subcommand(hill_climb_subcommand::<Self>())
 	}
 }
-
