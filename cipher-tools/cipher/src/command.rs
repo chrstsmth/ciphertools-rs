@@ -32,17 +32,17 @@ fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 }
 
 pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches) {
-	let ciphertext = ciphertext_option(&matches);
-	let key = key_option::<C>(&matches);
-
-	println!("{}", <C>::encipher(&ciphertext, &key));
-}
-
-pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches) {
 	let plaintext = plaintext_option(&matches);
 	let key = key_option::<C>(&matches);
 
-	println!("{}", <C>::decipher(&plaintext, &key));
+	println!("{}", <C>::encipher(&plaintext, &key));
+}
+
+pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches) {
+	let ciphertext = ciphertext_option(&matches);
+	let key = key_option::<C>(&matches);
+
+	println!("{}", <C>::decipher(&ciphertext , &key));
 }
 
 pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
