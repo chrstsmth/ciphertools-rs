@@ -27,9 +27,9 @@ impl<'a> Coincidences<'a> {
 impl<'a> fmt::Display for Coincidences<'a> {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 
-		for (i, cs) in self.0.c.iter().enumerate() {
+		for (i, cs) in self.0.into_iter().enumerate() {
 			write!(f, "{}:", i + 1)?;
-			for c in &cs.c {
+			for c in cs {
 				write!(f, " {}", c.text().into_iter().map(|a| char::from(*a)).collect::<String>())?;
 			}
 			writeln!(f, "")?;
@@ -49,6 +49,15 @@ impl<'a> CoincidencesAllOffets<'a> {
 		}
 		all
 	}
+}
+
+impl<'a> IntoIterator for &'a CoincidencesAllOffets<'a> {
+    type Item = &'a CoincidencesAtOffset<'a>;
+    type IntoIter = std::slice::Iter<'a, CoincidencesAtOffset<'a>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.c.iter()
+    }
 }
 
 impl<'a> CoincidencesAtOffset<'a> {
@@ -89,16 +98,25 @@ impl<'a> CoincidencesAtOffset<'a> {
 	}
 }
 
+impl<'a> IntoIterator for &'a CoincidencesAtOffset<'a> {
+    type Item = &'a Coincidence<'a>;
+    type IntoIter = std::slice::Iter<'a, Coincidence<'a>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.c.iter()
+    }
+}
+
 impl<'a> Coincidence<'a> {
-	fn text(&self) -> &'a [Alph] {
+	pub fn text(&self) -> &'a [Alph] {
 		self.c
 	}
 
-	fn indices(&self) -> (usize, usize) {
+	pub fn indices(&self) -> (usize, usize) {
 		self.i
 	}
 
-	fn len(&self) -> usize {
+	pub fn len(&self) -> usize {
 		self.len
 	}
 }
