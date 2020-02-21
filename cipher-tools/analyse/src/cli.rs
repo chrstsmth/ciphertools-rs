@@ -27,7 +27,7 @@ pub const DIFFERENCE_ARG_NAME: &str = "difference";
 pub const DISTRIBUTION_COMMAND_NAME: &str = "distribution";
 pub fn distribution_analysis_subcommand<'a, 'b>() -> App<'a, 'b> {
 	SubCommand::with_name(DISTRIBUTION_COMMAND_NAME)
-		.about("Frequency analysis")
+		.about("Distribution analysis")
 		.arg(text_arg().multiple(true))
 		.arg(language_model_arg().multiple(true))
 		.arg(ngram_length_arg())
