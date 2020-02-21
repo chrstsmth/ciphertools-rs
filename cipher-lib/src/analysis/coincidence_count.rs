@@ -1,45 +1,48 @@
-use crate::pallet::alph::*;
 use std::cmp;
-use std::fmt;
 
-pub struct Coincidences<'a>(CoincidencesAllOffets<'a>);
+pub struct Coincidences<'a, A: Eq> (CoincidencesAllOffets<'a, A>);
 
-pub struct CoincidencesAllOffets<'a> {
-	c: Vec<CoincidencesAtOffset<'a>>,
+pub struct CoincidencesAllOffets<'a, A>
+where
+	A: Eq
+{
+	c: Vec<CoincidencesAtOffset<'a, A>>,
 }
 
-pub struct CoincidencesAtOffset<'a> {
-	c: Vec<Coincidence<'a>>,
+pub struct CoincidencesAtOffset<'a, A>
+where
+	A: Eq
+{
+	c: Vec<Coincidence<'a, A>>,
 }
 
-pub struct Coincidence<'a> {
-	c: &'a [Alph],
+pub struct Coincidence<'a, A>
+where
+	A: Eq
+{
+	c: &'a [A],
 	i: (usize, usize),
 	len: usize,
 }
 
-impl<'a> Coincidences<'a> {
-	pub fn with_length(n: usize, text: &'a [Alph]) -> Self {
+impl<'a, A> Coincidences<'a, A>
+where
+	A: Eq
+{
+	pub fn with_length(n: usize, text: &'a [A]) -> Self {
 		Coincidences(CoincidencesAllOffets::with_length(n, text))
 	}
-}
 
-impl<'a> fmt::Display for Coincidences<'a> {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-
-		for (i, cs) in self.0.into_iter().enumerate() {
-			write!(f, "{}:", i + 1)?;
-			for c in cs {
-				write!(f, " {}", c.text().into_iter().map(|a| char::from(*a)).collect::<String>())?;
-			}
-			writeln!(f, "")?;
-		}
-		Ok(())
+	pub fn all_offsets(&'a self) -> &'a CoincidencesAllOffets<'a, A> {
+		&self.0
 	}
 }
 
-impl<'a> CoincidencesAllOffets<'a> {
-	fn with_length(n: usize, text: &'a [Alph]) -> Self {
+impl<'a, A> CoincidencesAllOffets<'a, A>
+where
+	A: Eq
+{
+	fn with_length(n: usize, text: &'a [A]) -> Self {
 		let mut all = CoincidencesAllOffets {
 			c: Vec::new(),
 		};
@@ -51,17 +54,23 @@ impl<'a> CoincidencesAllOffets<'a> {
 	}
 }
 
-impl<'a> IntoIterator for &'a CoincidencesAllOffets<'a> {
-    type Item = &'a CoincidencesAtOffset<'a>;
-    type IntoIter = std::slice::Iter<'a, CoincidencesAtOffset<'a>>;
+impl<'a, A> IntoIterator for &'a CoincidencesAllOffets<'a, A>
+where
+	A: Eq
+{
+    type Item = &'a CoincidencesAtOffset<'a, A>;
+    type IntoIter = std::slice::Iter<'a, CoincidencesAtOffset<'a, A>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.c.iter()
     }
 }
 
-impl<'a> CoincidencesAtOffset<'a> {
-	fn with_offset(text: &'a [Alph], n: usize) -> Self {
+impl<'a, A> CoincidencesAtOffset<'a, A>
+where
+	A: Eq
+{
+	fn with_offset(text: &'a [A], n: usize) -> Self {
 		let mut c = CoincidencesAtOffset {
 			c: Vec::new(),
 		};
@@ -98,17 +107,23 @@ impl<'a> CoincidencesAtOffset<'a> {
 	}
 }
 
-impl<'a> IntoIterator for &'a CoincidencesAtOffset<'a> {
-    type Item = &'a Coincidence<'a>;
-    type IntoIter = std::slice::Iter<'a, Coincidence<'a>>;
+impl<'a, A> IntoIterator for &'a CoincidencesAtOffset<'a, A>
+where
+	A: Eq
+{
+    type Item = &'a Coincidence<'a, A>;
+    type IntoIter = std::slice::Iter<'a, Coincidence<'a, A>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.c.iter()
     }
 }
 
-impl<'a> Coincidence<'a> {
-	pub fn text(&self) -> &'a [Alph] {
+impl<'a, A> Coincidence<'a, A>
+where
+	A: Eq
+{
+	pub fn text(&self) -> &'a [A] {
 		self.c
 	}
 

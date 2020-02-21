@@ -18,16 +18,19 @@ use std::ops::*;
 use std::path::Path;
 
 pub fn coincidence_count_command(matches: &clap::ArgMatches) {
-	let text = text_option(matches);
-	let text_alph: Vec<Alph> = text
-		.chars()
-		.map(|x| Alph::try_from(x))
-		.filter(|x| x.is_ok())
-		.map(|x| x.unwrap())
-		.collect();
+	let text: Vec<char> = text_option(matches).chars().collect();
 
-	let coincidences = Coincidences::with_length(30, &text_alph);
-	println!("{}", coincidences);
+	let coincidences = Coincidences::with_length(30, &text);
+	for (i, cs) in coincidences.all_offsets().into_iter().enumerate() {
+		print!("{}:", i + 1);
+		for c in cs {
+			for c in c.text() {
+				print!("{}", c);
+			}
+			print!(" ");
+		}
+		println!("");
+	}
 }
 
 pub fn frequency_analyisis_command(matches: &clap::ArgMatches) {
