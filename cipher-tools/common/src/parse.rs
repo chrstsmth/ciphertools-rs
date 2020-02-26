@@ -17,29 +17,29 @@ pub struct ParsedArg<'a, T> {
 
 pub fn dictionary_option<C: Cipher>(
 	matches: &clap::ArgMatches,
-) -> Box<dyn Iterator<Item = C::Key>> {
-	let dict_file = matches.value_of("dictionary").unwrap();
-	dictionary_file::<C>(&dict_file)
+) -> Option<Box<dyn Iterator<Item = C::Key>>> {
+	let dict_file = matches.value_of("dictionary")?;
+	Some(dictionary_file::<C>(&dict_file))
 }
 
-pub fn language_model_option(matches: &clap::ArgMatches) -> LanguageModel {
-	language_model(matches.value_of("language").unwrap())
+pub fn language_model_option(matches: &clap::ArgMatches) -> Option<LanguageModel> {
+	Some(language_model(matches.value_of("language")?))
 }
 
-pub fn ciphertext_option(matches: &clap::ArgMatches) -> String {
-	text(matches.value_of("ciphertext").unwrap())
+pub fn ciphertext_option(matches: &clap::ArgMatches) -> Option<String> {
+	Some(text(matches.value_of("ciphertext")?))
 }
 
-pub fn plaintext_option(matches: &clap::ArgMatches) -> String {
-	text(matches.value_of("plaintext").unwrap())
+pub fn plaintext_option(matches: &clap::ArgMatches) -> Option<String> {
+	Some(text(matches.value_of("plaintext")?))
 }
 
-pub fn text_option(matches: &clap::ArgMatches) -> String {
-	text(matches.value_of("text").unwrap())
+pub fn text_option(matches: &clap::ArgMatches) -> Option<String> {
+	Some(text(matches.value_of("text")?))
 }
 
-pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> C::Key {
-	key::<C>(matches.value_of("key").unwrap())
+pub fn key_option<C: Cipher>(matches: &clap::ArgMatches) -> Option<C::Key> {
+	Some(key::<C>(matches.value_of("key")?))
 }
 
 pub fn language_model_options<'a>(

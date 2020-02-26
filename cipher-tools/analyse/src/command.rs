@@ -18,7 +18,7 @@ use std::ops::*;
 use std::path::Path;
 
 pub fn coincidence_count_command(matches: &clap::ArgMatches) {
-	let text: Vec<char> = text_option(matches).chars().collect();
+	let text: Vec<char> = text_option(matches).unwrap().chars().collect();
 
 	let coincidences = Coincidences::with_length(30, &text);
 	for (i, cs) in coincidences.all_offsets().into_iter().enumerate() {

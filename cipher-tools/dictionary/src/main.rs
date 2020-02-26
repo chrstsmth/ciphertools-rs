@@ -1,5 +1,6 @@
 extern crate cipher_lib;
 extern crate clap;
+extern crate common;
 
 mod cli;
 mod command;
@@ -37,13 +38,13 @@ fn main() {
 
 	if let Some(matches) = matches.subcommand_matches(Vigenere::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {
-			range_command::<<Vigenere as Cipher>::Key, _>(matches, exit_early);
+			range_command::<Vigenere, _>(matches, exit_early);
 		} else if let Some(matches) = matches.subcommand_matches("random") {
 			VigenereKey::random_command(matches, exit_early);
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("range") {
-			range_command::<<Caesar as Cipher>::Key, _>(matches, exit_early)
+			range_command::<Caesar, _>(matches, exit_early)
 		}
 	}
 }

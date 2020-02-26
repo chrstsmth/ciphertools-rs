@@ -1,7 +1,8 @@
+use cipher_lib::cipher::Cipher;
 use cipher_lib::key::vigenere::*;
+use cipher_lib::key::*;
 use std::process;
 
-use cipher_lib::key::*;
 use parse::*;
 
 fn run<I, K, Exit>(keys: I, exit: Exit)
@@ -40,13 +41,14 @@ impl Random for VigenereKey {
 	}
 }
 
-pub fn range_command<K, Exit>(matches: &clap::ArgMatches, exit: Exit)
+pub fn range_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
 where
-	K: IntoBruteForceIterator + 'static,
+	C: Cipher,
+	C::Key: IntoBruteForceIterator + 'static,
 	Exit: Fn() -> bool,
 {
-	let start_key = start_key_option::<K>(&matches);
-	let end_key = end_key_option::<K>(&matches);
+	let start_key = start_key_option::<C>(&matches);
+	let end_key = end_key_option::<C>(&matches);
 
 	//TODO https://github.com/rust-lang/rfcs/pull/2497
 	if let Some(start) = start_key.clone() {
@@ -64,10 +66,10 @@ where
 
 	let start_iter = match start_key {
 		Some(key) => key.into_brute_force_iterator(),
-		None => K::start(),
+		None => <C as Cipher>::Key::start(),
 	};
 
-	let iter: Box<dyn Iterator<Item = K>> = match end_key {
+	let iter: Box<dyn Iterator<Item = <C as Cipher>::Key>> = match end_key {
 		Some(key) => {
 			let key_clone = key.clone();
 			Box::new(start_iter.take_while(move |x| *x != key_clone))
