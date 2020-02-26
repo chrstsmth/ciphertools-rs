@@ -112,3 +112,22 @@ pub fn chi_squared(text: &EnumMap<Alph,f64>, lang: &EnumMap<Alph,f64>) -> f64 {
 	}
 	chi_squared
 }
+
+pub fn index_of_coincidence(distribution: EnumMap<Alph,f64>) -> f64
+{
+	let mut ic = 0.0;
+	for a in Alph::iter() {
+		let prob = distribution[a];
+		ic += prob * prob;
+	}
+	ic
+}
+
+pub fn measure_of_roughness(distribution: EnumMap<Alph,f64>) -> f64
+{
+	let ic = index_of_coincidence(distribution);
+	let mut roughness = ic;
+	roughness -= 2.0 / f64::from(Alph::LENGTH);
+	roughness += 1.0 / f64::from(Alph::LENGTH);
+	roughness
+}

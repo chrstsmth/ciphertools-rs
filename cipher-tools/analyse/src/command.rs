@@ -1,10 +1,10 @@
-use cipher_lib::pallet::alph::*;
-
 use cipher_lib::analysis::coincidence_count::*;
 use cipher_lib::analysis::*;
 use cipher_lib::language_model::*;
+use cipher_lib::pallet::alph::*;
 use cli::*;
 use common::parse::*;
+use common::*;
 use itertools::Itertools;
 use num::Zero;
 use parse::*;
@@ -16,6 +16,7 @@ use std::convert::TryFrom;
 use std::fmt;
 use std::ops::*;
 use std::path::Path;
+use std::process;
 
 pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 	let text: Vec<char> = text_option(matches).unwrap().chars().collect();
@@ -199,4 +200,18 @@ where
 	});
 
 	return table;
+}
+
+pub fn index_of_concidence_command(matches: &clap::ArgMatches) {
+	let freq = match language_model_option(matches) {
+		Some(language) => frequency_language(&language),
+		_ => match text_option(matches) {
+			Some(text) => frequency(&string_to_alph(text)),
+			_ => process::exit(1),
+		},
+	};
+
+	let dist = distribution(freq);
+	let ic = index_of_coincidence(dist);
+	println!("{}", ic);
 }
