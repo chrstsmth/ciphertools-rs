@@ -1,8 +1,8 @@
 use std::cmp;
 
-pub struct Coincidences<'a, A: Eq> (CoincidencesAllOffets<'a, A>);
+pub struct Coincidences<'a, A: Eq>(CoincidencesAtOffsets<'a, A>);
 
-pub struct CoincidencesAllOffets<'a, A>
+pub struct CoincidencesAtOffsets<'a, A>
 where
 	A: Eq
 {
@@ -30,20 +30,20 @@ where
 	A: Eq
 {
 	pub fn with_length(n: usize, text: &'a [A]) -> Self {
-		Coincidences(CoincidencesAllOffets::with_length(n, text))
+		Coincidences(CoincidencesAtOffsets::with_length(n, text))
 	}
 
-	pub fn all_offsets(&'a self) -> &'a CoincidencesAllOffets<'a, A> {
+	pub fn all_offsets(&'a self) -> &'a CoincidencesAtOffsets<'a, A> {
 		&self.0
 	}
 }
 
-impl<'a, A> CoincidencesAllOffets<'a, A>
+impl<'a, A> CoincidencesAtOffsets<'a, A>
 where
 	A: Eq
 {
 	fn with_length(n: usize, text: &'a [A]) -> Self {
-		let mut all = CoincidencesAllOffets {
+		let mut all = CoincidencesAtOffsets {
 			c: Vec::new(),
 		};
 
@@ -54,7 +54,7 @@ where
 	}
 }
 
-impl<'a, A> IntoIterator for &'a CoincidencesAllOffets<'a, A>
+impl<'a, A> IntoIterator for &'a CoincidencesAtOffsets<'a, A>
 where
 	A: Eq
 {
