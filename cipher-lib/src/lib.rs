@@ -1,16 +1,15 @@
+#![feature(type_alias_impl_trait)]
+
 extern crate min_max_heap;
 extern crate cipher_derive;
 extern crate variant_count;
 extern crate enum_map;
 
 pub mod analysis;
-pub mod pallet;
-pub mod try_from_err;
+pub mod alphabet;
+pub mod character;
 pub mod cipher;
 pub mod key;
 pub mod language_model;
 pub mod candidate;
 pub mod score;
-
-#[cfg(test)]
-mod test_util;

@@ -1,17 +1,24 @@
 use std::convert::TryFrom;
 use std::fmt;
-use crate::try_from_err::*;
 use crate::key::*;
 use crate::cipher::caesar::*;
-use crate::pallet::alph::*;
-use crate::pallet::cipher_char::*;
+use crate::alphabet::latin::*;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct CaesarKey(pub Alph);
+pub struct CaesarKey(Latin);
 
-pub struct CaesarKeyIterator {
-	start: CaesarKey,
-	i: u32,
+pub struct CaesarKeyIterator<I: Iterator<Item = Latin>>(I);
+
+impl From<Latin> for CaesarKey {
+	fn from(c: Latin) -> Self {
+		CaesarKey(c)
+	}
+}
+
+impl From<CaesarKey> for Latin {
+	fn from(c: CaesarKey) -> Latin {
+		c.0
+	}
 }
 
 impl Key for CaesarKey {
@@ -19,62 +26,57 @@ impl Key for CaesarKey {
 }
 
 impl FromStr for CaesarKey {
-	type Err = TryFromStringError;
+	type Err = &'static str;
 
-	fn from_str(s: &str) -> Result<CaesarKey, TryFromStringError>
+	fn from_str(s: &str) -> Result<CaesarKey, Self::Err>
 	{
+		let error = "Failed to parse Ceasar Key: Should be one alphabet character";
 		let mut chars = s.chars();
 
 		let first = match chars.next() {
 			Some(first) => first,
-			_ => return Err(TryFromStringError),
+			_ => return Err(error),
 		};
 
 		match chars.next() {
-			Some(_) => return Err(TryFromStringError),
+			Some(_) => return Err(error),
 			_ => (),
 		};
-		let alph = match  Alph::try_from(first) {
-			Ok(alph) => alph,
-			_ => return Err(TryFromStringError),
+		let alph = match Latin::try_from(first) {
+			Ok(a) => a,
+			_ => return Err(error),
 		};
 
 		Ok(CaesarKey(alph))
 	}
 }
 
-impl IntoBruteForceIterator for CaesarKey {
-	type BruteForceIter = CaesarKeyIterator;
+impl IntoBruteForceIterator for CaesarKey
+{
+	type BruteForceIter = impl Iterator<Item = Self>;
+	type IntoBruteForceIter = impl Iterator<Item = Self>;
 
-	fn start() -> Self::BruteForceIter {
-		CaesarKeyIterator {
-			start: CaesarKey(Alph::A),
-			i: 0,
-		}
+	fn brute_force_iterator() -> Self::BruteForceIter {
+		CaesarKeyIterator(Latin::iter())
 	}
 
-	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
-		CaesarKeyIterator {
-			start: self.clone(),
-			i: 0,
-		}
+	fn into_brute_force_iterator(self) -> Self::IntoBruteForceIter {
+		Self::brute_force_iterator().skip(u32::from(self.0) as usize)
 	}
 }
 
-impl Iterator for CaesarKeyIterator {
+impl<I> Iterator for CaesarKeyIterator<I>
+where
+	I : Iterator<Item = Latin>
+{
 	type Item = CaesarKey;
-
 	fn next(&mut self) -> Option<Self::Item> {
-		let r = if self.i == Alph::LENGTH {
-			None
-		} else {
-			let a = CipherChar::from(Alph::try_from(self.i).unwrap());
-			let b = CipherChar::from(self.start.0);
-			Some(CaesarKey(Alph::try_from((a + b).0).unwrap()))
-		};
-		self.i += 1;
-		r
+		match self.0.next() {
+			Some(l) => Some(CaesarKey(l)),
+			None => None
+		}
 	}
+
 }
 
 impl fmt::Display for CaesarKey {

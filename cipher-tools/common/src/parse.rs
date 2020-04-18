@@ -3,7 +3,6 @@ use std::process;
 
 use cipher_lib::cipher::*;
 use cipher_lib::language_model::*;
-use std::error::Error;
 use std::io::prelude::*;
 use std::io::*;
 use std::str::FromStr;
@@ -91,7 +90,7 @@ pub fn dictionary_file<C: Cipher>(filename: &str) -> Box<dyn Iterator<Item = C::
 		.lines()
 		.map(|x| {
 			x.unwrap_or_else(|e| {
-				eprintln!("{}", e.description());
+				eprintln!("{}", e.to_string());
 				process::exit(1);
 			})
 		})

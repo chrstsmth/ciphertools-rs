@@ -6,6 +6,7 @@ use crate::key::caesar::*;
 use crate::key::vigenere::*;
 use crate::candidate::*;
 use cipher_derive::*;
+use crate::alphabet::latin::*;
 
 #[cfg(test)]
 mod tests;
@@ -19,10 +20,10 @@ impl Cipher for Caesar {
 
 	fn encipher(plaintext: &str, key: &Self::Key) -> String
 	{
-		Vigenere::encipher(plaintext, &VigenereKey::from(VigenereKey(vec!(key.0))))
+		Vigenere::encipher(plaintext, &VigenereKey::from([Latin::from(key.clone())].as_ref()))
 	}
 	fn decipher(ciphertext: &str, key: &Self::Key) -> String
 	{
-		Vigenere::decipher(ciphertext, &VigenereKey::from(VigenereKey(vec!(key.0))))
+		Vigenere::decipher(ciphertext, &VigenereKey::from([Latin::from(key.clone())].as_ref()))
 	}
 }

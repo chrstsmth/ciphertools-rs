@@ -1,7 +1,7 @@
 use cipher_lib::analysis::coincidence_count::*;
 use cipher_lib::analysis::*;
 use cipher_lib::language_model::*;
-use cipher_lib::pallet::alph::*;
+use cipher_lib::alphabet::latin::*;
 use cli::*;
 use common::parse::*;
 use common::*;
@@ -76,7 +76,7 @@ pub fn distribution_analysis_command(matches: &clap::ArgMatches) {
 
 pub struct OccurrenceTable<'a, N> {
 	header: Vec<&'a str>,
-	rows: Vec<(Vec<Alph>, Vec<N>)>,
+	rows: Vec<(Vec<Latin>, Vec<N>)>,
 }
 
 impl<'a, N> fmt::Display for OccurrenceTable<'a, N>
@@ -117,8 +117,8 @@ pub fn occurrence_analysis<'a, L, T, N>(
 	map_from_text: T,
 ) -> OccurrenceTable<'a, N>
 where
-	L: Fn(&LanguageModel) -> HashMap<Vec<Alph>, N>,
-	T: Fn(&[Alph]) -> HashMap<Vec<Alph>, N>,
+	L: Fn(&LanguageModel) -> HashMap<Vec<Latin>, N>,
+	T: Fn(&[Latin]) -> HashMap<Vec<Latin>, N>,
 	N: Add + Sub + PartialOrd + Zero + Clone + fmt::Display,
 {
 	#[derive(Clone)]
@@ -146,10 +146,10 @@ where
 	match text_args {
 		Some(text_args) => {
 			for t in text_args {
-				let text_alph: Vec<Alph> = t
+				let text_alph: Vec<Latin> = t
 					.value
 					.chars()
-					.map(|x| Alph::try_from(x))
+					.map(|x| Latin::try_from(x))
 					.filter(|x| x.is_ok())
 					.map(|x| x.unwrap())
 					.collect();
@@ -165,7 +165,7 @@ where
 	columns.sort_by(|a, b| a.i.cmp(&b.i));
 
 	let num_columns = columns.len();
-	let mut rows = BTreeMap::<Vec<Alph>, Vec<_>>::new();
+	let mut rows = BTreeMap::<Vec<Latin>, Vec<_>>::new();
 	let mut header = vec![""; num_columns];
 
 	for (i, column) in columns.into_iter().enumerate() {

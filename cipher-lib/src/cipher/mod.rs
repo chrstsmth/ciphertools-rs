@@ -13,7 +13,7 @@ pub trait Cipher: Clone + Eq + Ord {
 	fn decipher(ciphertext: &str, k: &Self::Key) -> String;
 }
 
-pub trait DictionaryAttack: Cipher where
+pub trait DictionaryAttack: Cipher
 {
 	fn dictionary_attack<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, candidates: Can, exit: Exit) where
 		Dict: Iterator<Item = Self::Key>,
@@ -22,7 +22,7 @@ pub trait DictionaryAttack: Cipher where
 		Score: Fn(Chars) -> u32;
 }
 
-pub trait HillClimb: DictionaryAttack where
+pub trait HillClimb: DictionaryAttack
 {
 	type MutationKey: Key + IntoMutationIterator;
 

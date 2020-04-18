@@ -2,7 +2,7 @@ use serde::ser::{Serialize, Serializer, SerializeMap, SerializeSeq};
 use serde::de::{self, Deserialize, Deserializer, Visitor, MapAccess, SeqAccess};
 use std::borrow::Borrow;
 use std::fmt;
-use crate::pallet::alph::*;
+use crate::alphabet::latin::*;
 use enum_map::*;
 
 use std::collections::VecDeque;
@@ -11,7 +11,7 @@ use std::collections::VecDeque;
 mod tests;
 
 struct NextNode {
-	node: EnumMap<Alph, Option<Box<Node>>>,
+	node: EnumMap<Latin, Option<Box<Node>>>,
 	pop: usize,
 }
 
@@ -52,7 +52,7 @@ impl NextNode {
 }
 
 impl<'a> LanguageModelTraverser<'a> {
-	pub fn next(&mut self, c: Alph) -> Option<&'a Node> {
+	pub fn next(&mut self, c: Latin) -> Option<&'a Node> {
 		let next: &Option<Box<Node>> = &self.cursor.next.node[c];
 		match next {
 			None => return None,
@@ -72,9 +72,9 @@ impl LanguageModel {
 	}
 
 	pub fn insert_words<S>(&mut self, s: &mut S, depth: usize) where
-		S: Iterator<Item = Alph>,
+		S: Iterator<Item = Latin>,
 	{
-		let mut v: VecDeque<Alph> = VecDeque::with_capacity(depth);
+		let mut v: VecDeque<Latin> = VecDeque::with_capacity(depth);
 
 		for c in s.take(v.capacity()).by_ref() {
 			v.push_back(c);
@@ -90,7 +90,7 @@ impl LanguageModel {
 	}
 
 	pub fn insert_word<S>(&mut self, s: &mut S) where
-		S: Iterator<Item = Alph>,
+		S: Iterator<Item = Latin>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
 
@@ -186,7 +186,7 @@ impl<'de> Visitor<'de> for NextNodeVisitor {
 		M: MapAccess<'de>,
 	{
 		let mut next = NextNode::new();
-		while let Some((lang, node)) = access.next_entry::<Alph, Node>()? {
+		while let Some((lang, node)) = access.next_entry::<Latin, Node>()? {
 			next.node[lang] = Some(Box::new(node));
 			next.pop += 1;
 		}

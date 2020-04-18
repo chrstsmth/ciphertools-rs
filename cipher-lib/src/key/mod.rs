@@ -11,9 +11,10 @@ pub trait Key: FromStr + fmt::Display + Clone + Eq + Ord {
 
 pub trait IntoBruteForceIterator: Key {
 	type BruteForceIter: Iterator<Item = Self>;
+	type IntoBruteForceIter: Iterator<Item = Self>;
 
-	fn start() -> Self::BruteForceIter;
-	fn into_brute_force_iterator(self) -> Self::BruteForceIter;
+	fn brute_force_iterator() -> Self::BruteForceIter;
+	fn into_brute_force_iterator(self) -> Self::IntoBruteForceIter;
 }
 
 pub trait IntoMutationIterator: Key {
@@ -22,8 +23,9 @@ pub trait IntoMutationIterator: Key {
 	fn into_mutation_iterator(self) -> Self::MutationIter;
 }
 
-pub trait IntoRandomIterator<C>: Key {
+pub trait IntoRandomIterator: Key {
 	type RandomIter: Iterator<Item = Self>;
+	type Constraint;
 
-	fn into_random_iterator(constraint: C) -> Self::RandomIter;
+	fn into_random_iterator(constraint: Self::Constraint) -> Self::RandomIter;
 }

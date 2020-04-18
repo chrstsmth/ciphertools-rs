@@ -11,7 +11,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 mod cli;
-mod try_from_err;
 #[macro_use]
 mod command;
 

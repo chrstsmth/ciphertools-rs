@@ -64,9 +64,9 @@ where
 		}
 	}
 
-	let start_iter = match start_key {
-		Some(key) => key.into_brute_force_iterator(),
-		None => <C as Cipher>::Key::start(),
+	let start_iter: Box<dyn Iterator<Item = <C as Cipher>::Key>> = match start_key {
+		Some(key) => Box::new(key.into_brute_force_iterator()),
+		None => Box::new(<C as Cipher>::Key::brute_force_iterator()),
 	};
 
 	let iter: Box<dyn Iterator<Item = <C as Cipher>::Key>> = match end_key {

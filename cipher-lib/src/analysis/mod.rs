@@ -2,11 +2,11 @@ pub mod coincidence_count;
 
 use enum_map::*;
 use crate::language_model::*;
-use crate::pallet::alph::*;
+use crate::alphabet::latin::*;
 use std::collections::HashMap;
 use std::iter::*;
 
-pub fn frequency(text: &[Alph]) -> EnumMap<Alph,u32> {
+pub fn frequency(text: &[Latin]) -> EnumMap<Latin,u32> {
 	let mut frequency = enum_map!{ _ => 0 };
 	for c in text {
 		frequency[*c] += 1;
@@ -14,7 +14,7 @@ pub fn frequency(text: &[Alph]) -> EnumMap<Alph,u32> {
 	frequency
 }
 
-pub fn frequency_language(language: &LanguageModel) -> EnumMap<Alph,u32> {
+pub fn frequency_language(language: &LanguageModel) -> EnumMap<Latin,u32> {
 	EnumMap::from(|e|
 		match language.traverse().next(e) {
 			Some(node) => node.freq(),
@@ -22,7 +22,7 @@ pub fn frequency_language(language: &LanguageModel) -> EnumMap<Alph,u32> {
 		})
 }
 
-pub fn ngram_frequency(length: usize, text: &[Alph]) -> HashMap<Vec<Alph>, u32>
+pub fn ngram_frequency(length: usize, text: &[Latin]) -> HashMap<Vec<Latin>, u32>
 {
 	let mut frequency = HashMap::new();
 	for w in text.windows(length) {
@@ -31,11 +31,11 @@ pub fn ngram_frequency(length: usize, text: &[Alph]) -> HashMap<Vec<Alph>, u32>
 	frequency
 }
 
-pub fn ngram_frequency_language(length: usize, language: &LanguageModel) -> HashMap<Vec<Alph>,u32> {
+pub fn ngram_frequency_language(length: usize, language: &LanguageModel) -> HashMap<Vec<Latin>,u32> {
 	#[derive(Clone)]
-	struct Iter<'a> {
-		a: Alph,
-		it: AlphIterator,
+	struct Iter<'a, I: Iterator<Item = Latin>> {
+		a: Latin,
+		it: I,
 		tr: LanguageModelTraverser<'a>,
 	};
 
@@ -48,8 +48,8 @@ pub fn ngram_frequency_language(length: usize, language: &LanguageModel) -> Hash
 	let mut stack = Vec::with_capacity(length);
 	stack.push(
 		Iter {
-			a: Alph::A,
-			it: Alph::iter(),
+			a: Latin::A,
+			it: Latin::iter(),
 			tr: language.traverse(),
 		});
 
@@ -67,8 +67,8 @@ pub fn ngram_frequency_language(length: usize, language: &LanguageModel) -> Hash
 									stack.iter().map(|it| it.a)), node.freq());
 						} else {
 							stack.push(Iter{
-								a: Alph::A,
-								it: Alph::iter(),
+								a: Latin::A,
+								it: Latin::iter(),
 								tr: next_tr,
 							});
 						}
@@ -87,7 +87,7 @@ pub fn ngram_frequency_language(length: usize, language: &LanguageModel) -> Hash
 	frequency
 }
 
-pub fn distribution(frequency: EnumMap<Alph,u32>) -> EnumMap<Alph,f64> {
+pub fn distribution(frequency: EnumMap<Latin,u32>) -> EnumMap<Latin,f64> {
 	let sum: u32 = frequency.iter()
 		.map(|(_,i)| i)
 		.sum();
@@ -95,7 +95,7 @@ pub fn distribution(frequency: EnumMap<Alph,u32>) -> EnumMap<Alph,f64> {
 	EnumMap::from(|e| f64::from(frequency[e]) / f64::from(sum))
 }
 
-pub fn ngram_distribution(frequency: HashMap<Vec<Alph>,u32>) -> HashMap<Vec<Alph>,f64> {
+pub fn ngram_distribution(frequency: HashMap<Vec<Latin>,u32>) -> HashMap<Vec<Latin>,f64> {
 	let mut sum: u32 = 0;
 	for (_, i) in &frequency {
 		sum += i;
@@ -104,7 +104,7 @@ pub fn ngram_distribution(frequency: HashMap<Vec<Alph>,u32>) -> HashMap<Vec<Alph
 	frequency.into_iter().map(|(k, v)| (k, f64::from(v) / f64::from(sum))).collect()
 }
 
-pub fn chi_squared(text: &EnumMap<Alph,f64>, lang: &EnumMap<Alph,f64>) -> f64 {
+pub fn chi_squared(text: &EnumMap<Latin,f64>, lang: &EnumMap<Latin,f64>) -> f64 {
 	let mut chi_squared = 0.0;
 	for ((_,c),(_,e)) in text.iter().zip(lang) {
 		let ce = *c - *e;
@@ -113,21 +113,21 @@ pub fn chi_squared(text: &EnumMap<Alph,f64>, lang: &EnumMap<Alph,f64>) -> f64 {
 	chi_squared
 }
 
-pub fn index_of_coincidence(distribution: EnumMap<Alph,f64>) -> f64
+pub fn index_of_coincidence(distribution: EnumMap<Latin,f64>) -> f64
 {
 	let mut ic = 0.0;
-	for a in Alph::iter() {
+	for a in Latin::iter() {
 		let prob = distribution[a];
 		ic += prob * prob;
 	}
 	ic
 }
 
-pub fn measure_of_roughness(distribution: EnumMap<Alph,f64>) -> f64
+pub fn measure_of_roughness(distribution: EnumMap<Latin,f64>) -> f64
 {
 	let ic = index_of_coincidence(distribution);
 	let mut roughness = ic;
-	roughness -= 2.0 / f64::from(Alph::LENGTH);
-	roughness += 1.0 / f64::from(Alph::LENGTH);
+	roughness -= 2.0 / f64::from(Latin::LENGTH);
+	roughness += 1.0 / f64::from(Latin::LENGTH);
 	roughness
 }

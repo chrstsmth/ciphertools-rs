@@ -1,15 +1,14 @@
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
-use crate::try_from_err::*;
 use crate::key::*;
 use crate::cipher::vigenere::*;
-use crate::pallet::alph::*;
+use crate::alphabet::latin::*;
 
 use rand::seq::SliceRandom;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd)]
-pub struct VigenereKey(pub Vec<Alph>);
+pub struct VigenereKey(Vec<Latin>);
 
 pub struct VigenereKeyBruteForceIterator {
 	it: VigenereKey,
@@ -25,10 +24,41 @@ pub struct VegenereKeyRandomIterator {
 	lengths: Vec<usize>,
 }
 
-impl IntoRandomIterator<Vec<usize>> for VigenereKey {
-	type RandomIter = VegenereKeyRandomIterator;
+impl VigenereKey {
+	pub fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
+		self.into_iter()
+	}
+}
 
-	fn into_random_iterator(constraint: Vec<usize>) -> VegenereKeyRandomIterator
+impl From<&[Latin]> for VigenereKey {
+	fn from(s: &[Latin]) -> VigenereKey {
+		VigenereKey(s.to_vec())
+	}
+}
+
+impl<'a> IntoIterator for &'a VigenereKey {
+	type Item = &'a Latin;
+	type IntoIter = std::slice::Iter<'a, Latin>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.0.iter()
+	}
+}
+
+impl<'a> IntoIterator for VigenereKey {
+	type Item = Latin;
+	type IntoIter = std::vec::IntoIter<Self::Item>;
+
+	fn into_iter(self) -> Self::IntoIter {
+		self.0.into_iter()
+	}
+}
+
+impl IntoRandomIterator for VigenereKey {
+	type RandomIter = VegenereKeyRandomIterator;
+	type Constraint = Vec<usize>;
+
+	fn into_random_iterator(constraint: Self::Constraint) -> VegenereKeyRandomIterator
 	{
 		VegenereKeyRandomIterator {
 			lengths: constraint,
@@ -55,14 +85,14 @@ impl Key for VigenereKey {
 }
 
 impl FromStr for VigenereKey {
-	type Err = TryFromStringError;
+	type Err = &'static str;
 
-	fn from_str(s: &str) -> Result<VigenereKey, TryFromStringError>
+	fn from_str(s: &str) -> Result<VigenereKey, Self::Err>
 	{
-		let mut vigenere_key = VigenereKey(Vec::<Alph>::with_capacity(s.len()));
+		let mut vigenere_key = VigenereKey(Vec::<Latin>::with_capacity(s.len()));
 		for c in s.chars() {
-			let alph = match Alph::try_from(c) {
-				Err(_) => return Err(TryFromStringError),
+			let alph = match Latin::try_from(c) {
+				Err(_) => return Err("Failed VigenereKey::FromStr"),
 				Ok(alph) => alph
 			};
 			vigenere_key.0.push(alph);
@@ -82,14 +112,15 @@ impl fmt::Display for VigenereKey {
 
 impl IntoBruteForceIterator for VigenereKey {
 	type BruteForceIter = VigenereKeyBruteForceIterator;
+	type IntoBruteForceIter = VigenereKeyBruteForceIterator;
 
-	fn start() -> Self::BruteForceIter {
+	fn brute_force_iterator() -> Self::BruteForceIter {
 		VigenereKeyBruteForceIterator {
-			it: VigenereKey(vec![Alph::A]),
+			it: VigenereKey(vec![Latin::A]),
 		}
 	}
 
-	fn into_brute_force_iterator(self) -> Self::BruteForceIter {
+	fn into_brute_force_iterator(self) -> Self::IntoBruteForceIter {
 		VigenereKeyBruteForceIterator {
 			it: self,
 		}
@@ -105,8 +136,8 @@ impl Iterator for VigenereKeyBruteForceIterator {
 
 		for a in &mut self.it.0.iter_mut().rev() {
 			let mut i: u32 = u32::from(*a);
-			i = (i + 1) % Alph::LENGTH;
-			*a = Alph::try_from(i).unwrap();
+			i = (i + 1) % Latin::LENGTH;
+			*a = Latin::try_from(i).unwrap();
 
 			if i != 0 {
 				wrap = false;
@@ -115,7 +146,7 @@ impl Iterator for VigenereKeyBruteForceIterator {
 		}
 
 		if wrap {
-			self.it.0.push(Alph::A);
+			self.it.0.push(Latin::A);
 		}
 		Some(item)
 	}
@@ -125,7 +156,7 @@ impl Iterator for VegenereKeyMutationIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		self.increment = (self.increment + 1) % Alph::LENGTH;
+		self.increment = (self.increment + 1) % Latin::LENGTH;
 
 		if self.increment == 0 {
 			self.increment = 1;
@@ -136,7 +167,7 @@ impl Iterator for VegenereKeyMutationIterator {
 		}
 
 		let mut item = self.start.clone();
-		item.0[self.index] = item.0[self.index] + Alph::try_from(self.increment).unwrap();
+		item.0[self.index] = item.0[self.index] + Latin::try_from(self.increment).unwrap();
 		Some(item)
 	}
 }
