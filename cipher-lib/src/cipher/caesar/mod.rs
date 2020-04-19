@@ -17,13 +17,14 @@ pub struct Caesar;
 impl Cipher for Caesar {
 	const NAME: &'static str = "caesar";
 	type Key = CaesarKey;
+	type Config = ();
 
-	fn encipher(plaintext: &str, key: &Self::Key) -> String
+	fn encipher(plaintext: &str, key: &Self::Key, _config: &Self::Config) -> String
 	{
-		Vigenere::encipher(plaintext, &VigenereKey::from([Latin::from(key.clone())].as_ref()))
+		Vigenere::encipher(plaintext, &VigenereKey::from([Latin::from(key.clone())].as_ref()), &())
 	}
-	fn decipher(ciphertext: &str, key: &Self::Key) -> String
+	fn decipher(ciphertext: &str, key: &Self::Key, _config: &Self::Config) -> String
 	{
-		Vigenere::decipher(ciphertext, &VigenereKey::from([Latin::from(key.clone())].as_ref()))
+		Vigenere::decipher(ciphertext, &VigenereKey::from([Latin::from(key.clone())].as_ref()), &())
 	}
 }

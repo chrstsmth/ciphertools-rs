@@ -10,11 +10,12 @@ mod tests;
 #[derive(DictionaryAttack, HillClimb, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vigenere;
 
-impl Cipher for Vigenere {
+impl<'a> Cipher for Vigenere {
 	const NAME: &'static str = "vigenere";
 	type Key = VigenereKey;
+	type Config = ();
 
-	fn encipher(plaintext: &str, key: &Self::Key) -> String
+	fn encipher(plaintext: &str, key: &Self::Key, _config: &Self::Config) -> String
 	{
 		let mut ciphertext = String::with_capacity(plaintext.len());
 		for (p, k) in plaintext.chars().zip(key.iter().cycle()) {
@@ -22,7 +23,7 @@ impl Cipher for Vigenere {
 		}
 		ciphertext
 	}
-	fn decipher(ciphertext: &str, key: &Self::Key) -> String
+	fn decipher(ciphertext: &str, key: &Self::Key, _config: &Self::Config) -> String
 	{
 		let mut plaintext = String::with_capacity(ciphertext.len());
 		for (p, k) in ciphertext.chars().zip(key.iter().cycle()) {

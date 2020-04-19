@@ -20,14 +20,14 @@ fn impl_dictionary_attack(ast: &syn::DeriveInput) -> TokenStream {
 	let expanded = quote! {
 		impl DictionaryAttack for #name where
 		{
-			fn dictionary_attack<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit) where
+			fn dictionary_attack<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, config: &Self::Config, score: Score, mut candidates: Can, exit: Exit) where
 				Dict: Iterator<Item = Self::Key>,
 				Can: FnMut(&Candidate<Self>),
 				Exit: Fn() -> bool,
 				Score: Fn(Chars) -> u32,
 			{
 				for key in dict {
-					let text = #name::decipher(&ciphertext, &key);
+					let text = #name::decipher(&ciphertext, &key, &config);
 
 					let can = Candidate {
 						score: score(text.chars()),
@@ -60,14 +60,14 @@ fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 		{
 			type MutationKey = Self::Key;
 
-			fn hill_climb<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, score: Score, mut candidates: Can, exit: Exit) where
+			fn hill_climb<Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, config: &Self::Config, score: Score, mut candidates: Can, exit: Exit) where
 				Dict: Iterator<Item = Self::Key>,
 				Can: FnMut(&Candidate<Self>),
 				Exit: Fn() -> bool,
 				Score: Fn(Chars) -> u32,
 			{
 				for key in dict {
-					let text = #name::decipher(&ciphertext, &key);
+					let text = #name::decipher(&ciphertext, &key, &config);
 
 					let mut best_mutation = Candidate {
 						score: score(text.chars()),
@@ -81,7 +81,7 @@ fn impl_hill_climb(ast: &syn::DeriveInput) -> TokenStream {
 						climbed = false;
 
 						for mutated_key in key.clone().into_mutation_iterator() {
-							let text = #name::decipher(&ciphertext, &mutated_key);
+							let text = #name::decipher(&ciphertext, &mutated_key, &config);
 
 							let competitor = Candidate {
 								score: score(text.chars()),

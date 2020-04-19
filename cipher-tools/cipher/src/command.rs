@@ -31,21 +31,21 @@ fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
 	}
 }
 
-pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches) {
+pub fn encipher_command<C: Cipher>(matches: &clap::ArgMatches, config: &C::Config) {
 	let plaintext = plaintext_option(&matches).unwrap();
 	let key = key_option::<C>(&matches).unwrap();
 
-	println!("{}", <C>::encipher(&plaintext, &key));
+	println!("{}", <C>::encipher(&plaintext, &key, &config));
 }
 
-pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches) {
+pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches, config: &C::Config) {
 	let ciphertext = ciphertext_option(&matches).unwrap();
 	let key = key_option::<C>(&matches).unwrap();
 
-	println!("{}", <C>::decipher(&ciphertext, &key));
+	println!("{}", <C>::decipher(&ciphertext, &key, &config));
 }
 
-pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
+pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
 where
 	C: DictionaryAttack,
 	Exit: Fn() -> bool,
@@ -57,13 +57,14 @@ where
 	<C>::dictionary_attack(
 		&ciphertext,
 		dictionary,
+		&config,
 		score_candidate(language_model),
 		insert_candidates(),
 		exit,
 	);
 }
 
-pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, exit: Exit)
+pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
 where
 	C: HillClimb,
 	Exit: Fn() -> bool,
@@ -75,6 +76,7 @@ where
 	<C>::hill_climb(
 		&ciphertext,
 		dictionary,
+		&config,
 		score_candidate(language_model),
 		insert_candidates(),
 		exit,
