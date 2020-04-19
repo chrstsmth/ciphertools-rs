@@ -1,6 +1,5 @@
 [workspace]
 members = [
-	"cipher-derive",
 	"cipher-lib",
 	"cipher-tools/analyse",
 	"cipher-tools/language-modeler",

@@ -2,12 +2,11 @@ use crate::cipher::*;
 use crate::key::vigenere::*;
 use crate::character::caesar_char::*;
 use std::iter::Iterator;
-use cipher_derive::*;
 
 #[cfg(test)]
 mod tests;
 
-#[derive(DictionaryAttack, HillClimb, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Vigenere;
 
 impl<'a> Cipher for Vigenere {
@@ -32,4 +31,3 @@ impl<'a> Cipher for Vigenere {
 		plaintext
 	}
 }
-

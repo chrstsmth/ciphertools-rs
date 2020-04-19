@@ -1,7 +1,6 @@
 #![feature(type_alias_impl_trait)]
 
 extern crate min_max_heap;
-extern crate cipher_derive;
 extern crate variant_count;
 extern crate enum_map;
 
@@ -13,3 +12,4 @@ pub mod key;
 pub mod language_model;
 pub mod candidate;
 pub mod score;
+pub mod algorithm;

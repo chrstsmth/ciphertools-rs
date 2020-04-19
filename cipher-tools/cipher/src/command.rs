@@ -4,6 +4,8 @@ use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
 use cipher_lib::alphabet::latin::*;
 use cipher_lib::score::*;
+use cipher_lib::algorithm::*;
+use cipher_lib::key::*;
 
 use common::parse::*;
 use std::convert::TryFrom;
@@ -47,14 +49,14 @@ pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches, config: &C::Confi
 
 pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
 where
-	C: DictionaryAttack,
+	C: Cipher,
 	Exit: Fn() -> bool,
 {
 	let ciphertext = ciphertext_option(&matches).unwrap();
 	let dictionary = dictionary_option::<C>(&matches).unwrap();
 	let language_model = language_model_option(&matches).unwrap();
 
-	<C>::dictionary_attack(
+	dictionary_attack::<C,_,_,_,_>(
 		&ciphertext,
 		dictionary,
 		&config,
@@ -66,14 +68,15 @@ where
 
 pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
 where
-	C: HillClimb,
+	C: Cipher,
+	C::Key: IntoMutationIterator,
 	Exit: Fn() -> bool,
 {
 	let ciphertext = ciphertext_option(&matches).unwrap();
 	let dictionary = dictionary_option::<C>(&matches).unwrap();
 	let language_model = language_model_option(&matches).unwrap();
 
-	<C>::hill_climb(
+	hill_climb::<C,_,_,_,_>(
 		&ciphertext,
 		dictionary,
 		&config,

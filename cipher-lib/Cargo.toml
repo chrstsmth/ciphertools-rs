@@ -11,4 +11,3 @@ rand = "*"
 min-max-heap = "*"
 variant_count = "*"
 enum-map = "*"
-cipher-derive = { version = "*", path = "../cipher-derive" }
