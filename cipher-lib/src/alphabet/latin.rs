@@ -275,7 +275,7 @@ impl Add for Latin {
 	fn add(self, other: Latin) -> Latin {
 		let a = u32::from(self);
 		let b = u32::from(other);
-		let c = (a + b) % Self::LENGTH;
+		let c = (a + b).rem_euclid(Self::LENGTH);
 		Latin::try_from(c).unwrap()
 	}
 }
@@ -283,9 +283,9 @@ impl Add for Latin {
 impl Sub for Latin {
 	type Output = Latin;
 	fn sub(self, other: Latin) -> Latin {
-		let a = u32::from(self);
-		let b = u32::from(other);
-		let c = (Self::LENGTH + a - b) % Self::LENGTH;
+		let a = u32::from(self) as i32;
+		let b = u32::from(other) as i32;
+		let c = (a - b).rem_euclid(Self::VARIANT_COUNT as i32) as u32;
 		Latin::try_from(c).unwrap()
 	}
 }

@@ -20,7 +20,7 @@ impl Add<Latin> for CaesarChar {
 	type Output = Self;
 	fn add(self, other: Latin) -> CaesarChar {
 		match Latin::try_from(self.0) {
-			Ok(b) => Self::from(char::from(other + b)),
+			Ok(b) => Self::from(char::from(b + other)),
 			Err(_) => self,
 		}
 	}
@@ -30,7 +30,7 @@ impl Sub<Latin> for CaesarChar {
 	type Output = Self;
 	fn sub(self, other: Latin) -> CaesarChar {
 		match Latin::try_from(self.0) {
-			Ok(b) => Self::from(char::from(other - b)),
+			Ok(b) => Self::from(char::from(b - other)),
 			Err(_) => self,
 		}
 	}
