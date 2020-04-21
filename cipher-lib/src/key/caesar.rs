@@ -1,7 +1,6 @@
 use std::convert::TryFrom;
 use std::fmt;
 use crate::key::*;
-use crate::cipher::caesar::*;
 use crate::alphabet::latin::*;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -21,9 +20,7 @@ impl From<CaesarKey> for Latin {
 	}
 }
 
-impl Key for CaesarKey {
-	type Cipher = Caesar;
-}
+impl Key for CaesarKey { }
 
 impl FromStr for CaesarKey {
 	type Err = &'static str;

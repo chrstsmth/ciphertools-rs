@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::convert::TryFrom;
 use std::fmt;
 use crate::key::*;
-use crate::cipher::vigenere::*;
 use crate::alphabet::latin::*;
 
 use rand::seq::SliceRandom;
@@ -80,9 +79,7 @@ impl Iterator for VegenereKeyRandomIterator {
 	}
 }
 
-impl Key for VigenereKey {
-	type Cipher = Vigenere;
-}
+impl Key for VigenereKey { }
 
 impl FromStr for VigenereKey {
 	type Err = &'static str;
