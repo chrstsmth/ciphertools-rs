@@ -1,27 +1,16 @@
+use cipher_lib::key::any_key::*;
 use cipher_lib::cipher::*;
-
 use cipher_lib::candidate::*;
 use cipher_lib::language_model::*;
 use cipher_lib::alphabet::latin::*;
 use cipher_lib::score::*;
 use cipher_lib::algorithm::*;
 use cipher_lib::key::*;
-
 use common::parse::*;
 use std::convert::TryFrom;
 use std::str::Chars;
 
-fn insert_candidates<C: Cipher>() -> impl FnMut(&Candidate<C>) {
-	let mut candidates = Candidates::<C>::with_capacity(10);
-	move |c: &Candidate<C>| {
-		if candidates.insert_candidate(c) {
-			print!("{}[2J", 27 as char);
-			println!("{}", candidates);
-		}
-	}
-}
-
-fn score_candidate(language_model: LanguageModel) -> impl Fn(Chars) -> u32 {
+fn score_candidate<'a>(language_model: &'a LanguageModel) -> impl Fn(Chars) -> u32 + 'a {
 	move |chars: std::str::Chars| {
 		let alph = chars
 			.map(|x| Latin::try_from(x))
@@ -47,41 +36,54 @@ pub fn decipher_command<C: Cipher>(matches: &clap::ArgMatches, config: &C::Confi
 	println!("{}", <C>::decipher(&ciphertext, &key, &config));
 }
 
-pub fn dictionary_attack_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
+pub fn dictionary_attack_command<C>(matches: &clap::ArgMatches, config: C::Config)
 where
 	C: Cipher,
-	Exit: Fn() -> bool,
 {
 	let ciphertext = ciphertext_option(&matches).unwrap();
 	let dictionary = dictionary_option::<C>(&matches).unwrap();
 	let language_model = language_model_option(&matches).unwrap();
 
-	dictionary_attack::<C,_,_,_,_>(
+	let candidates = dictionary_attack::<C,_,_>(
 		&ciphertext,
 		dictionary,
-		&config,
-		score_candidate(language_model),
-		insert_candidates(),
-		exit,
-	);
+		config,
+		score_candidate(&language_model));
+
+	consume_candidates(candidates);
 }
 
-pub fn hillclimb_command<C, Exit>(matches: &clap::ArgMatches, config: &C::Config, exit: Exit)
+pub fn hillclimb_command<C>(matches: &clap::ArgMatches, config: &C::Config)
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator,
-	Exit: Fn() -> bool,
+	<C::Key as TryFrom<AnyKey>>::Error: std::fmt::Debug, // for unrap()
 {
 	let ciphertext = ciphertext_option(&matches).unwrap();
 	let dictionary = dictionary_option::<C>(&matches).unwrap();
 	let language_model = language_model_option(&matches).unwrap();
 
-	hill_climb::<C,_,_,_,_>(
-		&ciphertext,
-		dictionary,
-		&config,
-		score_candidate(language_model),
-		insert_candidates(),
-		exit,
-	);
+	let candidates = dictionary.map(|seed_key|
+		hill_climb::<C,_>(
+			&ciphertext,
+			seed_key,
+			config,
+			score_candidate(&language_model)))
+		.flatten();
+
+	consume_candidates(candidates);
+}
+
+fn consume_candidates<Cs>(candidates: Cs)
+where
+	Cs: Iterator<Item = Candidate>
+{
+	let intermediates = Candidates::intermediates(10, candidates);
+	for cs in intermediates {
+		print!("{}[2J", 27 as char);
+		for c in cs {
+			print!("{}", c);
+		}
+		println!();
+	}
 }

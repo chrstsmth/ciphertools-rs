@@ -7,8 +7,6 @@ extern crate serde;
 extern crate serde_json;
 
 use clap::{App, AppSettings};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 
 mod cli;
 #[macro_use]
@@ -21,17 +19,6 @@ use cli::*;
 use command::*;
 
 fn main() {
-	let exit = Arc::new(AtomicBool::new(false));
-	let exit_early = || exit.load(Ordering::SeqCst);
-
-	{
-		let ctrlc_exit = exit.clone();
-		ctrlc::set_handler(move || {
-			ctrlc_exit.store(true, Ordering::SeqCst);
-		})
-		.expect("Error setting SIGINT trap");
-	}
-
 	let matches = App::new("Cipher Tools")
 		.setting(AppSettings::ArgRequiredElseHelp)
 		.subcommand(Vigenere::command())
@@ -44,9 +31,9 @@ fn main() {
 		} else if let Some(matches) = matches.subcommand_matches("decipher") {
 			decipher_command::<Vigenere>(&matches, &());
 		} else if let Some(matches) = matches.subcommand_matches("dictionary") {
-			dictionary_attack_command::<Vigenere, _>(&matches, &(), exit_early);
+			dictionary_attack_command::<Vigenere>(&matches, ());
 		} else if let Some(matches) = matches.subcommand_matches("hillclimb") {
-			hillclimb_command::<Vigenere, _>(&matches, &(), exit_early);
+			hillclimb_command::<Vigenere>(&matches, &());
 		}
 	} else if let Some(matches) = matches.subcommand_matches(Caesar::NAME) {
 		if let Some(matches) = matches.subcommand_matches("encipher") {

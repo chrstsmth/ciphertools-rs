@@ -29,6 +29,24 @@ impl VigenereKey {
 	}
 }
 
+impl From<VigenereKey> for AnyKey {
+	fn from(k: VigenereKey) -> AnyKey {
+		AnyKey::Vigenere(k)
+	}
+}
+
+impl TryFrom<AnyKey> for VigenereKey {
+	type Error = &'static str;
+
+	fn try_from(a: AnyKey) -> Result<Self, Self::Error> {
+		if let AnyKey::Vigenere(k) = a {
+			Ok(k)
+		} else {
+			Err("try_from::<AnyKey> for CaesarKey")
+		}
+	}
+}
+
 impl From<&[Latin]> for VigenereKey {
 	fn from(s: &[Latin]) -> VigenereKey {
 		VigenereKey(s.to_vec())

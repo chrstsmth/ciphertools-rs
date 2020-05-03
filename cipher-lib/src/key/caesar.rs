@@ -8,6 +8,26 @@ pub struct CaesarKey(Latin);
 
 pub struct CaesarKeyIterator<I: Iterator<Item = Latin>>(I);
 
+impl Key for CaesarKey { }
+
+impl From<CaesarKey> for AnyKey {
+	fn from(k: CaesarKey) -> AnyKey {
+		AnyKey::Caesar(k)
+	}
+}
+
+impl TryFrom<AnyKey> for CaesarKey {
+	type Error = &'static str;
+
+	fn try_from(a: AnyKey) -> Result<Self, Self::Error> {
+		if let AnyKey::Caesar(k) = a {
+			Ok(k)
+		} else {
+			Err("try_from::<AnyKey> for CaesarKey")
+		}
+	}
+}
+
 impl From<Latin> for CaesarKey {
 	fn from(c: Latin) -> Self {
 		CaesarKey(c)
@@ -19,8 +39,6 @@ impl From<CaesarKey> for Latin {
 		c.0
 	}
 }
-
-impl Key for CaesarKey { }
 
 impl FromStr for CaesarKey {
 	type Err = &'static str;

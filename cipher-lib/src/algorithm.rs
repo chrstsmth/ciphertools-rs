@@ -1,75 +1,94 @@
+use std::convert::TryFrom;
 use crate::cipher::*;
 use crate::key::*;
+use crate::key::any_key::*;
 use crate::candidate::*;
 use std::str::Chars;
 
-pub fn dictionary_attack<C,Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, config: &C::Config, score: Score, mut candidates: Can, exit: Exit)
+pub fn dictionary_attack<C,Dict,Score>(ciphertext: &str, dict: Dict, config: C::Config, score: Score) -> impl Iterator<Item = Candidate>
 where
 	C: Cipher,
 	Dict: Iterator<Item = C::Key>,
-	Can: FnMut(&Candidate<C>),
-	Exit: Fn() -> bool,
 	Score: Fn(Chars) -> u32,
 {
-	for key in dict {
-		let text = C::decipher(&ciphertext, &key, &config);
+	let ciphertext_clone = String::from(ciphertext);
+	dict.map(move |key| {
+		let text = C::decipher(&ciphertext_clone, &key, &config);
+		Candidate::new(score(text.chars()), key, text)
+	})
+}
 
-		let can = Candidate {
-			score: score(text.chars()),
-			text: text,
-			key: key,
-		};
+struct HillClimbIterator<C,Score>
+where
+	C: Cipher,
+	C::Key: IntoMutationIterator,
+	Score: Fn(Chars) -> u32,
+{
+	ciphertext: String,
+	best: Candidate,
+	config: C::Config,
+	score: Score
+}
 
-		candidates(&can);
+impl<C,Score> HillClimbIterator<C,Score>
+where
+	C: Cipher,
+	C::Key: IntoMutationIterator,
+	Score: Fn(Chars) -> u32,
+{
+	fn new(ciphertext: String, seed: C::Key, config: C::Config, score: Score) -> Self {
+		let plaintext = C::decipher(&ciphertext, &seed, &config);
 
-		if exit() {
-			break;
+		HillClimbIterator {
+			ciphertext,
+			best: Candidate::new((score)(plaintext.chars()), seed, plaintext),
+			config,
+			score
 		}
 	}
 }
 
-pub fn hill_climb<C,Dict,Can,Exit,Score>(ciphertext: &str, dict: Dict, config: &C::Config, score: Score, mut candidates: Can, exit: Exit)
+impl<C,Score> Iterator for HillClimbIterator<C,Score>
+where
+	C: Cipher,
+	C::Key: IntoMutationIterator + TryFrom<AnyKey>,
+	Score: Fn(Chars) -> u32,
+	<C::Key as TryFrom<AnyKey>>::Error: std::fmt::Debug, // for unrap()
+{
+	type Item = Candidate;
+	fn next(&mut self) -> Option<Self::Item> {
+		let mut climbed = false;
+
+		let seed = C::Key::try_from(self.best.key()).unwrap();
+
+		for k in seed.into_mutation_iterator() {
+			let plaintext = C::decipher(&self.ciphertext, &k, &self.config);
+			let score = (self.score)(plaintext.chars());
+
+			if score > self.best.score() {
+				self.best = Candidate::new(score, k, plaintext);
+				climbed = true;
+			}
+		}
+
+		if climbed {
+			Some(self.best.clone())
+		} else {
+			None
+		}
+	}
+}
+
+pub fn hill_climb<C,Score>(ciphertext: &str, seed_key: C::Key, config: &C::Config, score: Score) -> impl Iterator<Item = Candidate>
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator,
-	Dict: Iterator<Item = C::Key>,
-	Can: FnMut(&Candidate<C>),
-	Exit: Fn() -> bool,
 	Score: Fn(Chars) -> u32,
+	<C::Key as TryFrom<AnyKey>>::Error: std::fmt::Debug, // for unrap()
 {
-	for key in dict {
-		let text = C::decipher(&ciphertext, &key, &config);
-
-		let mut best_mutation = Candidate {
-			score: score(text.chars()),
-			text: text,
-			key: key.clone(),
-		};
-		candidates(&best_mutation);
-
-		let mut climbed = true;
-		while climbed {
-			climbed = false;
-
-			for mutated_key in key.clone().into_mutation_iterator() {
-				let text = C::decipher(&ciphertext, &mutated_key, &config);
-
-				let competitor = Candidate {
-					score: score(text.chars()),
-					text: text,
-					key: mutated_key.clone(),
-				};
-				if competitor > best_mutation {
-					best_mutation = competitor;
-					climbed = true;
-				}
-
-				candidates(&best_mutation);
-
-				if exit() {
-					return;
-				}
-			}
-		}
-	}
+	HillClimbIterator::<C,_>::new(
+		String::from(ciphertext),
+		seed_key,
+		config.clone(),
+		score)
 }

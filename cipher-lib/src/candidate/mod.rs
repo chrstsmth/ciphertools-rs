@@ -1,62 +1,102 @@
 use std::fmt;
-use crate::cipher::*;
-use min_max_heap::*;
-use std::sync::Mutex;
+use crate::key::Key;
+use crate::key::any_key::AnyKey;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Candidate<C> where
-	C: Cipher,
-{
-	pub score: u32,
-	pub key: C::Key,
-	pub text: String,
+pub struct Candidate {
+	score: u32,
+	key: AnyKey,
+	text: String,
 }
 
-pub struct Candidates<C: Cipher>
-{
-	pub candidates: Mutex<MinMaxHeap<Candidate<C>>>,
+
+#[derive(Clone)]
+pub struct Candidates(Vec<Candidate>);
+
+impl Candidate {
+	pub fn new<K: Key>(score: u32, key: K, text: String) -> Self {
+		Candidate {
+			score,
+			key: K::into(key),
+			text,
+		}
+	}
+
+	pub fn key(&self) -> AnyKey {
+		return self.key.clone();
+	}
+
+	pub fn score(&self) -> u32 {
+		return self.score;
+	}
 }
 
-impl<C: Cipher> fmt::Display for Candidate<C>
+impl fmt::Display for Candidate
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		write!(f, "{} {} {}", self.score, self.key, self.text)
 	}
 }
 
-impl<C: Cipher> Candidates<C> {
-	pub fn with_capacity(cap: usize) -> Candidates<C>
-	{
-		Candidates::<C> {
-			candidates: Mutex::new(MinMaxHeap::<Candidate<C>>::with_capacity(cap)),
-		}
-	}
+pub struct CandidatesIntermediates<I> where
+	I: Iterator<Item = Candidate>
+{
+	it: I,
+	cs: Candidates,
+}
 
-	pub fn insert_candidate(&mut self, candidate: &Candidate<C>) -> bool
-	{
-		let mut modified = false;
-		let mut candidates = self.candidates.lock().unwrap();
+impl<I> Iterator for CandidatesIntermediates<I> where
+	I: Iterator<Item = Candidate>
+{
+	type Item = Vec<Candidate>;
 
-		if candidates.len() < candidates.capacity() {
-			candidates.push(candidate.clone());
-			modified = true;
-		} else if *candidates.peek_min().unwrap() < *candidate {
-			if !candidates.clone().into_vec_desc().contains(candidate) {
-				candidates.replace_min(candidate.clone());
-				modified = true;
+	fn next(&mut self) -> Option<Self::Item> {
+		for c in &mut self.it {
+			if self.cs.present_candidate(&c) {
+				return Some(self.cs.0.clone());
 			}
 		}
-		modified
+		return None;
 	}
 }
 
-impl<C: Cipher> fmt::Display for Candidates<C>
+impl Candidates {
+	fn with_length(n: usize) -> Candidates
+	{
+		Candidates(Vec::with_capacity(n))
+	}
+
+
+	pub fn intermediates<I>(n: usize, it: I) -> CandidatesIntermediates<I> where
+		I: Iterator<Item = Candidate>
+	{
+		CandidatesIntermediates {
+			it,
+			cs: Candidates::with_length(n)
+		}
+	}
+
+	pub fn present_candidate(&mut self, c: &Candidate) -> bool
+	{
+		if self.0.len() < self.0.capacity() {
+			self.0.push(c.clone());
+		} else if self.0.last().unwrap() < c && !self.0.contains(&c) {
+				self.0.pop();
+				self.0.push(c.clone());
+		} else {
+			return false;
+		}
+
+		self.0.sort_by(|a, b| b.cmp(a)); // Reverse order sort
+		return true;
+	}
+}
+
+impl fmt::Display for Candidates
 {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		let candidates = &(*self.candidates.lock().unwrap());
-		let it = candidates.clone().into_vec_desc();
-		for candidate in it {
-			writeln!(f, "{}", candidate)?
+		for c in &self.0 {
+			writeln!(f, "{}", *c)?
 		}
 		Ok(())
 	}

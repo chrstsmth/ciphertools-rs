@@ -1,11 +1,13 @@
+pub mod any_key;
 pub mod vigenere;
 pub mod caesar;
 
+use std::convert::TryFrom;
 use std::str::FromStr;
 use std::fmt;
+use any_key::*;
 
-pub trait Key: FromStr + fmt::Display + Clone + Eq + Ord {
-}
+pub trait Key: Into<AnyKey> + TryFrom<AnyKey> + FromStr + fmt::Display + Clone + Eq + Ord { }
 
 pub trait IntoBruteForceIterator: Key {
 	type BruteForceIter: Iterator<Item = Self>;
