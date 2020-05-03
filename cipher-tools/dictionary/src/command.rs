@@ -32,7 +32,7 @@ impl Random for VigenereKey {
 		Exit: Fn() -> bool,
 	{
 		let iter = if let Some(lengths) = lengths_option(matches) {
-			Self::into_random_iterator(lengths)
+			Self::random_iterator(lengths)
 		} else {
 			process::exit(1);
 		};

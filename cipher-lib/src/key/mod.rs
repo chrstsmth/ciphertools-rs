@@ -27,5 +27,5 @@ pub trait IntoRandomIterator: Key {
 	type RandomIter: Iterator<Item = Self>;
 	type Constraint;
 
-	fn into_random_iterator(constraint: Self::Constraint) -> Self::RandomIter;
+	fn random_iterator(constraint: Self::Constraint) -> Self::RandomIter;
 }

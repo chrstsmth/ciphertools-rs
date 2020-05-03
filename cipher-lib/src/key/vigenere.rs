@@ -75,8 +75,7 @@ impl IntoRandomIterator for VigenereKey {
 	type RandomIter = VegenereKeyRandomIterator;
 	type Constraint = Vec<usize>;
 
-	fn into_random_iterator(constraint: Self::Constraint) -> VegenereKeyRandomIterator
-	{
+	fn random_iterator(constraint: Self::Constraint) -> VegenereKeyRandomIterator {
 		VegenereKeyRandomIterator {
 			lengths: constraint,
 		}
@@ -87,7 +86,6 @@ impl Iterator for VegenereKeyRandomIterator {
 	type Item = VigenereKey;
 
 	fn next(&mut self) -> Option<Self::Item> {
-
 		let key_len = *self.lengths.choose(&mut rand::thread_rng()).unwrap();
 		let mut key = Vec::with_capacity(key_len);
 		for _ in 0..key_len {
