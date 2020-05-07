@@ -73,25 +73,24 @@ impl LanguageModel {
 		}
 	}
 
-	pub fn insert_words<S>(&mut self, s: &mut S, depth: usize) where
-		S: Iterator<Item = Latin>,
+	pub fn stagered_insert_word_n_times<S>(&mut self, s: &mut S, n: u32) where
+		S: Iterator<Item = Latin> + Clone,
 	{
-		let mut v: VecDeque<Latin> = VecDeque::with_capacity(depth);
-
-		for c in s.take(v.capacity()).by_ref() {
-			v.push_back(c);
+		loop {
+			self.insert_word_n_times(&mut s.clone(), n);
+			if let None = s.next() {
+				break;
+			}
 		}
-		self.insert_word(&mut v.iter().cloned());
-
-		for c in s.by_ref() {
-			v.pop_front();
-			v.push_back(c);
-			self.insert_word(&mut v.iter().cloned());
-		}
-		()
 	}
 
-	pub fn insert_word<S>(&mut self, s: &mut S) where
+	pub fn stagered_insert_word<S>(&mut self, s: &mut S) where
+		S: Iterator<Item = Latin> + Clone,
+	{
+		self.stagered_insert_word_n_times(s, 1);
+	}
+
+	pub fn insert_word_n_times<S>(&mut self, s: &mut S, n: u32) where
 		S: Iterator<Item = Latin>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
@@ -106,8 +105,15 @@ impl LanguageModel {
 				_ => (),
 			}
 			cursor = next.as_mut().unwrap();
-			cursor.freq += 1;
+			cursor.freq += n;
 		}
+		self.head.freq += n;
+	}
+
+	pub fn insert_word<S>(&mut self, s: &mut S) where
+		S: Iterator<Item = Latin>,
+	{
+		self.insert_word_n_times(s, 1);
 	}
 
 	pub fn generate_probabilities(&mut self) {
@@ -127,7 +133,6 @@ impl LanguageModel {
 				}
 			}
 		}
-		self.head.freq += 1;
 	}
 
 	pub fn traverse(&self) -> LanguageModelTraverser {
