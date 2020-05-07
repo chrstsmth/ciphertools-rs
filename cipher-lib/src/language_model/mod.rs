@@ -17,6 +17,7 @@ struct NextNode {
 
 pub struct Node {
 	freq: u32,
+	prob: f64,
 	next: NextNode,
 }
 
@@ -33,6 +34,7 @@ impl Node {
 	pub fn new() -> Node {
 		Node {
 			freq: 0,
+			prob: 0.0,
 			next: NextNode::new(),
 		}
 	}
@@ -105,6 +107,25 @@ impl LanguageModel {
 			}
 			cursor = next.as_mut().unwrap();
 			cursor.freq += 1;
+		}
+	}
+
+	pub fn generate_probabilities(&mut self) {
+		LanguageModel::generate_probabilities_for_node(&mut self.head, 1.0);
+	}
+
+	fn generate_probabilities_for_node(parent: &mut Node, prob_of_reaching_parent: f64) {
+		parent.prob = prob_of_reaching_parent;
+
+		for c in Latin::iter() {
+			let next = &mut parent.next.node[c];
+			match next {
+				None => (),
+				Some(node) => {
+					let p = f64::from(node.freq) / f64::from(parent.freq);
+					LanguageModel::generate_probabilities_for_node(node, p);
+				}
+			}
 		}
 		self.head.freq += 1;
 	}
