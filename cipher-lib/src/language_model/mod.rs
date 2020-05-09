@@ -128,7 +128,7 @@ impl LanguageModel {
 			match next {
 				None => (),
 				Some(node) => {
-					let p = f64::from(node.freq) / f64::from(parent.freq);
+					let p = prob_of_reaching_parent * f64::from(node.freq) / f64::from(parent.freq);
 					LanguageModel::generate_probabilities_for_node(node, p);
 				}
 			}
