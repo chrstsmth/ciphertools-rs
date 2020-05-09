@@ -24,12 +24,33 @@ fn main() {
 			_ => (),
 		}
 
-		let mut i = s
-			.chars()
-			.map(|x| Latin::try_from(x))
-			.filter(|x| x.is_ok())
-			.map(|x| x.unwrap());
-		l.insert_words(&mut i, 5);
+		let it = s
+			.lines()
+			.map(|y| {
+				let mut x = y.split('\t');
+				x.next(); // word number
+				let word = String::from(x.next().unwrap());
+				x.next(); // repeated word
+				let freq: u32 = x.next().unwrap().parse().unwrap();
+				(word, freq)
+			})
+			.filter(|(word, _)| {
+				for c in word.chars() {
+					if Latin::try_from(c).is_err() {
+						return false;
+					}
+				}
+				return true;
+			})
+			.map(|(word, freq)| {
+				let word: Vec<Latin> = word.chars().map(|x| Latin::try_from(x).unwrap()).collect();
+				(word, freq)
+			});
+
+		for (word, freq) in it {
+			l.insert_word_n_times(&mut word.clone().into_iter(), freq);
+		}
+
 		println!("{}", serde_json::to_string(&l).unwrap());
 	}
 }
