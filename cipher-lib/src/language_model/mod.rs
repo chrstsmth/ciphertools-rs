@@ -18,6 +18,7 @@ struct NextNode {
 pub struct Node {
 	freq: u32,
 	prob: f64,
+	is_word: bool,
 	next: NextNode,
 }
 
@@ -35,12 +36,21 @@ impl Node {
 		Node {
 			freq: 0,
 			prob: 0.0,
+			is_word: false,
 			next: NextNode::new(),
 		}
 	}
 
+	pub fn is_word(&self) -> bool {
+		self.is_word
+	}
+
 	pub fn freq(&self) -> u32 {
 		self.freq
+	}
+
+	pub fn prob(&self) -> f64 {
+		self.prob
 	}
 }
 
@@ -107,6 +117,7 @@ impl LanguageModel {
 			cursor = next.as_mut().unwrap();
 			cursor.freq += n;
 		}
+		cursor.is_word = true;
 		self.head.freq += n;
 	}
 
@@ -174,12 +185,12 @@ impl Serialize for Node {
 		let mut m = serializer.serialize_seq(Some(2))?;
 		m.serialize_element(&self.freq)?;
 		m.serialize_element(&self.next)?;
+		m.serialize_element(&self.is_word)?;
 		m.end()
 	}
 }
 
 struct NodeVisitor;
-
 impl<'de> Visitor<'de> for NodeVisitor {
 	type Value = Node;
 
@@ -195,12 +206,13 @@ impl<'de> Visitor<'de> for NodeVisitor {
 			.ok_or_else(|| de::Error::invalid_length(1, &self))?;
 		node.next = seq.next_element()?
 			.ok_or_else(|| de::Error::invalid_length(2, &self))?;
+		node.is_word = seq.next_element()?
+			.ok_or_else(|| de::Error::invalid_length(3, &self))?;
 		Ok(node)
 	}
 }
 
 struct NextNodeVisitor;
-
 impl<'de> Visitor<'de> for NextNodeVisitor {
 	type Value = NextNode;
 
