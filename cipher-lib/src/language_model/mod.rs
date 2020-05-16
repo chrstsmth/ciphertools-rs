@@ -83,24 +83,34 @@ impl LanguageModel {
 		}
 	}
 
-	pub fn stagered_insert_word_n_times<S>(&mut self, s: &mut S, n: u32) where
+	pub fn insert_word<S>(&mut self, s: S) where
+		S: Iterator<Item = Latin>,
+	{
+		self.insert_word_n_times(s, 1);
+	}
+
+	pub fn insert_word_n_times<S>(&mut self, s: S, n: u32) where
+		S: Iterator<Item = Latin>,
+	{
+		self.insert(s, true, n);
+	}
+
+	pub fn windowed_insert_word<S>(&mut self, s: S) where
 		S: Iterator<Item = Latin> + Clone,
 	{
-		loop {
-			self.insert_word_n_times(&mut s.clone(), n);
-			if let None = s.next() {
-				break;
-			}
+		self.windowed_insert_word_n_times(s, 1);
+	}
+
+	pub fn windowed_insert_word_n_times<S>(&mut self, mut s: S, n: u32) where
+		S: Iterator<Item = Latin> + Clone,
+	{
+		self.insert(&mut s.clone(), true, n);
+		while let Some(_) = s.next() {
+			self.insert(&mut s.clone(), false, n);
 		}
 	}
 
-	pub fn stagered_insert_word<S>(&mut self, s: &mut S) where
-		S: Iterator<Item = Latin> + Clone,
-	{
-		self.stagered_insert_word_n_times(s, 1);
-	}
-
-	pub fn insert_word_n_times<S>(&mut self, s: &mut S, n: u32) where
+	fn insert<S>(&mut self, s: S, is_word: bool, n: u32) where
 		S: Iterator<Item = Latin>,
 	{
 		let mut cursor: &mut Node = &mut self.head;
@@ -117,14 +127,8 @@ impl LanguageModel {
 			cursor = next.as_mut().unwrap();
 			cursor.freq += n;
 		}
-		cursor.is_word = true;
+		cursor.is_word = is_word;
 		self.head.freq += n;
-	}
-
-	pub fn insert_word<S>(&mut self, s: &mut S) where
-		S: Iterator<Item = Latin>,
-	{
-		self.insert_word_n_times(s, 1);
 	}
 
 	pub fn generate_probabilities(&mut self) {
