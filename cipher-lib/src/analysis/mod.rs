@@ -15,6 +15,29 @@ impl Frequencies {
 	}
 }
 
+impl<S> From<S> for Frequencies
+where
+	S: Iterator<Item = Latin>
+{
+	fn from(text: S) -> Self {
+		let mut frequency = enum_map!{ _ => 0 };
+		for c in text {
+			frequency[c] += 1;
+		}
+		Frequencies(frequency)
+	}
+}
+
+impl From<&LanguageModel> for Frequencies {
+	fn from(language: &LanguageModel) -> Self {
+		Frequencies(EnumMap::from(|e|
+			match language.traverse().next(e) {
+				Some(node) => node.freq(),
+				None => 0,
+			}))
+	}
+}
+
 impl IntoIterator for Frequencies {
 	type Item = (Latin, u32);
 	type IntoIter = <EnumMap::<Latin,u32> as IntoIterator>::IntoIter;
@@ -31,16 +54,36 @@ impl Index<Latin> for Frequencies {
 	}
 }
 
+impl Distribution {
+	pub fn iter<'a>(&'a self) -> impl Iterator<Item = (Latin, &'a f64)> {
+		self.0.iter()
+	}
+}
+
+impl From<Frequencies> for Distribution {
+	fn from(frequency: Frequencies) -> Self {
+		let sum: u32 = frequency.iter()
+			.map(|(_,i)| i)
+			.sum();
+
+		Distribution(EnumMap::from(|e| f64::from(frequency[e]) / f64::from(sum)))
+	}
+}
+
+impl From<&[(Latin, f64)]> for Distribution {
+	fn from(data: &[(Latin, f64)]) -> Distribution  {
+		let mut distribution = enum_map!{ _ => 0.0 };
+		for (l, d) in data {
+			distribution[*l] = *d;
+		}
+		Distribution(distribution)
+	}
+}
+
 impl Index<Latin> for Distribution {
 	type Output = f64;
 	fn index(&self, i: Latin) -> &Self::Output {
 		&self.0[i]
-	}
-}
-
-impl Distribution {
-	pub fn iter<'a>(&'a self) -> impl Iterator<Item = (Latin, &'a f64)> {
-		self.0.iter()
 	}
 }
 
@@ -53,35 +96,11 @@ impl IntoIterator for Distribution {
 	}
 }
 
-pub fn frequency(text: &[Latin]) -> Frequencies {
-	let mut frequency = enum_map!{ _ => 0 };
-	for c in text {
-		frequency[*c] += 1;
-	}
-	Frequencies(frequency)
-}
-
-pub fn frequency_language(language: &LanguageModel) -> Frequencies {
-	Frequencies(EnumMap::from(|e|
-		match language.traverse().next(e) {
-			Some(node) => node.freq(),
-			None => 0,
-		}))
-}
-
-pub fn distribution(frequency: Frequencies) -> Distribution {
-	let sum: u32 = frequency.iter()
-		.map(|(_,i)| i)
-		.sum();
-
-	Distribution(EnumMap::from(|e| f64::from(frequency[e]) / f64::from(sum)))
-}
-
-pub fn chi_squared(text: &EnumMap<Latin,f64>, lang: &EnumMap<Latin,f64>) -> f64 {
+pub fn chi_squared(text: Distribution, lang: Distribution) -> f64 {
 	let mut chi_squared = 0.0;
 	for ((_,c),(_,e)) in text.iter().zip(lang) {
-		let ce = *c - *e;
-		chi_squared += ce * ce / *e;
+		let ce = *c - e;
+		chi_squared += ce * ce / e;
 	}
 	chi_squared
 }

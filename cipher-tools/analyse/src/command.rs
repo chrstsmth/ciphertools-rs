@@ -22,14 +22,14 @@ pub fn coincidence_count_command(matches: &clap::ArgMatches) {
 
 pub fn index_of_concidence_command(matches: &clap::ArgMatches) {
 	let freq = match language_model_option(matches) {
-		Some(language) => frequency_language(&language),
+		Some(language) => Frequencies::from(&language),
 		_ => match text_option(matches) {
-			Some(text) => frequency(&string_to_alph(text)),
+			Some(text) => Frequencies::from(string_to_alph(text).into_iter()),
 			_ => process::exit(1),
 		},
 	};
 
-	let dist = distribution(freq);
+	let dist = Distribution::from(freq);
 	let ic = index_of_coincidence(dist);
 	println!("{}", ic);
 }
