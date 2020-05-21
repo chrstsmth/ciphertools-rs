@@ -52,6 +52,42 @@ impl Node {
 	pub fn prob(&self) -> f64 {
 		self.prob
 	}
+
+	pub fn ngram_frequencies(&self, n: u32) -> HashMap<Vec<Latin>, u32> {
+		HashMap::from_iter(self.ngrams(n))
+	}
+
+	fn ngrams(&self, n: u32) -> Vec<(Vec<Latin>, u32)> {
+		let mut ngrams = self.ngrams_in_reverse(n);
+		for (ngram, _) in &mut ngrams {
+			ngram.reverse();
+		}
+		ngrams
+	}
+
+	// This could be improved so that the ngrams aren't in reverse.
+	fn ngrams_in_reverse(&self, n: u32) -> Vec<(Vec<Latin>, u32)> {
+		let mut ngrams = Vec::new();
+
+		if n < 1 {
+			return ngrams;
+		}
+
+		for (c, next) in &self.next.node {
+			if let Some(node) = next {
+				if n == 1 {
+					ngrams.push((vec![c], node.freq));
+				} else {
+					let mut ngrams_from_node = node.ngrams_in_reverse(n - 1);
+					for (ngram, _) in &mut ngrams_from_node {
+						ngram.push(c);
+					}
+					ngrams.append(&mut ngrams_from_node);
+				}
+			}
+		}
+		ngrams
+	}
 }
 
 impl NextNode {
@@ -138,22 +174,44 @@ impl LanguageModel {
 	fn generate_probabilities_for_node(parent: &mut Node, prob_of_reaching_parent: f64) {
 		parent.prob = prob_of_reaching_parent;
 
-		for c in Latin::iter() {
-			let next = &mut parent.next.node[c];
-			match next {
-				None => (),
-				Some(node) => {
-					let p = prob_of_reaching_parent * f64::from(node.freq) / f64::from(parent.freq);
-					LanguageModel::generate_probabilities_for_node(node, p);
+		for (_, next) in &mut parent.next.node {
+			if let Some(node) = next {
+				let p = prob_of_reaching_parent * f64::from(node.freq) / f64::from(parent.freq);
+				LanguageModel::generate_probabilities_for_node(node, p);
+			}
+		}
+	}
+
+	pub fn ngram_frequencies(&self, n: u32) -> HashMap<Vec<Latin>, u32> {
+		self.ngram_frequencies_recurse(n, &self.head)
+	}
+
+	fn ngram_frequencies_recurse(&self, n: u32, node: &Node) -> HashMap<Vec<Latin>, u32> {
+		let mut ngrams = HashMap::new();
+
+		for (_, next) in &node.next.node {
+			if let Some(node) = next {
+				for (ngram, freq) in self.ngram_frequencies_recurse(n, node) {
+					*ngrams.entry(ngram).or_insert(0) += freq;
 				}
 			}
 		}
+
+		for (ngram, freq) in node.ngrams(n) {
+			*ngrams.entry(ngram).or_insert(0) += freq;
+		}
+
+		ngrams
 	}
 
 	pub fn traverse(&self) -> LanguageModelTraverser {
 		LanguageModelTraverser {
 			cursor: &self.head,
 		}
+	}
+
+	pub fn head(&self) -> &Node {
+		&self.head
 	}
 }
 

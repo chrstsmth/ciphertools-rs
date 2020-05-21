@@ -1,5 +1,4 @@
 use enum_map::*;
-use crate::language_model::*;
 use crate::alphabet::latin::*;
 use std::iter::*;
 use std::ops::Index;
@@ -22,16 +21,6 @@ where
 			frequency[c] += 1;
 		}
 		Frequencies(frequency)
-	}
-}
-
-impl From<&LanguageModel> for Frequencies {
-	fn from(language: &LanguageModel) -> Self {
-		Frequencies(EnumMap::from(|e|
-			match language.traverse().next(e) {
-				Some(node) => node.freq(),
-				None => 0,
-			}))
 	}
 }
 
