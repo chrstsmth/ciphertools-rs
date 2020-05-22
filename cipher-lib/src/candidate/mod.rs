@@ -2,9 +2,9 @@ use std::fmt;
 use crate::key::Key;
 use crate::key::any_key::AnyKey;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, PartialOrd)]
 pub struct Candidate {
-	score: u32,
+	score: f64,
 	key: AnyKey,
 	text: String,
 }
@@ -14,7 +14,7 @@ pub struct Candidate {
 pub struct Candidates(Vec<Candidate>);
 
 impl Candidate {
-	pub fn new<K: Key>(score: u32, key: K, text: String) -> Self {
+	pub fn new<K: Key>(score: f64, key: K, text: String) -> Self {
 		Candidate {
 			score,
 			key: K::into(key),
@@ -26,7 +26,7 @@ impl Candidate {
 		return self.key.clone();
 	}
 
-	pub fn score(&self) -> u32 {
+	pub fn score(&self) -> f64 {
 		return self.score;
 	}
 }
@@ -87,7 +87,7 @@ impl Candidates {
 			return false;
 		}
 
-		self.0.sort_by(|a, b| b.cmp(a)); // Reverse order sort
+		self.0.sort_by(|a, b| b.partial_cmp(a).unwrap()); // Reverse order sort
 		return true;
 	}
 }

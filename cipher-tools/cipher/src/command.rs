@@ -10,7 +10,7 @@ use common::parse::*;
 use std::convert::TryFrom;
 use std::str::Chars;
 
-fn score_candidate<'a>(language_model: &'a LanguageModel) -> impl Fn(Chars) -> u32 + 'a {
+fn score_candidate<'a>(language_model: &'a LanguageModel) -> impl Fn(Chars) -> f64 + 'a {
 	move |chars: std::str::Chars| {
 		let alph = chars
 			.map(|x| Latin::try_from(x))

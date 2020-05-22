@@ -9,7 +9,7 @@ pub fn dictionary_attack<C,Dict,Score>(ciphertext: &str, dict: Dict, config: C::
 where
 	C: Cipher,
 	Dict: Iterator<Item = C::Key>,
-	Score: Fn(Chars) -> u32,
+	Score: Fn(Chars) -> f64,
 {
 	let ciphertext_clone = String::from(ciphertext);
 	dict.map(move |key| {
@@ -22,7 +22,7 @@ struct HillClimbIterator<C,Score>
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator,
-	Score: Fn(Chars) -> u32,
+	Score: Fn(Chars) -> f64,
 {
 	ciphertext: String,
 	best: Candidate,
@@ -34,7 +34,7 @@ impl<C,Score> HillClimbIterator<C,Score>
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator,
-	Score: Fn(Chars) -> u32,
+	Score: Fn(Chars) -> f64,
 {
 	fn new(ciphertext: String, seed: C::Key, config: C::Config, score: Score) -> Self {
 		let plaintext = C::decipher(&ciphertext, &seed, &config);
@@ -52,7 +52,7 @@ impl<C,Score> Iterator for HillClimbIterator<C,Score>
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator + TryFrom<AnyKey>,
-	Score: Fn(Chars) -> u32,
+	Score: Fn(Chars) -> f64,
 	<C::Key as TryFrom<AnyKey>>::Error: std::fmt::Debug, // for unrap()
 {
 	type Item = Candidate;
@@ -83,7 +83,7 @@ pub fn hill_climb<C,Score>(ciphertext: &str, seed_key: C::Key, config: &C::Confi
 where
 	C: Cipher,
 	C::Key: IntoMutationIterator,
-	Score: Fn(Chars) -> u32,
+	Score: Fn(Chars) -> f64,
 	<C::Key as TryFrom<AnyKey>>::Error: std::fmt::Debug, // for unrap()
 {
 	HillClimbIterator::<C,_>::new(
