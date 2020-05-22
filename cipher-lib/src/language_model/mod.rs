@@ -4,6 +4,9 @@ use std::borrow::Borrow;
 use std::fmt;
 use crate::alphabet::latin::*;
 use enum_map::*;
+use std::collections::HashMap;
+use std::iter::FromIterator;
+use crate::analysis::ngram_frequencies::*;
 
 use std::collections::VecDeque;
 
@@ -53,8 +56,8 @@ impl Node {
 		self.prob
 	}
 
-	pub fn ngram_frequencies(&self, n: u32) -> HashMap<Vec<Latin>, u32> {
-		HashMap::from_iter(self.ngrams(n))
+	pub fn ngram_frequencies(&self, n: u32) -> NgramFrequency {
+		NgramFrequency::from(HashMap::from_iter(self.ngrams(n)))
 	}
 
 	fn ngrams(&self, n: u32) -> Vec<(Vec<Latin>, u32)> {
@@ -182,11 +185,11 @@ impl LanguageModel {
 		}
 	}
 
-	pub fn ngram_frequencies(&self, n: u32) -> HashMap<Vec<Latin>, u32> {
+	pub fn ngram_frequencies(&self, n: u32) -> NgramFrequency {
 		self.ngram_frequencies_recurse(n, &self.head)
 	}
 
-	fn ngram_frequencies_recurse(&self, n: u32, node: &Node) -> HashMap<Vec<Latin>, u32> {
+	fn ngram_frequencies_recurse(&self, n: u32, node: &Node) -> NgramFrequency {
 		let mut ngrams = HashMap::new();
 
 		for (_, next) in &node.next.node {
@@ -201,7 +204,7 @@ impl LanguageModel {
 			*ngrams.entry(ngram).or_insert(0) += freq;
 		}
 
-		ngrams
+		NgramFrequency::from(ngrams)
 	}
 
 	pub fn traverse(&self) -> LanguageModelTraverser {

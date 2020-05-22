@@ -22,16 +22,6 @@ impl From<Frequencies> for Distribution {
 	}
 }
 
-impl From<&[(Latin, f64)]> for Distribution {
-	fn from(data: &[(Latin, f64)]) -> Distribution  {
-		let mut distribution = enum_map!{ _ => 0.0 };
-		for (l, d) in data {
-			distribution[*l] = *d;
-		}
-		Distribution(distribution)
-	}
-}
-
 impl Index<Latin> for Distribution {
 	type Output = f64;
 	fn index(&self, i: Latin) -> &Self::Output {
