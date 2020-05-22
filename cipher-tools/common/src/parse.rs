@@ -122,7 +122,7 @@ pub fn language_model(filename: &str) -> LanguageModel {
 		Ok(file) => file,
 	};
 
-	let language = match serde_json::from_reader(BufReader::new(file)) {
+	let mut language: LanguageModel = match serde_json::from_reader(BufReader::new(file)) {
 		Err(why) => {
 			eprintln!("{}: {}", filename, why);
 			process::exit(1);
@@ -130,6 +130,7 @@ pub fn language_model(filename: &str) -> LanguageModel {
 		Ok(language) => language,
 	};
 
+	language.generate_probabilities();
 	language
 }
 
